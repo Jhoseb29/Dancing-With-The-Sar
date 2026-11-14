@@ -14,6 +14,9 @@
   min-height: var(--topbar-height);
   padding: var(--spacing-12) var(--spacing-40);
   pointer-events: none;
+  // Legible sobre imágenes claras (nubes, nieve): velo negro plano, sin degradado ni blur
+  // (mismo token que los paneles flotantes; ver docs/06-design-system.md, barra superior).
+  background: var(--color-overlay);
 
   > * {
     pointer-events: auto;

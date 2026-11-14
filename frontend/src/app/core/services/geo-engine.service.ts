@@ -121,7 +121,11 @@ export class GeoEngineService {
             ? this.events.layersFor(event.type)
             : this.scene.layers().filter((l) => this.ui.layer(l.presetId)?.kind === 'gamc-wms');
         const date = this.scene.time().date;
-        untracked(() => this.engine?.setOverlays(this.toOverlays(layers, date)));
+        untracked(() => {
+          const overlays = this.toOverlays(layers, date);
+          this.scene.pruneReportedLayers(overlays.map((o) => o.presetId));
+          this.engine?.setOverlays(overlays);
+        });
       }, options),
       effect(() => {
         const event = this.scene.state().event;

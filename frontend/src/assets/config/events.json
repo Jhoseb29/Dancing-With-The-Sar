@@ -72,12 +72,11 @@
       "available": true,
       "layers": [
         "gibs-modis-721",
-        "gibs-modis-flood",
-        "gibs-opera-dswx-s1"
+        "gibs-modis-flood"
       ],
       "howToRead": {
-        "es": "El azul marca agua: la capa MODIS detecta agua en 2 días y OPERA DSWx-S1 usa radar Sentinel-1, que ve a través de las nubes. En el fondo 7-2-1 el agua también se ve azul oscuro.",
-        "en": "Blue marks water: the MODIS layer detects water over 2 days and OPERA DSWx-S1 uses the Sentinel-1 radar, which sees through clouds. In the 7-2-1 background water also looks dark blue."
+        "es": "Capa MODIS de 2 días: celeste es agua superficial, rojo es inundación, amarillo es inundación recurrente y gris es sin datos (nubes). Debajo, el fondo 7-2-1: el agua se ve azul oscuro, la vegetación verde y las nubes celestes.",
+        "en": "2-day MODIS layer: light blue is surface water, red is flood, yellow is recurring flood and grey is no data (clouds). Underneath, the 7-2-1 background: water looks dark blue, vegetation green and clouds light blue."
       },
       "defaultPlaceId": "cochabamba-basin"
     },

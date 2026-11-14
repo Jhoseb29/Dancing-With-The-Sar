@@ -12,7 +12,11 @@ Al mostrar un evento, la vista `events` SHALL dibujar exactamente las capas del 
 
 #### Scenario: Inundación
 - **WHEN** se muestra un evento `flood` en Cochabamba
-- **THEN** se ven las capas de agua (MODIS Flood y OPERA DSWx-S1) en azul sobre el falso color 7-2-1, con sus leyendas
+- **THEN** se ve la capa MODIS Flood 2-Day (celeste agua, rojo inundación, amarillo recurrente, gris sin datos) sobre el falso color 7-2-1, con su leyenda
+
+#### Scenario: Las capas de la cuenca no se pierden
+- **WHEN** el usuario tiene capas GAMC en `basin`, abre un evento y vuelve a `basin`
+- **THEN** las capas GAMC siguen activas y en `events` no se dibujan (cada vista tiene sus capas)
 
 #### Scenario: Radar NISAR sobre Cochabamba
 - **WHEN** se muestra un evento `radar` en Cochabamba el 2026-10-25

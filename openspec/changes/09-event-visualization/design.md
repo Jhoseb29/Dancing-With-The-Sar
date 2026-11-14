@@ -8,7 +8,7 @@ Fases 1–2 dejaron el shadow, la configuración en JSON y un agente Gemini que 
 | `id` | Satélites/capas (en orden de dibujo) | Lectura | Estadísticas |
 | :--- | :--- | :--- | :--- |
 | `wildfire` | MODIS 7-2-1 + focos FIRMS (VIIRS) | Rojizo/marrón = área quemada; puntos = focos detectados ese día | FIRMS |
-| `flood` | MODIS 7-2-1 + MODIS Flood 2-Day + OPERA DSWx-S1 | Azul = agua (radar u óptico); 7-2-1: agua azul oscuro | — |
+| `flood` | MODIS 7-2-1 + MODIS Flood 2-Day | Celeste = agua, rojo = inundación, amarillo = recurrente, gris = sin datos (nubes); 7-2-1: agua azul oscuro | — |
 | `radar` | NISAR GCOV falso color | Colores = respuesta del radar banda L por polarización | — |
 | `vegetation` | MODIS NDVI 16 días | Verde intenso = vegetación densa; marrón = suelo/seco | — |
 | `deformation` | — (NISAR GUNW aún no procesado) | — | `available: false` |
@@ -41,3 +41,9 @@ Motor 2.5D (MapLibre, proyección globo: sirve tanto para Bolivia como para Coch
 - **[Riesgo] Cobertura irregular** (NISAR, DSWx-S1 por pasadas; nubes en MODIS) → la UI dice "sin cobertura en este día" y permite moverse de día; `events.json` guarda fechas con cobertura verificada.
 - **[Riesgo] 2 años de FIRMS = ~146 peticiones por fuente** → caché en disco y límite de rango; primera consulta lenta (decenas de segundos), siguientes instantáneas.
 - **[Trade-off] Sin focos en la vista 3D** en esta fase: el globo Cesium sigue mostrando la órbita; los eventos van en el motor 2.5D.
+
+### Capas por vista (2026-11-14)
+Las capas de un evento salen de `events.json` (no de `/layers`). `/layers` queda solo para las capas municipales GAMC de la cuenca, así cambiar de vista no borra lo que el usuario eligió en la otra.
+
+### OPERA DSWx-S1 descartado para Cochabamba
+Verificado con su colormap oficial: "no agua" es blanco opaco, "HAND masked" y "layover/shadow" son grises. En la cuenca (montaña) casi todo queda enmascarado y las escenas se ven como rectángulos. Se mantiene en `layers.json` por si sirve en llanuras (Beni), pero no en el evento `flood`.

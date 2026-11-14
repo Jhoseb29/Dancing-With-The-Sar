@@ -119,6 +119,17 @@ export class SceneStore {
     this._reported.update((r) => ({ ...r, camera }));
   }
 
+  /** Quita del estado reportado las capas que el motor ya no dibuja. */
+  pruneReportedLayers(keep: readonly string[]): void {
+    this._reported.update((r) => {
+      const stale = Object.keys(r.layers).filter((id) => !keep.includes(id));
+      if (stale.length === 0) return r;
+      const layers = { ...r.layers };
+      stale.forEach((id) => delete layers[id]);
+      return { ...r, layers };
+    });
+  }
+
   reportLayer(presetId: string, status: LayerStatus): void {
     this._reported.update((r) => (r.layers[presetId] === status ? r : { ...r, layers: { ...r.layers, [presetId]: status } }));
   }

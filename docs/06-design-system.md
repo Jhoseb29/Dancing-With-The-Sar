@@ -71,7 +71,7 @@ Especificación verificable: [`openspec/changes/06-frontend-geo-engine-and-perfo
 | **Botón fantasma** | Borde 1 px `#f0f0fa`, fondo transparente, radio 4 px, texto 12 px 700 MAYÚSCULAS 0.10em, relleno 12×20 px. Hover: fondo blanco al 8 %. |
 | **Botón secundario** | Igual, con borde y texto `#545457`→`#9a9aa3`. |
 | **Toggle píldora** | Radio 32 px; para selectores compactos (polarización HH/HV, idioma ES/EN, capas). |
-| **Barra superior** | Transparente sobre el globo o mapa, sin sombra ni blur. Nombre del proyecto a la izquierda, navegación a la derecha y, en el extremo derecho, el widget **`pass-countdown`** (próximo paso de NISAR) con borde de 1 px, como el selector de lanzamientos de la referencia. |
+| **Barra superior** | Velo negro plano (`--color-overlay`) sobre el globo o mapa, sin sombra, blur ni degradado: totalmente transparente no era legible sobre imágenes claras (nubes en MODIS). Nombre del proyecto a la izquierda, navegación a la derecha y, en el extremo derecho, el widget **`pass-countdown`** (próximo paso de NISAR) con borde de 1 px, como el selector de lanzamientos de la referencia. |
 | **Panel flotante** | Bloque en el tercio izquierdo (máx. 450 px), fondo `--color-overlay`, borde 1 px `#404040`, radio 4 px. Contiene títulos, controles y leyendas sobre el mapa. |
 | **Badge de madurez** | Monocromático, distinguido por el **trazo** del borde: `VALIDATED` sólido, `PROVISIONAL` discontinuo, `BETA` punteado. Siempre con el texto, nunca solo el estilo. |
 | **Leyenda de capa** | Barra de color generada desde `display.colormap` + unidades; es el único lugar de la interfaz con color. |

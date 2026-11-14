@@ -20,8 +20,15 @@
 ## 4. Verificación
 
 - [x] 4.1 Radar NISAR en Cochabamba (2026-10-25) visto en el navegador; 18 fechas con cobertura verificadas
-- [ ] 4.1b Ver en el navegador flood y vegetation (teselas GIBS verificadas con 200 y contenido, vista no revisada)
+- [x] 4.1b Ver en el navegador flood y vegetation (2026-11-14): vegetación OK (solo NDVI); en flood se quitó OPERA DSWx-S1 (ver 6.2)
 - [x] 4.2 Agente: "imagen de radar NISAR" e "incendios en Bolivia últimos 2 años" (sin FIRMS: lo dice y muestra MODIS)
-- [ ] 4.2b Agente: "inundaciones en Cochabamba"
+- [x] 4.2b Agente: "Muéstrame las inundaciones en Cochabamba" → `show_event(flood, cochabamba-basin)`, explica los colores oficiales de la leyenda; las capas GAMC de la cuenca quedan intactas
 - [x] 4.3 FIRMS con key: 259.768 focos en Bolivia (2024-11-14 → 2026-11-14), día pico 2025-10-11 (6.175), filtrado por frontera real; caché alineada y corte SP/NRT verificados
 - [x] 4.4 Build sin warnings, sin keys en `dist/`
+
+## 6. Ajustes tras revisión en el navegador (2026-11-14)
+
+- [x] 6.1 Capas por vista: los eventos ya no escriben `/layers` (era compartido con la cuenca y borraba las capas GAMC). El mapa dibuja en `events` las capas de `events.json` del evento activo y en el resto solo las capas `gamc-wms` del shadow. Mismo cambio en `show_event` del backend.
+- [x] 6.2 Inundaciones sin OPERA DSWx-S1: su colormap oficial pinta "no agua" en blanco opaco y "enmascarado por terreno" en gris; sobre el Tunari tapaba el mapa con rectángulos de escenas. Quedan MODIS 7-2-1 + MODIS Flood 2-Day. La guía usa los colores oficiales: celeste agua, rojo inundación, amarillo recurrente, gris sin datos.
+- [x] 6.3 El estado reportado quita las capas que ya no se dibujan (el agente las leía con `get_view`).
+- [x] 6.4 Barra superior con velo negro plano (`--color-overlay`, sin degradado): legible sobre imágenes claras (nubes). Actualizado `docs/06-design-system.md`.

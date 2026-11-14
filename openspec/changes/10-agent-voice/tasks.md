@@ -18,7 +18,7 @@
 - [x] 4.1 Síntesis: saludo leído en 3 frases con "Microsoft Raul - Spanish (Mexico)" (mejor de 2 voces es); "¿" conservado
 - [x] 4.2 Reconocimiento con micrófono real: confirmado por el usuario con la transcripción en el servidor (sección 5)
 - [x] 4.3a Barge-in con "Callar": la voz se detiene al instante
-- [ ] 4.3b Manos libres (requiere micrófono real)
+- [x] 4.3b Manos libres con micrófono simulado (2026-11-14): 1 clic → voz → agente actúa → lee la respuesta → el micrófono se reabre solo (2.ª ronda OK) → con silencio se cierra a los 8 s sin enviar nada. La voz empieza 1,2 s después de `agent.text`. Pendiente solo la prueba con el micrófono real del usuario (5.6).
 - [x] 4.4 Build sin warnings
 
 ## 5. Transcripción en el servidor (tras fallo `network` del navegador del usuario)

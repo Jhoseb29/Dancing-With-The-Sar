@@ -9,7 +9,7 @@ Verificadas leyendo el `WMTSCapabilities.xml` de NASA GIBS (EPSG:3857) y pidiend
 | Uso | Capa GIBS | Notas verificadas |
 | :--- | :--- | :--- |
 | Radar NISAR | `NISAR_L2_Geocoded_Polarimetric_Covariance` | Falso color GCOV, `GoogleMapsCompatible_Level13`, fechas 2025-10-29 → 2026-11-11 (cobertura por pasadas). Sobre el centro de Cochabamba hay imagen en **18 fechas** entre el 2026-06-25 y el 2026-10-25 (pares cada 12 días; hueco 2026-07-27 → 2026-08-10). El 2026-10-30 las pasadas caen al oeste y al este de la ciudad, no sobre ella. |
-| Agua por radar | `OPERA_L3_Dynamic_Surface_Water_Extent-Sentinel-1` | DSWx-S1, Level12, leyenda SVG oficial. |
+| Agua por radar | `OPERA_L3_Dynamic_Surface_Water_Extent-Sentinel-1` | DSWx-S1, Level12. En catálogo, pero fuera del evento `flood` (ver design: tapa la cuenca de montaña). |
 | Inundación | `MODIS_Combined_Flood_2-Day` | Diario, Level9, leyenda SVG oficial. |
 | Falso color 7-2-1 | `MODIS_Terra_CorrectedReflectance_Bands721` | Diario, Level9: agua azul oscuro, vegetación verde, áreas quemadas rojizas. |
 | Vegetación | `MODIS_Terra_L3_NDVI_16Day` | Compuesto de 16 días, Level9, leyenda SVG. |
