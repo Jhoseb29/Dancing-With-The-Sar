@@ -1,0 +1,32 @@
+schema: spec-driven
+
+context: |
+  Language: es
+  All OpenSpec artifacts (proposal, specs, design, tasks) MUST be written in Spanish, keeping OpenSpec structural headings and RFC 2119 keywords (SHALL, MUST, SHOULD, MAY) in English.
+
+  Project: Dancing with the SARs — Alerta Temprana de Riesgos en Cuencas (Cochabamba, Bolivia) | NASA Space Apps Challenge 2026.
+  Architecture: Monorepo with a Modular Monolith backend (`./backend`) and Angular 22 SPA frontend (`./frontend`).
+  Backend Runtimes:
+  - `./backend/gateway-ts` (TypeScript / NestJS): API Gateway/BFF, GAMC WMS secure proxy, COG/Zarr/PMTiles catalog, Risk Assessment domain.
+  - `./backend/compute-py` (Python / FastAPI): NASA Earthdata/ASF ingestion, SAR/DEM/GPM geoprocessing (COG, Zarr, PMTiles), LLM advisor, Harness 1 (Analyst/Validator/Judge), Harness 2 (Didactic Interpreter & Dataset Builder).
+  Frontend (`./frontend`):
+  - Angular 22 with native Signals (NgRx SignalStore only where cross-feature shared state justifies it), Standalone Components, Pipes, Lazy Loading, Smart/Dumb pattern.
+  - Strict folder structure: `core/`, `features/`, `layout/`, `shared/`.
+  - Strict component file rule: every component/feature view uses exactly 3 files (`.ts`, `.html`, `.scss`).
+
+  Non-Negotiable Constraints:
+  1. ZERO MOCKS: Only real NASA/Copernicus/OPERA/GPM/GAMC data (`./data-map.json`). Flag data maturity (`BETA`, `PROVISIONAL`, `VALIDATED`) explicitly.
+  2. SECURITY & 12-FACTOR: Never hardcode or commit credentials (`EARTHDATA_USERNAME`, `EARTHDATA_PASSWORD`, `GAMC_WMS_KEY`, LLM API keys). All config comes from environment variables / backend `.env` (never exposed to frontend).
+  3. SOLID & MODULAR BOUNDARIES: Each backend module owns its architecture (3-Layer or Hexagonal/Ports & Adapters) and communicates only via explicit contracts.
+  4. GIT HYGIENE: Agents must NEVER run `git commit` or `git push`; never commit `data/raw/` or large binaries.
+
+rules:
+  proposal:
+    - Specify which backend modules (`gateway-ts` / `compute-py`) and frontend areas (`core` / `layout` / `features` / `shared`) are affected.
+    - Explicitly list real data sources from `data-map.json` and confirm zero-mock compliance.
+  design:
+    - Justify the chosen module architecture (3-Layer vs Hexagonal) and trade-offs.
+    - Define explicit DTO / OpenAPI / JSON Schema contracts between TypeScript and Python modules.
+    - Verify 12-Factor compliance (especially Config, Backing Services, Disposability, Logs).
+  tasks:
+    - Keep tasks small, verifiable against real data/endpoints, and separated by module.

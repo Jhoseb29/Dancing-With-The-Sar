@@ -1,0 +1,244 @@
+{
+  "$comment": "Data acquisition map for 'Dancing with the SARs' (NASA Space Apps 2026, Cochabamba). Built 2026-11-14 from the challenge Resources tab and the ASF NISAR Data User Guide. Hand this file to the download agent. Never put credentials in this file.",
+  "project": {
+    "name": "Dancing with the SARs",
+    "local_theme": "Alerta Temprana de Riesgos en Cuencas (early warning for river-basin risks: floods, mudflows/torrents, slope instability, soil saturation)",
+    "challenge_url": "https://www.spaceappschallenge.org/2026/challenges/dancing-with-the-sars/?tab=details",
+    "goal": "Track and visualize surface change over the Cochabamba basin with NISAR L-band SAR (water/flooding, soil moisture, vegetation change, ground deformation) and present it in an interactive web app."
+  },
+
+  "area_of_interest": {
+    "crs": "EPSG:4326",
+    "bbox_order": "minLon, minLat, maxLon, maxLat",
+    "core_city": {
+      "name": "Cochabamba metropolitan area (GAMC urban extent)",
+      "bbox": [-66.280703, -17.53119, -66.04585, -17.24657],
+      "wkt": "POLYGON((-66.280703 -17.53119, -66.04585 -17.53119, -66.04585 -17.24657, -66.280703 -17.24657, -66.280703 -17.53119))"
+    },
+    "basin": {
+      "name": "Full basin extent (union of GAMC 'Cuencas UH 7' and 'Cuencas UH 8')",
+      "bbox": [-66.536394, -17.870027, -65.574648, -17.186852],
+      "wkt": "POLYGON((-66.536394 -17.870027, -65.574648 -17.870027, -65.574648 -17.186852, -66.536394 -17.186852, -66.536394 -17.870027))"
+    },
+    "search_point": "POINT(-66.157 -17.39)",
+    "notes": "Use 'basin' for searches and clipping; use 'core_city' for the default app view. The Tunari range (north) drains through torrents into the Rocha river valley: slope deformation and mudflow risk are in the north, flooding in the valley floor."
+  },
+
+  "time_windows": {
+    "seasonality": "Cochabamba rainy season is roughly December-March; dry season roughly May-October. Comparing dry vs. wet acquisitions is the core change-detection story.",
+    "nisar_availability": {
+      "BETA": "Subset of acquisitions 2025-10-17 to 2026-01-20 (up to 8 per track). Not calibrated. May or may not cover Cochabamba: check first.",
+      "PROVISIONAL": "All L-band acquisitions 2026-06-17 to ~2026-10-23 (dry season). Calibrated, partially validated.",
+      "VALIDATED": "All L-band acquisitions from 2026-10-21 onward. Fully calibrated and validated (L0-L2). SME2 not yet validated.",
+      "permanent_gap": "2026-07-27T22:03:25Z to 2026-08-10T00:55:27Z (no NISAR data)"
+    },
+    "recommended": [
+      {"id": "dry_2026", "start": "2026-06-17", "end": "2026-10-20", "maturity": "PROVISIONAL", "purpose": "Dry-season baseline"},
+      {"id": "wet_onset_2026", "start": "2026-10-21", "end": "today", "maturity": "VALIDATED", "purpose": "Start of rainy season; keep pulling new acquisitions as they arrive (12-day repeat)"},
+      {"id": "wet_2025_2026", "start": "2025-10-17", "end": "2026-01-20", "maturity": "BETA", "purpose": "Optional: previous rainy season, only if it covers the AOI. Do not mix quantitatively with PROVISIONAL/VALIDATED without flagging it."}
+    ],
+    "caution": "Differences between BETA, PROVISIONAL and VALIDATED products can come from processing changes (different CRID), not real surface change. Label the maturity of every layer shown in the app."
+  },
+
+  "authentication": {
+    "earthdata_login": {
+      "required_for": ["NISAR (ASF DAAC)", "OPERA", "HLS", "GPM IMERG"],
+      "how": "Read credentials from environment variables EARTHDATA_USERNAME / EARTHDATA_PASSWORD, or from a ~/.netrc (Windows: %USERPROFILE%\\_netrc) entry for machine urs.earthdata.nasa.gov. earthaccess.login() picks up either automatically.",
+      "rule": "Ask the user for credentials at runtime or use the env/netrc. Never write them into code, this file, logs or the repo."
+    },
+    "gamc_wms": {
+      "required_for": ["GAMC municipal layers"],
+      "how": "Project API key from https://recursosgamc.cochabamba.bo/api-doc (project 02). Store it as GAMC_WMS_KEY in the backend .env only.",
+      "rule": "The key travels in the URL: proxy it through our backend, never expose it in the frontend or commit it."
+    }
+  },
+
+  "tools": {
+    "python": ">=3.10",
+    "packages": ["earthaccess", "asf_search", "xarray", "h5netcdf", "fsspec", "aiohttp", "rioxarray", "rasterio", "gdal", "numpy", "shapely", "pyproj"],
+    "tips": [
+      "NISAR files are HDF5 and large (GCOV hundreds of MB to GB; RSLC ~30 GB). Prefer streaming + subsetting to the AOI over full downloads.",
+      "Stream with earthaccess.open(results) or fsspec HTTPS (cache_type='background', block_size=16MB) and xarray.open_datatree(engine='h5netcdf', phony_dims='access', decode_timedelta=False).",
+      "GDAL /vsicurl/ can subset HDF5 without downloading the whole file.",
+      "Direct S3 access only works from AWS us-west-2; from a laptop use HTTPS."
+    ]
+  },
+
+  "datasets": [
+    {
+      "id": "nisar_gcov",
+      "priority": 1,
+      "required": true,
+      "name": "NISAR L2 Geocoded Polarimetric Covariance (GCOV)",
+      "why": "Main layer. Radiometrically terrain-corrected L-band backscatter (gamma0). Water and flooded areas appear dark (specular); HV tracks vegetation volume; time series show soil wetting, flooding and vegetation loss. Directly answers 'which polarizations highlight the change'.",
+      "collections": {
+        "VALIDATED": "NISAR_L2_GCOV_V1",
+        "PROVISIONAL": "NISAR_L2_GCOV_PROVISIONAL_V1",
+        "BETA": "NISAR_L2_GCOV_BETA_V1"
+      },
+      "search": {
+        "earthaccess": "earthaccess.search_data(short_name='NISAR_L2_GCOV_V1', bounding_box=(-66.536394, -17.870027, -65.574648, -17.186852), temporal=('2026-10-21', '<today>'))",
+        "asf_search": "asf.search(dataset='NISAR', processingLevel='GCOV', dataMaturity='VALIDATED', intersectsWith='<basin.wkt>', start='2026-10-21')"
+      },
+      "subset_layers": [
+        "/science/LSAR/GCOV/grids/frequencyA/HHHH",
+        "/science/LSAR/GCOV/grids/frequencyA/HVHV",
+        "/science/LSAR/GCOV/grids/frequencyA/VVVV (if present)",
+        "/science/LSAR/GCOV/grids/frequencyA/VHVH (if present)",
+        "/science/LSAR/GCOV/grids/frequencyA/mask",
+        "/science/LSAR/GCOV/grids/frequencyA/numberOfLooks"
+      ],
+      "selection_rules": [
+        "Keep ONE track/frame geometry (same relative orbit, same direction) for the time series so pixels are comparable; record track and frame from the file name (NISAR_L_L2_PR_GCOV_CYL_REL_P_FRM_...).",
+        "If both ascending and descending cover the AOI, pick the one with more acquisitions; optionally keep the other as a second series.",
+        "Take every available date in each window (12-day repeat)."
+      ],
+      "pixel_spacing": "10 or 20 m (frequency A), 80 m (frequency B); UTM projection",
+      "output": "Clip to basin bbox, convert to dB, write one Cloud-Optimized GeoTIFF per date and polarization (EPSG:3857 or keep UTM + overviews), plus a Zarr cube (time, y, x) per polarization for animations and pixel time series."
+    },
+    {
+      "id": "nisar_gunw",
+      "priority": 2,
+      "required": true,
+      "name": "NISAR L2 Geocoded Unwrapped Interferogram (GUNW)",
+      "why": "Centimetre-scale ground displacement: slope movement on the Tunari foothills (landslide/mudflow precursors) and valley subsidence. Coherence loss also flags surface disturbance after storms.",
+      "collections": {
+        "VALIDATED": "NISAR_L2_GUNW_V1",
+        "PROVISIONAL": "NISAR_L2_GUNW_PROVISIONAL_V1",
+        "BETA": "NISAR_L2_GUNW_BETA_V1"
+      },
+      "search": {
+        "earthaccess": "earthaccess.search_data(short_name='NISAR_L2_GUNW_V1', bounding_box=<basin.bbox>, temporal=(...))",
+        "asf_search": "asf.search(dataset='NISAR', processingLevel='GUNW', dataMaturity='VALIDATED', intersectsWith='<basin.wkt>')"
+      },
+      "subset_layers": ["unwrapped phase", "coherence", "connected components / mask (exact HDF5 paths: inspect one file first and record them here)"],
+      "selection_rules": [
+        "Same track/frame as nisar_gcov.",
+        "Prefer consecutive 12-day pairs (sequential network) for a displacement time series; keep pair dates in metadata."
+      ],
+      "output": "Line-of-sight displacement (mm) and coherence as COGs per pair, clipped to basin."
+    },
+    {
+      "id": "nisar_sme2",
+      "priority": 3,
+      "required": false,
+      "name": "NISAR L3 Soil Moisture (SME2)",
+      "why": "Ready-made soil moisture: saturated soils plus rain means runoff and flood risk. Only PROVISIONAL exists so far (VALIDATED expected 2027).",
+      "collections": {
+        "PROVISIONAL": "NISAR_L3_SME2_PROVISIONAL_V1",
+        "BETA": "NISAR_L3_SME2_BETA_V1"
+      },
+      "notes": "Check spatial resolution and AOI coverage before committing to it. If it doesn't cover the basin, derive a relative wetness index from GCOV instead."
+    },
+    {
+      "id": "opera_rtc_s1",
+      "priority": 3,
+      "required": false,
+      "name": "OPERA L2 RTC from Sentinel-1 (C-band)",
+      "why": "Multi-year history (2016+) to show past rainy seasons and flood events that NISAR missed; C-band vs L-band comparison is something the challenge explicitly suggests (different frequencies).",
+      "collections": {"default": "OPERA_L2_RTC-S1_V1"},
+      "notes": "Verify the short name and AOI coverage in Earthdata Search before bulk download. Pick 2-3 wet-season peaks (Jan-Mar) and matching dry-season dates."
+    },
+    {
+      "id": "opera_dswx_s1",
+      "priority": 3,
+      "required": false,
+      "name": "OPERA L3 Dynamic Surface Water Extent from Sentinel-1 (DSWx-S1)",
+      "why": "Ready-made water masks to validate our NISAR water/flood thresholds.",
+      "collections": {"default": "OPERA_L3_DSWX-S1_V1"},
+      "notes": "Verify short name and coverage (South America) before use."
+    },
+    {
+      "id": "dem",
+      "priority": 1,
+      "required": true,
+      "name": "Copernicus DEM GLO-30",
+      "why": "Same DEM family NISAR uses for terrain correction. Needed for slope, flow direction, drainage and the 3D terrain view in the app.",
+      "source": "AWS Open Data: s3://copernicus-dem-30m/ (public, no auth; tiles named Copernicus_DSM_COG_10_S18_00_W067_00_DEM etc.) or OpenTopography.",
+      "tiles_needed": "Tiles covering lat -18 to -17, lon -67 to -65 (S18 W067, S18 W066, plus neighbours if the basin bbox crosses them).",
+      "output": "Mosaic, clip to basin, COG + terrain-RGB tiles (for MapLibre/deck.gl terrain) + slope COG."
+    },
+    {
+      "id": "gpm_imerg",
+      "priority": 2,
+      "required": true,
+      "name": "GPM IMERG Final Daily precipitation",
+      "why": "Rain is the driver. Plot rainfall next to SAR backscatter/soil wetness so the app can explain why the surface changed.",
+      "collections": {"default": "GPM_3IMERGDF (version 07)"},
+      "notes": "Verify current version/short name in Earthdata Search. Extract a daily time series for the basin (mean over bbox) covering 2025-10-01 to today. Final runs lag ~3.5 months: use GPM_3IMERGDL (Late) for the most recent weeks.",
+      "output": "CSV/Parquet: date, precip_mm (basin mean), plus optional small daily grid as Zarr."
+    },
+    {
+      "id": "optical_context",
+      "priority": 3,
+      "required": false,
+      "name": "Optical context: Harmonized Landsat Sentinel-2 (HLS) or Sentinel-2 L2A",
+      "why": "Human-readable context next to radar (true colour, NDVI) for storytelling; cloud-free dates only.",
+      "collections": {"HLS": ["HLSS30.v2.0", "HLSL30.v2.0"]},
+      "notes": "Optional. Pick 1 clear dry-season date and 1 wet-season date closest to SAR acquisitions."
+    },
+    {
+      "id": "gamc_wms",
+      "priority": 1,
+      "required": true,
+      "name": "GAMC municipal WMS layers (Cochabamba)",
+      "why": "Local ground truth: basins, drainage, emergency records, district boundaries, 2750 m contour (urban growth limit).",
+      "access": "WMS 1.1.1 via proxy https://serviciosgamc.cochabamba.bo/api/gs/wms with params key, service_id, SERVICE=WMS, VERSION=1.1.1 (GetLegendGraphic 1.0.0), REQUEST, LAYERS= (empty). Operations: GetMap (PNG), GetLegendGraphic (PNG), GetFeatureInfo (application/json).",
+      "download": "Not downloadable as vectors: consume live through the backend proxy; GetFeatureInfo for attributes on click.",
+      "services": [
+        {"name": "Cuencas UH 8", "type": "categorized", "service_id": "4499e961-2b2e-4cf3-84dd-30789c31ec96", "bbox": [-66.433583, -17.677893, -65.844154, -17.186852]},
+        {"name": "Cuencas UH 7", "type": "categorized", "service_id": "fb368617-f2fd-43e8-867a-4456364efb52", "bbox": [-66.536394, -17.870027, -65.574648, -17.231247]},
+        {"name": "Cuencas de Influencia", "type": "categorized", "service_id": "02ddf5a6-4d80-4ed3-8c73-b531b0574e81", "bbox": [-66.278147, -17.53119, -66.064787, -17.24657]},
+        {"name": "Drenaje e Influencia", "type": "simple", "service_id": "d4cea6e3-fc7f-482a-94ad-bd377df78886", "bbox": [-66.269936, -17.530591, -66.045853, -17.260142]},
+        {"name": "Cota 2750", "type": "categorized", "service_id": "297cefa4-0832-42bb-a98e-2cbea989fd9d", "bbox": [-66.193763, -17.367136, -66.103902, -17.257306]},
+        {"name": "Limite Distritos", "type": "categorized", "service_id": "7eb13092-bf0e-493b-aae6-03c43eedda2c", "bbox": [-66.280703, -17.53119, -66.06952, -17.257306], "note": "Portal lists this with the same bbox as Cota 2750 (likely an error); bbox here taken from the same layer in project 03."},
+        {"name": "Emergencias", "type": "simple", "service_id": "e105a6ed-74bb-41a5-8c85-9360711ddf69", "bbox": [-66.280703, -17.53119, -66.06952, -17.257306]}
+      ]
+    },
+    {
+      "id": "jrc_gsw",
+      "priority": 4,
+      "required": false,
+      "name": "JRC Global Surface Water (occurrence)",
+      "why": "Permanent vs. seasonal water reference (Laguna Alalay, reservoirs) so the app doesn't flag permanent water as floods.",
+      "source": "https://global-surface-water.appspot.com/download (tile 70W_10S covers the AOI; verify)"
+    }
+  ],
+
+  "download_plan": [
+    "1. Authenticate with earthaccess.login() (env vars or netrc). Stop and ask the user if credentials are missing.",
+    "2. Search nisar_gcov for all maturities over area_of_interest.basin; write a manifest (granule name, date, track, frame, direction, maturity, size, URL) to data/manifests/nisar_gcov.csv BEFORE downloading anything.",
+    "3. Choose the track/frame per nisar_gcov.selection_rules and report the choice plus total size to the user.",
+    "4. Stream/subset the chosen GCOV granules to the basin and the listed layers; save intermediates under data/raw/ (never commit).",
+    "5. Repeat steps 2-4 for nisar_gunw (same track/frame), then nisar_sme2 if it covers the AOI.",
+    "6. Download Copernicus DEM tiles and GPM IMERG daily series.",
+    "7. Optional: opera_rtc_s1, opera_dswx_s1, optical_context, jrc_gsw.",
+    "8. Convert outputs to COG / Zarr / CSV under data/processed/ following each dataset's 'output'."
+  ],
+
+  "storage_layout": {
+    "data/manifests/": "Search results as CSV (small, can be shared)",
+    "data/raw/": "Original or subset HDF5/GeoTIFF/NetCDF (large, never commit)",
+    "data/processed/cog/": "Cloud-Optimized GeoTIFFs for the map",
+    "data/processed/zarr/": "Time-series cubes",
+    "data/processed/tables/": "CSV/Parquet time series (rainfall, per-district stats)"
+  },
+
+  "rules_for_agent": [
+    "Do not commit or push anything to git.",
+    "Do not store credentials anywhere in files.",
+    "Show the manifest and estimated total size to the user before any download larger than ~5 GB.",
+    "Mark any short name flagged 'verify' as confirmed or corrected in your report."
+  ],
+
+  "sources_read": [
+    "https://www.spaceappschallenge.org/2026/challenges/dancing-with-the-sars/?tab=resources",
+    "https://nisar-docs.asf.alaska.edu/availability-overview",
+    "https://nisar-docs.asf.alaska.edu/products-overview",
+    "https://nisar-docs.asf.alaska.edu/access-overview",
+    "https://nisar-docs.asf.alaska.edu/gcov",
+    "https://nisar-docs.asf.alaska.edu/asf-search",
+    "https://nisar-docs.asf.alaska.edu/earthaccess",
+    "https://recursosgamc.cochabamba.bo/api-doc"
+  ]
+}
