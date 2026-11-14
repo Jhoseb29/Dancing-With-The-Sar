@@ -1,0 +1,172 @@
+{
+  "app": {
+    "name": "Dancing with the SARs",
+    "tagline": "Basin early warning · Cochabamba"
+  },
+  "nav": {
+    "orbit": "Orbit",
+    "basin": "Basin",
+    "temporal": "Time lab",
+    "risk": "Risk",
+    "insights": "Insights",
+    "provenance": "Provenance",
+    "language": "Language",
+    "menu": "Menu",
+    "events": "Events"
+  },
+  "countdown": {
+    "label": "Next pass · Cochabamba",
+    "loading": "Computing orbit…",
+    "none": "No passes in 48 h",
+    "error": "Orbit unavailable"
+  },
+  "orbit": {
+    "kicker": "NISAR · NASA–ISRO · L-band",
+    "title": "The radar dancing over Cochabamba",
+    "intro": "NISAR circles the Earth every ~100 minutes and repeats the same orbit every 12 days. Its radar sees through clouds and at night, so it can track water, soil and terrain in our basins all year round.",
+    "readout": "Computed telemetry",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "altitude": "Altitude",
+    "speed": "Speed",
+    "nextPass": "Next pass",
+    "closest": "Closest distance",
+    "ascending": "Ascending",
+    "descending": "Descending",
+    "upcoming": "Upcoming passes (48 h)",
+    "speedControl": "Time speed",
+    "now": "Now",
+    "follow": "Follow NISAR",
+    "home": "Global view",
+    "toBasin": "View Cochabamba",
+    "legendOrbit": "Orbit",
+    "legendFuture": "Upcoming track",
+    "legendPast": "Previous track",
+    "legendSwath": "Illustrative swath ~{{km}} km",
+    "disclaimerPosition": "Position computed from public orbital elements (TLE) with the SGP4 model. This is not live telemetry.",
+    "disclaimerPass": "A predicted orbital pass does not guarantee that NISAR acquires an image: that depends on its observation plan.",
+    "disclaimerSwath": "The swath is illustrative: the real radar looks sideways, not straight down.",
+    "tleEpoch": "TLE epoch",
+    "tleSource": "Source",
+    "tleStale": "Orbital elements are more than {{days}} days old: the position may be inaccurate.",
+    "loading": "Loading NISAR orbit…",
+    "error": "Could not get the NISAR orbit",
+    "lastAcquisition": "Latest real acquisition over Cochabamba",
+    "pendingCatalog": "Will appear once the backend catalog is available."
+  },
+  "pending": {
+    "kicker": "In preparation",
+    "body": "This view uses real data that the backend is still preparing. No made-up data: it will appear as soon as the pipeline publishes it.",
+    "needs": "Needs",
+    "back": "Back to orbit",
+    "temporal": "Dry vs rainy season comparison with NISAR and GPM IMERG rainfall.",
+    "risk": "Risk by basin: Tunari slopes vs Rocha valley.",
+    "insights": "Explanations for citizens, civil defense and technical staff (Harness 2).",
+    "provenance": "Manifests, data maturity and Harness 1 judgment."
+  },
+  "basin": {
+    "kicker": "Basin · Cochabamba",
+    "title": "From the Tunari to the Rocha",
+    "intro": "Real municipal basins, drainage, emergencies and districts. Toggle layers, click the map to see their data or search a place above.",
+    "toOrbit": "Back to orbit",
+    "gamcLayers": "Municipal layers (GAMC)",
+    "gamcSource": "Real data from the Autonomous Municipal Government of Cochabamba · Project 02",
+    "status": {
+      "loading": "loading…",
+      "error": "unavailable"
+    },
+    "legendOf": "Legend of {{name}}",
+    "pointInfo": "Data at this point",
+    "close": "Close",
+    "querying": "Querying GAMC…",
+    "noData": "No data at this point."
+  },
+  "common": {
+    "km": "km",
+    "kms": "km/s"
+  },
+  "search": {
+    "label": "Search place",
+    "placeholder": "Search place…",
+    "kind": {
+      "country": "Country",
+      "department": "Department",
+      "city": "City",
+      "basin": "Basin",
+      "zone": "Zone"
+    }
+  },
+  "agent": {
+    "title": "Agent · Mission control",
+    "name": "Guide",
+    "you": "You",
+    "open": "Talk to the agent",
+    "close": "Close",
+    "send": "Send",
+    "placeholder": "Type your question… (Enter to send)",
+    "online": "Online",
+    "connecting": "Connecting…",
+    "offline": "Offline",
+    "thinking": "Thinking…",
+    "acting": "Moving the view…",
+    "retry": "Retry",
+    "errors": {
+      "llm_not_configured": "The agent is not configured: GEMINI_API_KEY is missing in the backend.",
+      "llm_error": "The agent could not answer. Try again.",
+      "rate_limited": "Too many messages in a row; wait a few seconds.",
+      "too_long": "The message is too long (max 500 characters).",
+      "bad_message": "Invalid message.",
+      "disconnected": "Agent unavailable: the service is not responding.",
+      "no_speech": "Your speech was not understood. Try again, a bit closer to the microphone.",
+      "stt_error": "The audio could not be transcribed. Try again.",
+      "audio_too_large": "The audio is too long; speak in shorter sentences."
+    },
+    "voice": {
+      "settings": "Voice settings",
+      "readReplies": "Read replies",
+      "handsFree": "Hands-free",
+      "stop": "Stop talking",
+      "talk": "Talk",
+      "stopListening": "Stop",
+      "listening": "Listening…",
+      "speaking": "Speaking…",
+      "speakNow": "Speak now…",
+      "privacy": "Your voice is recorded only while the microphone is on and sent to the project server, which transcribes it with Gemini (Google). It is not stored. The microphone only turns on when you press it.",
+      "privacyOk": "Got it, talk",
+      "errors": {
+        "not-supported": "Your browser does not support speech recognition (try Chrome or Edge). You can keep typing.",
+        "not-allowed": "No permission to use the microphone. Enable it in the browser.",
+        "service-not-allowed": "The browser does not allow speech recognition here.",
+        "audio-capture": "No microphone was found.",
+        "network": "Speech recognition needs an internet connection.",
+        "language-not-supported": "The browser does not recognize speech in this language.",
+        "start-failed": "Could not start the microphone. Try again."
+      },
+      "transcribing": "Transcribing…"
+    }
+  },
+  "events": {
+    "kicker": "Events · NASA imagery by day",
+    "title": "Event explorer",
+    "type": "Event type",
+    "place": "Place",
+    "day": "Day shown",
+    "prev": "Previous day",
+    "next": "Next day",
+    "range": "Event range: {{start}} → {{end}}",
+    "howToRead": "How to read this image",
+    "fireStats": "Heat hotspots (NASA FIRMS)",
+    "statsLoading": "Querying NASA FIRMS… the first time may take a while.",
+    "firmsUnavailable": "FIRMS statistics are unavailable: FIRMS_MAP_KEY is missing in the backend. MODIS imagery is still shown.",
+    "statsError": "FIRMS statistics could not be retrieved right now.",
+    "hotspots": "hotspots detected in the range",
+    "peak": "Peak day: {{date}} ({{count}} hotspots) · view",
+    "monthly": "Hotspots per month",
+    "dayHotspots": "{{count}} hotspots on {{date}}",
+    "layers": "Layers for this event",
+    "noCoverage": "no coverage this day",
+    "source": "Imagery: NASA EOSDIS GIBS. Hotspots: NASA FIRMS (VIIRS).",
+    "verifiedDays": "Days with imagery over this place (verified):",
+    "rateLimited": "NASA FIRMS reached this key's query limit (5000 per 10 minutes). What was downloaded is saved; retry in a few minutes."
+  }
+}

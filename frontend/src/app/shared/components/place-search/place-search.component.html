@@ -1,0 +1,34 @@
+<div class="search" role="search">
+  <label class="sr-only" for="place-search-input">{{ 'search.label' | transloco }}</label>
+  <input
+    id="place-search-input"
+    class="input"
+    type="search"
+    autocomplete="off"
+    role="combobox"
+    aria-controls="place-search-results"
+    [attr.aria-expanded]="open() && results().length > 0"
+    [value]="query()"
+    [placeholder]="'search.placeholder' | transloco"
+    (input)="onInput($any($event.target).value)"
+    (keydown)="onKeydown($event)"
+    (focus)="open.set(true)"
+    (blur)="close()"
+  />
+
+  @if (open() && results().length) {
+    <ul id="place-search-results" class="results" role="listbox">
+      @for (place of results(); track place.id; let i = $index) {
+        <li
+          role="option"
+          [attr.aria-selected]="i === activeIndex()"
+          [class.active]="i === activeIndex()"
+          (mousedown)="choose(place)"
+        >
+          <span>{{ place.name[lang()] }}</span>
+          <span class="caption">{{ 'search.kind.' + place.kind | transloco }}{{ place.approximate ? ' · ≈' : '' }}</span>
+        </li>
+      }
+    </ul>
+  }
+</div>

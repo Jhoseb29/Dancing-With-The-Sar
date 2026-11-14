@@ -1,0 +1,58 @@
+<header class="topbar">
+  <a class="brand label" routerLink="/orbita" queryParamsHandling="preserve">
+    {{ 'app.name' | transloco }}
+  </a>
+
+  <button
+    class="btn-ghost menu-toggle"
+    type="button"
+    [attr.aria-expanded]="menuOpen()"
+    aria-controls="main-nav"
+    (click)="toggleMenu()"
+  >
+    {{ 'nav.menu' | transloco }}
+  </button>
+
+  <nav id="main-nav" class="nav" [class.open]="menuOpen()">
+    <app-place-search
+      [places]="places"
+      [lang]="scene.lang()"
+      [query]="scene.search().query"
+      (queryChange)="onQuery($event)"
+      (selected)="onPlaceSelected($event)"
+    />
+
+    @for (item of nav; track item.id) {
+      <a
+        class="nav-link label"
+        [routerLink]="['/', item.path]"
+        routerLinkActive="active"
+        queryParamsHandling="preserve"
+        (click)="menuOpen.set(false)"
+      >
+        {{ item.titleKey | transloco }}
+      </a>
+    }
+
+    <div class="langs" role="group" [attr.aria-label]="'nav.language' | transloco">
+      @for (lang of langs; track lang) {
+        <button
+          class="btn-pill"
+          type="button"
+          [attr.aria-pressed]="scene.lang() === lang"
+          (click)="setLang(lang)"
+        >
+          {{ lang }}
+        </button>
+      }
+    </div>
+  </nav>
+
+  <app-pass-countdown class="countdown" [pass]="orbit.nextPass()" [status]="orbit.status()" />
+</header>
+
+<main class="stage">
+  <router-outlet />
+</main>
+
+<app-agent-dock />

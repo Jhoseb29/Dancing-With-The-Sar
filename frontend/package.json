@@ -1,0 +1,40 @@
+{
+  "name": "dancing-with-the-sars-frontend",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "sync-schemas": "node scripts/sync-schemas.mjs",
+    "prestart": "npm run sync-schemas",
+    "prebuild": "npm run sync-schemas"
+  },
+  "private": true,
+  "packageManager": "npm@11.17.0",
+  "dependencies": {
+    "@angular/common": "^22.2.0",
+    "@angular/compiler": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/forms": "^22.2.0",
+    "@angular/platform-browser": "^22.2.0",
+    "@angular/router": "^22.2.0",
+    "@fontsource/barlow": "^5.3.0",
+    "@jsverse/transloco": "^8.4.0",
+    "ajv": "^8.20.0",
+    "cesium": "^1.147.0",
+    "comlink": "^4.4.2",
+    "maplibre-gl": "^6.18.0",
+    "rxjs": "~7.8.0",
+    "satellite.js": "^6.0.2",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.2.7",
+    "@angular/cli": "^22.2.7",
+    "@angular/compiler-cli": "^22.2.0",
+    "prettier": "^3.8.1",
+    "typescript": "~6.0.2"
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "places": [
+    {
+      "id": "bolivia",
+      "name": {
+        "es": "Bolivia",
+        "en": "Bolivia"
+      },
+      "aliases": [
+        "estado plurinacional de bolivia"
+      ],
+      "kind": "country",
+      "bbox": [
+        -69.645703,
+        -22.891699,
+        -57.495654,
+        -9.710449
+      ],
+      "source": "Natural Earth 1:50m Admin 0 (dominio público) · límite en backend/compute-py/src/modules/events/data/bolivia_ne50m.geojson"
+    },
+    {
+      "id": "cochabamba-city",
+      "name": {
+        "es": "Cochabamba (área urbana)",
+        "en": "Cochabamba (urban area)"
+      },
+      "aliases": [
+        "cochabamba",
+        "cbba",
+        "ciudad de cochabamba",
+        "llajta"
+      ],
+      "kind": "city",
+      "bbox": [
+        -66.280703,
+        -17.53119,
+        -66.04585,
+        -17.24657
+      ],
+      "source": "data-map.json → area_of_interest.core_city"
+    },
+    {
+      "id": "cochabamba-basin",
+      "name": {
+        "es": "Cuenca de Cochabamba (UH 7 + UH 8)",
+        "en": "Cochabamba basin (UH 7 + UH 8)"
+      },
+      "aliases": [
+        "cuenca",
+        "cuenca del rocha",
+        "rio rocha",
+        "valle de cochabamba"
+      ],
+      "kind": "basin",
+      "bbox": [
+        -66.536394,
+        -17.870027,
+        -65.574648,
+        -17.186852
+      ],
+      "source": "data-map.json → area_of_interest.basin"
+    },
+    {
+      "id": "influence-basins",
+      "name": {
+        "es": "Cuencas de influencia (GAMC)",
+        "en": "Influence basins (GAMC)"
+      },
+      "aliases": [
+        "cuencas de influencia",
+        "torrenteras"
+      ],
+      "kind": "basin",
+      "bbox": [
+        -66.278147,
+        -17.53119,
+        -66.064787,
+        -17.24657
+      ],
+      "source": "GAMC WMS · Cuencas de Influencia (extensión del servicio)"
+    },
+    {
+      "id": "north-zone-2750",
+      "name": {
+        "es": "Zona norte · Cota 2750",
+        "en": "North zone · 2750 m contour"
+      },
+      "aliases": [
+        "cota 2750",
+        "zona norte",
+        "pie del tunari",
+        "tunari"
+      ],
+      "kind": "zone",
+      "bbox": [
+        -66.193763,
+        -17.367136,
+        -66.103902,
+        -17.257306
+      ],
+      "source": "GAMC WMS · Cota 2750 (extensión del servicio)"
+    }
+  ]
+}

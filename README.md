@@ -43,7 +43,8 @@ La solución busca responder tres preguntas críticas para tomadores de decision
 │   ├── 02-backend-modules.md
 │   ├── 03-frontend-architecture.md
 │   ├── 04-data-pipeline-and-harnesses.md
-│   └── 05-openspec-workflow.md
+│   ├── 05-openspec-workflow.md
+│   └── 06-design-system.md
 ├── openspec/                  # Especificaciones SDD (OpenSpec 1.15.0)
 ├── backend/                   # Monolito modular (TypeScript + Python)
 │   ├── gateway-ts/            # Runtime NestJS (BFF, Proxy GAMC, Catálogo, Riesgo)
@@ -71,3 +72,4 @@ La solución busca responder tres preguntas críticas para tomadores de decision
 * **Estándares y estructura del Frontend Angular 22:** [`docs/03-frontend-architecture.md`](./docs/03-frontend-architecture.md)
 * **Pipeline real COG + Zarr + PMTiles y flujo Harness 1 -> Harness 2:** [`docs/04-data-pipeline-and-harnesses.md`](./docs/04-data-pipeline-and-harnesses.md)
 * **Cómo trabajaremos con OpenSpec (SDD):** [`docs/05-openspec-workflow.md`](./docs/05-openspec-workflow.md)
+* **Sistema de diseño "Control de Misión" (tokens, tipografía, componentes):** [`docs/06-design-system.md`](./docs/06-design-system.md)

@@ -1,0 +1,88 @@
+<app-map-canvas (ready)="onCanvasReady($event)" />
+
+<aside class="panel overlay" [attr.aria-label]="'basin.title' | transloco">
+  <p class="caption">{{ 'basin.kicker' | transloco }}</p>
+  <h1 class="headline">{{ 'basin.title' | transloco }}</h1>
+  <p>{{ 'basin.intro' | transloco }}</p>
+
+  <section class="block">
+    <div class="row">
+      @for (placeId of quickPlaces; track placeId) {
+        <button
+          class="btn-pill"
+          type="button"
+          [attr.aria-pressed]="scene.camera().placeId === placeId"
+          (click)="goToPlace(placeId)"
+        >
+          {{ placeName(placeId) }}
+        </button>
+      }
+    </div>
+    @if (map.view(); as v) {
+      <p class="caption tabular">
+        {{ v.lat | coordinate: 'lat' : scene.lang() }} · {{ v.lon | coordinate: 'lon' : scene.lang() }} · z{{ v.zoom.toFixed(1) }}
+      </p>
+    }
+  </section>
+
+  <section class="block">
+    <h2 class="label">{{ 'basin.gamcLayers' | transloco }}</h2>
+    <p class="caption">{{ 'basin.gamcSource' | transloco }}</p>
+    <ul class="layers">
+      @for (item of gamcLayers(); track item.preset.id) {
+        <li>
+          <label class="toggle">
+            <input
+              type="checkbox"
+              [checked]="item.visible"
+              (change)="toggle(item.preset.id, $any($event.target).checked)"
+            />
+            <span>{{ item.preset.name[scene.lang()] }}</span>
+            @if (item.status === 'loading') {
+              <span class="caption">{{ 'basin.status.loading' | transloco }}</span>
+            } @else if (item.status === 'error') {
+              <span class="caption error">{{ 'basin.status.error' | transloco }}</span>
+            }
+          </label>
+          @if (item.visible && item.preset.legend) {
+            <img class="legend" [src]="item.legendUrl" [alt]="'basin.legendOf' | transloco: { name: item.preset.name[scene.lang()] }" loading="lazy" />
+          }
+        </li>
+      }
+    </ul>
+  </section>
+
+  @if (map.featureInfo(); as info) {
+    <section class="block" aria-live="polite">
+      <div class="row between">
+        <h2 class="label">{{ 'basin.pointInfo' | transloco }}</h2>
+        <button class="btn-secondary small" type="button" (click)="map.clearFeatureInfo()">{{ 'basin.close' | transloco }}</button>
+      </div>
+      <p class="caption tabular">{{ info.lat | coordinate: 'lat' : scene.lang() }} · {{ info.lon | coordinate: 'lon' : scene.lang() }}</p>
+      @if (info.loading) {
+        <p class="muted">{{ 'basin.querying' | transloco }}</p>
+      } @else {
+        @for (result of info.results; track result.presetId) {
+          <div class="result">
+            <p class="label">{{ layerName(result.presetId) }}</p>
+            @if (result.error) {
+              <p class="caption error">{{ result.error }}</p>
+            } @else if (result.features.length === 0) {
+              <p class="muted">{{ 'basin.noData' | transloco }}</p>
+            } @else {
+              @for (feature of result.features; track $index) {
+                <dl class="attrs tabular">
+                  @for (entry of entries(feature.properties); track entry.key) {
+                    <div><dt class="caption">{{ entry.key }}</dt><dd>{{ entry.value }}</dd></div>
+                  }
+                </dl>
+              }
+            }
+          </div>
+        }
+      }
+    </section>
+  }
+
+  <a class="btn-ghost" routerLink="/orbita" queryParamsHandling="preserve">← {{ 'basin.toOrbit' | transloco }}</a>
+</aside>

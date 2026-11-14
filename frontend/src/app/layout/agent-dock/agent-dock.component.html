@@ -1,0 +1,139 @@
+@if (open()) {
+  <section class="dock" role="dialog" [attr.aria-label]="'agent.title' | transloco">
+    <header class="head">
+      <div>
+        <p class="label">{{ 'agent.title' | transloco }}</p>
+        <p class="caption">
+          @switch (agent.connection()) {
+            @case ('open') {
+              @if (voice.listening()) {
+                {{ 'agent.voice.listening' | transloco }}
+              } @else if (voice.speaking()) {
+                {{ 'agent.voice.speaking' | transloco }}
+              } @else if (agent.status() === 'transcribing') {
+                {{ 'agent.voice.transcribing' | transloco }}
+              } @else if (agent.status() === 'acting') {
+                {{ 'agent.acting' | transloco }}
+              } @else if (agent.status() === 'thinking') {
+                {{ 'agent.thinking' | transloco }}
+              } @else {
+                {{ 'agent.online' | transloco }}
+              }
+            }
+            @case ('connecting') {
+              {{ 'agent.connecting' | transloco }}
+            }
+            @default {
+              {{ 'agent.offline' | transloco }}
+            }
+          }
+        </p>
+      </div>
+      <button class="btn-secondary small" type="button" (click)="toggle()">{{ 'agent.close' | transloco }}</button>
+    </header>
+
+    <div class="voice-row" role="group" [attr.aria-label]="'agent.voice.settings' | transloco">
+      <button
+        class="btn-pill small"
+        type="button"
+        [disabled]="!voice.outputSupported"
+        [attr.aria-pressed]="voice.settings().output"
+        (click)="voice.setOutput(!voice.settings().output)"
+      >
+        {{ 'agent.voice.readReplies' | transloco }}
+      </button>
+      <button
+        class="btn-pill small"
+        type="button"
+        [disabled]="!voice.inputSupported"
+        [attr.aria-pressed]="voice.settings().handsFree"
+        (click)="voice.setHandsFree(!voice.settings().handsFree)"
+      >
+        {{ 'agent.voice.handsFree' | transloco }}
+      </button>
+      @if (voice.speaking()) {
+        <button class="btn-secondary small" type="button" (click)="voice.interrupt()">{{ 'agent.voice.stop' | transloco }}</button>
+      }
+    </div>
+
+    <ol #log class="log" aria-live="polite">
+      @for (entry of agent.transcript(); track entry.id) {
+        <li [class]="entry.role">
+          <span class="who caption">{{ (entry.role === 'user' ? 'agent.you' : 'agent.name') | transloco }}</span>
+          <p>{{ entry.text }}</p>
+        </li>
+      }
+      @if (busy()) {
+        <li class="agent pending">
+          <span class="who caption">{{ 'agent.name' | transloco }}</span>
+          <p class="muted">{{ (agent.status() === 'acting' ? 'agent.acting' : 'agent.thinking') | transloco }}</p>
+        </li>
+      }
+    </ol>
+
+    @if (voice.listening() || voice.interim()) {
+      <div class="interim" aria-live="polite">
+        <span>{{ voice.interim() || ('agent.voice.speakNow' | transloco) }}</span>
+        <span class="meter" aria-hidden="true"><span class="meter-fill" [style.width.%]="voice.level() * 100"></span></span>
+      </div>
+    }
+
+    @if (askPrivacy()) {
+      <div class="notice" role="alertdialog">
+        <p>{{ 'agent.voice.privacy' | transloco }}</p>
+        <button class="btn-ghost small" type="button" (click)="acceptPrivacy()">{{ 'agent.voice.privacyOk' | transloco }}</button>
+      </div>
+    }
+
+    @if (voice.error(); as verr) {
+      <p class="caption">{{ ('agent.voice.errors.' + verr) | transloco }}</p>
+    }
+
+    @if (agent.error(); as err) {
+      <div class="notice" role="alert">
+        <p>{{ 'agent.errors.' + err.code | transloco }}</p>
+        @if (err.code === 'llm_error' || err.code === 'disconnected') {
+          <button class="btn-secondary small" type="button" (click)="retry()">{{ 'agent.retry' | transloco }}</button>
+        }
+      </div>
+    } @else if (agent.connection() === 'closed' && agent.transcript().length === 0) {
+      <div class="notice" role="alert">
+        <p>{{ 'agent.errors.disconnected' | transloco }}</p>
+        <button class="btn-secondary small" type="button" (click)="retry()">{{ 'agent.retry' | transloco }}</button>
+      </div>
+    }
+
+    <form class="composer" (submit)="$event.preventDefault(); send()">
+      <label class="sr-only" for="agent-input">{{ 'agent.placeholder' | transloco }}</label>
+      <textarea
+        #input
+        id="agent-input"
+        rows="2"
+        maxlength="500"
+        [value]="draft()"
+        [placeholder]="'agent.placeholder' | transloco"
+        (input)="draft.set($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+      ></textarea>
+      <button
+        class="btn-ghost mic"
+        type="button"
+        [class.live]="voice.listening()"
+        [disabled]="!voice.inputSupported || agent.connection() !== 'open'"
+        [attr.aria-pressed]="voice.listening()"
+        [attr.aria-label]="(voice.listening() ? 'agent.voice.stopListening' : 'agent.voice.talk') | transloco"
+        [title]="voice.inputSupported ? '' : ('agent.voice.errors.not-supported' | transloco)"
+        (click)="onMic()"
+      >
+        {{ (voice.listening() ? 'agent.voice.stopListening' : 'agent.voice.talk') | transloco }}
+      </button>
+      <button class="btn-ghost" type="submit" [disabled]="busy() || !draft().trim() || agent.connection() !== 'open'">
+        {{ 'agent.send' | transloco }}
+      </button>
+    </form>
+  </section>
+} @else {
+  <button class="btn-ghost launcher" type="button" (click)="toggle()">
+    {{ 'agent.open' | transloco }}
+  </button>
+}

@@ -1,0 +1,126 @@
+@use './styles/tokens';
+// Barlow 400/700 se cargan desde angular.json (styles) con @fontsource/barlow (autohospedada).
+
+// Base global del sistema "Control de Misión" (docs/06-design-system.md).
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--color-void-black);
+  color: var(--color-star-white);
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-label);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+// Utilidades compartidas (solo tokens).
+
+.headline {
+  margin: 0;
+  font-size: var(--text-headline);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--leading-headline);
+  letter-spacing: var(--tracking-headline);
+  text-transform: uppercase;
+
+  @media (max-width: 767px) {
+    font-size: var(--text-headline-mobile);
+  }
+}
+
+.label {
+  font-size: var(--text-label);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.caption {
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+  color: var(--color-muted-text);
+}
+
+.muted {
+  color: var(--color-muted-text);
+}
+
+.tabular {
+  font-feature-settings: 'tnum' on;
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-ghost,
+.btn-secondary,
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-10);
+  padding: var(--spacing-12) var(--spacing-20);
+  border: var(--border-hairline) solid var(--color-star-white);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-star-white);
+  font-family: var(--font-primary);
+  font-size: var(--text-label);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-hover-fill);
+  }
+
+  &:focus-visible {
+    outline: var(--border-hairline) solid var(--color-star-white);
+    outline-offset: var(--spacing-4);
+  }
+}
+
+.btn-secondary {
+  border-color: var(--color-dim-steel);
+  color: var(--color-muted-text);
+}
+
+.btn-pill {
+  padding: var(--spacing-4) var(--spacing-12);
+  border-radius: var(--radius-pill);
+
+  &[aria-pressed='false'] {
+    border-color: var(--color-dim-steel);
+    color: var(--color-muted-text);
+  }
+}
+
+.panel {
+  padding: var(--panel-padding);
+  max-width: var(--panel-max-width);
+  border: var(--border-hairline) solid var(--color-dark-gunmetal);
+  border-radius: var(--radius-md);
+  background: var(--color-overlay);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

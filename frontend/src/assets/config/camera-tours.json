@@ -1,0 +1,27 @@
+{
+  "tours": [
+    {
+      "id": "welcome",
+      "name": { "es": "Bienvenida: del planeta a Cochabamba", "en": "Welcome: from the planet to Cochabamba" },
+      "engine": "globe",
+      "steps": [
+        { "lon": -64.5, "lat": -16.5, "altKm": 22000, "durationMs": 2500, "pauseMs": 1500 },
+        { "placeId": "bolivia", "durationMs": 3500, "pauseMs": 2000 },
+        { "placeId": "cochabamba-basin", "durationMs": 3500, "pauseMs": 2500 },
+        { "placeId": "cochabamba-city", "durationMs": 3000, "pauseMs": 0 }
+      ]
+    },
+    {
+      "id": "planet-spin",
+      "name": { "es": "Vuelta al planeta siguiendo el ecuador", "en": "Spin around the planet along the equator" },
+      "engine": "globe",
+      "steps": [
+        { "lon": -65, "lat": -10, "altKm": 25000, "durationMs": 3000, "pauseMs": 0 },
+        { "lon": 25, "lat": 0, "altKm": 25000, "durationMs": 5000, "pauseMs": 0 },
+        { "lon": 115, "lat": 0, "altKm": 25000, "durationMs": 5000, "pauseMs": 0 },
+        { "lon": -155, "lat": 0, "altKm": 25000, "durationMs": 5000, "pauseMs": 0 },
+        { "lon": -65, "lat": -16.5, "altKm": 22000, "durationMs": 5000, "pauseMs": 0 }
+      ]
+    }
+  ]
+}

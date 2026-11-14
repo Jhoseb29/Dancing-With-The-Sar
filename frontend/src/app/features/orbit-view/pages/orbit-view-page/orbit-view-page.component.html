@@ -1,0 +1,103 @@
+<app-globe-canvas (ready)="onCanvasReady($event)" />
+
+<aside class="panel overlay" [attr.aria-label]="'orbit.title' | transloco">
+  <p class="caption">{{ 'orbit.kicker' | transloco }}</p>
+  <h1 class="headline">{{ 'orbit.title' | transloco }}</h1>
+  <p class="intro">{{ 'orbit.intro' | transloco }}</p>
+
+  @switch (orbit.status()) {
+    @case ('error') {
+      <p class="notice" role="alert">{{ 'orbit.error' | transloco }} · <span class="muted">{{ orbit.error() }}</span></p>
+    }
+    @case ('ready') {
+      <section class="block">
+        <h2 class="label">{{ 'orbit.readout' | transloco }}</h2>
+        <p class="caption tabular">{{ simTimeLabel() }}</p>
+        @if (globe.readout(); as r) {
+          <dl class="readout tabular">
+            <div><dt class="caption">{{ 'orbit.latitude' | transloco }}</dt><dd>{{ r.latDeg | coordinate: 'lat' : scene.lang() }}</dd></div>
+            <div><dt class="caption">{{ 'orbit.longitude' | transloco }}</dt><dd>{{ r.lonDeg | coordinate: 'lon' : scene.lang() }}</dd></div>
+            <div><dt class="caption">{{ 'orbit.altitude' | transloco }}</dt><dd>{{ r.altitudeKm.toFixed(0) }} {{ 'common.km' | transloco }}</dd></div>
+            <div><dt class="caption">{{ 'orbit.speed' | transloco }}</dt><dd>{{ r.speedKmS.toFixed(2) }} {{ 'common.kms' | transloco }}</dd></div>
+          </dl>
+        }
+      </section>
+
+      <section class="block">
+        <h2 class="label">{{ 'orbit.upcoming' | transloco }}</h2>
+        @if (upcoming().length) {
+          <ol class="passes tabular">
+            @for (pass of upcoming(); track pass.timeMs) {
+              <li>
+                <span>{{ pass.label }}</span>
+                <span class="muted">
+                  {{ (pass.direction === 'ascending' ? 'orbit.ascending' : 'orbit.descending') | transloco }}
+                  · {{ pass.distanceKm }} {{ 'common.km' | transloco }}
+                </span>
+              </li>
+            }
+          </ol>
+        } @else {
+          <p class="muted">{{ 'countdown.none' | transloco }}</p>
+        }
+        <p class="caption">{{ 'orbit.disclaimerPass' | transloco }}</p>
+      </section>
+    }
+    @default {
+      <p class="muted">{{ 'orbit.loading' | transloco }}</p>
+    }
+  }
+
+  <section class="block">
+    <h2 class="label">{{ 'orbit.speedControl' | transloco }}</h2>
+    <div class="row">
+      @for (value of speeds; track value) {
+        <button class="btn-pill tabular" type="button" [attr.aria-pressed]="scene.time().speed === value" (click)="setSpeed(value)">
+          {{ value }}×
+        </button>
+      }
+      <button class="btn-secondary" type="button" (click)="resetToNow()">{{ 'orbit.now' | transloco }}</button>
+    </div>
+    <div class="row">
+      <button class="btn-pill" type="button" [attr.aria-pressed]="scene.camera().follow" (click)="toggleFollow()">
+        {{ 'orbit.follow' | transloco }}
+      </button>
+      <button class="btn-secondary" type="button" (click)="flyHome()">{{ 'orbit.home' | transloco }}</button>
+    </div>
+    <div class="row">
+      @for (tour of tours; track tour.id) {
+        <button class="btn-pill" type="button" [attr.aria-pressed]="scene.camera().tourId === tour.id" (click)="startTour(tour.id)">
+          {{ tour.name[scene.lang()] }}
+        </button>
+      }
+    </div>
+    <button class="btn-ghost" type="button" (click)="goToBasin()">{{ 'orbit.toBasin' | transloco }} →</button>
+  </section>
+
+  <section class="block">
+    <ul class="legend caption">
+      <li><span class="swatch ring"></span>{{ 'orbit.legendOrbit' | transloco }}</li>
+      <li><span class="swatch future"></span>{{ 'orbit.legendFuture' | transloco }}</li>
+      <li><span class="swatch past"></span>{{ 'orbit.legendPast' | transloco }}</li>
+      <li><span class="swatch swath"></span>{{ 'orbit.legendSwath' | transloco: { km: swathKm } }}</li>
+    </ul>
+  </section>
+
+  <section class="block">
+    <h2 class="label">{{ 'orbit.lastAcquisition' | transloco }}</h2>
+    <p class="muted">{{ 'orbit.pendingCatalog' | transloco }}</p>
+  </section>
+
+  <footer class="block disclaimers">
+    @if (orbit.elements(); as el) {
+      <p class="caption tabular">
+        {{ 'orbit.tleEpoch' | transloco }}: {{ tleEpochLabel() }} · {{ 'orbit.tleSource' | transloco }}: {{ el.source }} · NORAD {{ el.noradId }}
+      </p>
+    }
+    @if (orbit.isTleStale()) {
+      <p class="notice" role="alert">{{ 'orbit.tleStale' | transloco: { days: staleDays } }}</p>
+    }
+    <p class="caption">{{ 'orbit.disclaimerPosition' | transloco }}</p>
+    <p class="caption">{{ 'orbit.disclaimerSwath' | transloco }}</p>
+  </footer>
+</aside>

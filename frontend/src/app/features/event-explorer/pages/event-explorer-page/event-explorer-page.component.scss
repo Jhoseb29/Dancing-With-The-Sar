@@ -1,0 +1,135 @@
+:host {
+  display: block;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.overlay {
+  position: absolute;
+  top: calc(var(--topbar-height) + var(--spacing-24));
+  left: var(--spacing-40);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: var(--element-gap);
+  width: var(--panel-max-width);
+  max-height: calc(100vh - var(--topbar-height) - var(--spacing-60));
+  overflow-y: auto;
+
+  @media (max-width: 767px) {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-width: none;
+    max-height: 48vh;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+}
+
+p {
+  margin: 0;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-10);
+  padding-top: var(--spacing-15);
+  border-top: var(--border-hairline) solid var(--color-dark-gunmetal);
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-10);
+
+  &.center {
+    align-items: center;
+  }
+}
+
+button[disabled] {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.date {
+  padding: var(--spacing-10) var(--spacing-12);
+  border: var(--border-hairline) solid var(--color-dim-steel);
+  border-radius: var(--radius-md);
+  background: var(--color-void-black);
+  color: var(--color-star-white);
+  font-family: var(--font-primary);
+  font-size: var(--text-label);
+  color-scheme: dark;
+}
+
+.small {
+  padding: var(--spacing-4) var(--spacing-12);
+}
+
+.big {
+  font-size: var(--text-headline-mobile);
+  font-weight: var(--font-weight-bold);
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 64px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: var(--border-hairline) solid var(--color-dim-steel);
+
+  li {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .bar {
+    display: block;
+    width: 100%;
+    min-height: 1px;
+    background: var(--color-star-white);
+  }
+}
+
+.layers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+}
+
+.legend {
+  display: block;
+  max-width: 100%;
+  margin-top: var(--spacing-4);
+  background: var(--color-star-white);
+  border-radius: var(--radius-md);
+}
+
+.notice {
+  padding: var(--spacing-10) var(--spacing-12);
+  border: var(--border-hairline) dashed var(--color-star-white);
+  border-radius: var(--radius-md);
+}

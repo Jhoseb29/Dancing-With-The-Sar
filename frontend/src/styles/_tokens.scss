@@ -1,0 +1,57 @@
+// Tokens del sistema de diseño "Control de Misión" — ver docs/06-design-system.md.
+// Los .scss de componentes solo usan estas variables.
+
+:root {
+  // Colores de interfaz (monocromáticos)
+  --color-void-black: #000000;
+  --color-star-white: #f0f0fa;
+  --color-muted-text: #9a9aa3;
+  --color-dim-steel: #545457;
+  --color-dark-gunmetal: #404040;
+  --color-overlay: rgba(0, 0, 0, 0.72);
+  --color-hover-fill: rgba(240, 240, 250, 0.08);
+
+  // Tipografía
+  --font-primary: 'Barlow', ui-sans-serif, system-ui, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+
+  --text-caption: 10px;
+  --text-label: 12px;
+  --text-body: 13px;
+  --text-body-lg: 16px;
+  --text-headline: 48px;
+  --text-headline-mobile: 32px;
+
+  --leading-body: 1.7;
+  --leading-ui: 1.5;
+  --leading-headline: 1.05;
+
+  --tracking-label: 0.1em;
+  --tracking-caption: 0.09em;
+  --tracking-headline: 0.02em;
+
+  // Espaciado
+  --spacing-4: 4px;
+  --spacing-10: 10px;
+  --spacing-12: 12px;
+  --spacing-13: 13px;
+  --spacing-15: 15px;
+  --spacing-18: 18px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-30: 30px;
+  --spacing-40: 40px;
+  --spacing-60: 60px;
+
+  --section-gap: 60px;
+  --panel-padding: 20px;
+  --element-gap: 18px;
+  --panel-max-width: 450px;
+  --topbar-height: 64px;
+
+  // Bordes
+  --border-hairline: 1px;
+  --radius-md: 4px;
+  --radius-pill: 32px;
+}
