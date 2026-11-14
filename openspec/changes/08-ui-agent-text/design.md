@@ -34,6 +34,7 @@
 | `set_time_speed(speed)` | `/time/speed` |
 | `follow_satellite(enabled)` | `/camera/follow` |
 | `set_language(lang)` | `/lang` |
+| `set_side_panel(visible)` | `/panels/layerPanel` (oculta o muestra el panel lateral de la vista; añadido 2026-11-14) |
 | `get_view()` | sin parche: devuelve estado y reportado actuales |
 
 Los ids válidos se pasan como `enum` en las declaraciones (generadas desde la configuración JSON), así el modelo no puede inventar lugares ni capas.

@@ -1,6 +1,11 @@
 <app-globe-canvas (ready)="onCanvasReady($event)" />
 
-<aside class="panel overlay" [attr.aria-label]="'orbit.title' | transloco">
+<app-side-panel
+  [open]="scene.panels().layerPanel"
+  [label]="'orbit.title' | transloco"
+  [hideLabel]="'panel.hide' | transloco"
+  (openChange)="setPanelOpen($event)"
+>
   <p class="caption">{{ 'orbit.kicker' | transloco }}</p>
   <h1 class="headline">{{ 'orbit.title' | transloco }}</h1>
   <p class="intro">{{ 'orbit.intro' | transloco }}</p>
@@ -100,4 +105,4 @@
     <p class="caption">{{ 'orbit.disclaimerPosition' | transloco }}</p>
     <p class="caption">{{ 'orbit.disclaimerSwath' | transloco }}</p>
   </footer>
-</aside>
+</app-side-panel>

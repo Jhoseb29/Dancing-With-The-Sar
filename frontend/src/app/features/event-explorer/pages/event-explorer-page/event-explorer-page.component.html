@@ -1,6 +1,11 @@
 <app-map-canvas (ready)="onCanvasReady($event)" />
 
-<aside class="panel overlay" [attr.aria-label]="'events.title' | transloco">
+<app-side-panel
+  [open]="scene.panels().layerPanel"
+  [label]="active()?.config ? name(active()?.config?.name) : ('events.title' | transloco)"
+  [hideLabel]="'panel.hide' | transloco"
+  (openChange)="setPanelOpen($event)"
+>
   <p class="caption">{{ 'events.kicker' | transloco }}</p>
   <h1 class="headline">{{ active()?.config ? name(active()?.config?.name) : ('events.title' | transloco) }}</h1>
 
@@ -131,4 +136,4 @@
       <p class="caption">{{ 'events.source' | transloco }}</p>
     </section>
   }
-</aside>
+</app-side-panel>

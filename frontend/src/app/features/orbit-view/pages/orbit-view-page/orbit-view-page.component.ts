@@ -1,3 +1,4 @@
+import { SidePanelComponent } from '../../../../shared/components/side-panel/side-panel.component';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { RuntimeConfigService } from '../../../../core/config/runtime-config.service';
@@ -13,7 +14,7 @@ const SPEEDS = [1, 60, 600] as const;
 /** Vista de planeta: NISAR en órbita en tiempo real (posición calculada). Smart. */
 @Component({
   selector: 'app-orbit-view-page',
-  imports: [GlobeCanvasComponent, TranslocoPipe, CoordinatePipe],
+  imports: [GlobeCanvasComponent, SidePanelComponent, TranslocoPipe, CoordinatePipe],
   templateUrl: './orbit-view-page.component.html',
   styleUrl: './orbit-view-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -122,5 +123,10 @@ export class OrbitViewPageComponent {
       dateStyle: 'medium',
       timeStyle: withSeconds ? 'medium' : 'short',
     }).format(new Date(ms));
+  }
+
+  /** Ocultar o mostrar el panel (mismo flag del shadow que usa el agente con set_side_panel). */
+  protected setPanelOpen(open: boolean): void {
+    void this.scene.set('/panels/layerPanel', open);
   }
 }

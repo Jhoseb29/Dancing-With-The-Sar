@@ -1,3 +1,4 @@
+import { SidePanelComponent } from '../../../../shared/components/side-panel/side-panel.component';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { RuntimeConfigService } from '../../../../core/config/runtime-config.service';
@@ -17,7 +18,7 @@ type StatsState =
 /** Explorador de eventos (OpenSpec 09): imágenes NASA por tipo de evento y día. Smart. */
 @Component({
   selector: 'app-event-explorer-page',
-  imports: [MapCanvasComponent, TranslocoPipe],
+  imports: [MapCanvasComponent, SidePanelComponent, TranslocoPipe],
   templateUrl: './event-explorer-page.component.html',
   styleUrl: './event-explorer-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -128,4 +129,10 @@ export class EventExplorerPageComponent {
       this.stats.set({ status, message: result.message });
     }
   }
+
+  /** Ocultar o mostrar el panel (mismo flag del shadow que usa el agente con set_side_panel). */
+  protected setPanelOpen(open: boolean): void {
+    void this.scene.set('/panels/layerPanel', open);
+  }
+
 }

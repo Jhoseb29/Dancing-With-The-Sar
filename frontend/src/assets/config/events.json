@@ -31,13 +31,13 @@
       },
       "available": true,
       "layers": [
-        "gibs-modis-721"
+        "gibs-viirs-falsecolor"
       ],
       "points": "firms",
       "stats": "firms",
       "howToRead": {
-        "es": "En el falso color 7-2-1 las áreas quemadas se ven rojizas o marrones y la vegetación sana verde. Los puntos son focos de calor detectados por VIIRS (NASA FIRMS) ese día.",
-        "en": "In 7-2-1 false color, burned areas look reddish or brown and healthy vegetation green. Points are heat hotspots detected by VIIRS (NASA FIRMS) that day."
+        "es": "En el falso color de VIIRS (como el 7-2-1) las áreas quemadas se ven rojizas o marrones y la vegetación sana verde. Los puntos son focos de calor detectados por VIIRS (NASA FIRMS) ese día.",
+        "en": "In VIIRS false color (like 7-2-1), burned areas look reddish or brown and healthy vegetation green. Points are heat hotspots detected by VIIRS (NASA FIRMS) that day."
       },
       "defaultPlaceId": "bolivia"
     },
@@ -71,12 +71,12 @@
       },
       "available": true,
       "layers": [
-        "gibs-modis-721",
+        "gibs-viirs-falsecolor",
         "gibs-modis-flood"
       ],
       "howToRead": {
-        "es": "Capa MODIS de 2 días: celeste es agua superficial, rojo es inundación, amarillo es inundación recurrente y gris es sin datos (nubes). Debajo, el fondo 7-2-1: el agua se ve azul oscuro, la vegetación verde y las nubes celestes.",
-        "en": "2-day MODIS layer: light blue is surface water, red is flood, yellow is recurring flood and grey is no data (clouds). Underneath, the 7-2-1 background: water looks dark blue, vegetation green and clouds light blue."
+        "es": "Capa MODIS de 2 días: celeste es agua superficial, rojo es inundación, amarillo es inundación recurrente y gris es sin datos (nubes). Debajo, el falso color de VIIRS: el agua se ve azul oscuro, la vegetación verde y las nubes celestes.",
+        "en": "2-day MODIS layer: light blue is surface water, red is flood, yellow is recurring flood and grey is no data (clouds). Underneath, the VIIRS false color: water looks dark blue, vegetation green and clouds light blue."
       },
       "defaultPlaceId": "cochabamba-basin"
     },

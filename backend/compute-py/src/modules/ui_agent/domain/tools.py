@@ -95,6 +95,15 @@ def declarations(catalog: UiCatalog) -> list[ToolDeclaration]:
             },
         ),
         ToolDeclaration(
+            name="set_side_panel",
+            description="Muestra u oculta el panel lateral de la vista actual (órbita, cuenca o eventos) para dejar el mapa o el globo libre.",
+            parameters={
+                "type": "object",
+                "properties": {"visible": {"type": "boolean"}},
+                "required": ["visible"],
+            },
+        ),
+        ToolDeclaration(
             name="show_event",
             description="Muestra un tipo de evento (incendios, inundaciones, radar NISAR, vegetación) con las imágenes satelitales adecuadas para un lugar y rango de fechas. Abre la vista 'events'. Las fechas no pueden ser futuras.",
             parameters={
@@ -229,6 +238,12 @@ def build_ops(name: str, args: dict[str, Any], scene: dict[str, Any], catalog: U
         if not (event["start"] <= day <= event["end"]):
             raise ToolError(f"La fecha debe estar entre {event['start']} y {event['end']}")
         return [{"op": "replace", "path": "/time/date", "value": day}]
+
+    if name == "set_side_panel":
+        visible = args.get("visible")
+        if not isinstance(visible, bool):
+            raise ToolError("visible debe ser booleano")
+        return [{"op": "replace", "path": "/panels/layerPanel", "value": visible}]
 
     if name == "set_language":
         lang = _one_of(args, "lang", ["es", "en"])

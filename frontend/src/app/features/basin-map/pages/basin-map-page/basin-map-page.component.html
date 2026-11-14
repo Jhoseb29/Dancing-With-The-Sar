@@ -1,6 +1,11 @@
 <app-map-canvas (ready)="onCanvasReady($event)" />
 
-<aside class="panel overlay" [attr.aria-label]="'basin.title' | transloco">
+<app-side-panel
+  [open]="scene.panels().layerPanel"
+  [label]="'basin.title' | transloco"
+  [hideLabel]="'panel.hide' | transloco"
+  (openChange)="setPanelOpen($event)"
+>
   <p class="caption">{{ 'basin.kicker' | transloco }}</p>
   <h1 class="headline">{{ 'basin.title' | transloco }}</h1>
   <p>{{ 'basin.intro' | transloco }}</p>
@@ -85,4 +90,4 @@
   }
 
   <a class="btn-ghost" routerLink="/orbita" queryParamsHandling="preserve">← {{ 'basin.toOrbit' | transloco }}</a>
-</aside>
+</app-side-panel>

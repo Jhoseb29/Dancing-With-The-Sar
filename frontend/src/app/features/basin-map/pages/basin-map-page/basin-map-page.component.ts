@@ -1,3 +1,4 @@
+import { SidePanelComponent } from '../../../../shared/components/side-panel/side-panel.component';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -12,7 +13,7 @@ import { CoordinatePipe } from '../../../../shared/pipes/coordinate.pipe';
 /** Vista de la cuenca (motor 2.5D) con capas municipales reales del GAMC. Smart. */
 @Component({
   selector: 'app-basin-map-page',
-  imports: [MapCanvasComponent, TranslocoPipe, RouterLink, CoordinatePipe],
+  imports: [MapCanvasComponent, SidePanelComponent, TranslocoPipe, RouterLink, CoordinatePipe],
   templateUrl: './basin-map-page.component.html',
   styleUrl: './basin-map-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,4 +77,10 @@ export class BasinMapPageComponent {
       .slice(0, 8)
       .map(([key, value]) => ({ key, value: String(value) }));
   }
+
+  /** Ocultar o mostrar el panel (mismo flag del shadow que usa el agente con set_side_panel). */
+  protected setPanelOpen(open: boolean): void {
+    void this.scene.set('/panels/layerPanel', open);
+  }
+
 }

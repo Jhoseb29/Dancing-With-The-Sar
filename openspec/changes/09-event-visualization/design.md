@@ -7,8 +7,8 @@ Fases 1–2 dejaron el shadow, la configuración en JSON y un agente Gemini que 
 ### D1. Categorías en `events.json`
 | `id` | Satélites/capas (en orden de dibujo) | Lectura | Estadísticas |
 | :--- | :--- | :--- | :--- |
-| `wildfire` | MODIS 7-2-1 + focos FIRMS (VIIRS) | Rojizo/marrón = área quemada; puntos = focos detectados ese día | FIRMS |
-| `flood` | MODIS 7-2-1 + MODIS Flood 2-Day | Celeste = agua, rojo = inundación, amarillo = recurrente, gris = sin datos (nubes); 7-2-1: agua azul oscuro | — |
+| `wildfire` | VIIRS NOAA-20 falso color + focos FIRMS (VIIRS) | Rojizo/marrón = área quemada; puntos = focos detectados ese día | FIRMS |
+| `flood` | VIIRS NOAA-20 falso color + MODIS Flood 2-Day | Celeste = agua, rojo = inundación, amarillo = recurrente, gris = sin datos (nubes); falso color: agua azul oscuro | — |
 | `radar` | NISAR GCOV falso color | Colores = respuesta del radar banda L por polarización | — |
 | `vegetation` | MODIS NDVI 16 días | Verde intenso = vegetación densa; marrón = suelo/seco | — |
 | `deformation` | — (NISAR GUNW aún no procesado) | — | `available: false` |
@@ -47,3 +47,6 @@ Las capas de un evento salen de `events.json` (no de `/layers`). `/layers` queda
 
 ### OPERA DSWx-S1 descartado para Cochabamba
 Verificado con su colormap oficial: "no agua" es blanco opaco, "HAND masked" y "layover/shadow" son grises. En la cuenca (montaña) casi todo queda enmascarado y las escenas se ven como rectángulos. Se mantiene en `layers.json` por si sirve en llanuras (Beni), pero no en el evento `flood`.
+
+### Fondo diario: VIIRS NOAA-20 en vez de MODIS Terra (2026-11-14)
+La imagen diaria de MODIS Terra deja franjas negras entre órbitas cerca del ecuador (GIBS las rellena de negro en JPEG); se notaba al alejar el mapa (reporte del usuario). VIIRS NOAA-20 (`BandsM11-I2-I1`, equivalente al 7-2-1, y `TrueColor`) tiene una franja de ~3000 km y cubre el planeta sin huecos. Verificado: mismo día, MODIS con franjas y VIIRS sin ellas; datos desde 2018-01-05 (cubre la historia de FIRMS). Resolución algo menor (375 m frente a 250 m). Las capas MODIS siguen en el catálogo, sin uso en eventos.

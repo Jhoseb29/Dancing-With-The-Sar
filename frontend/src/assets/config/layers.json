@@ -229,6 +229,54 @@
       ]
     },
     {
+      "id": "gibs-viirs-falsecolor",
+      "kind": "gibs-wmts",
+      "group": "event",
+      "name": {
+        "es": "VIIRS falso color (M11-I2-I1)",
+        "en": "VIIRS false color (M11-I2-I1)"
+      },
+      "description": {
+        "es": "Equivalente al 7-2-1 de MODIS: agua azul oscuro, vegetación verde, áreas quemadas rojizas, nubes celestes. Franja ancha: cubre el planeta sin huecos entre órbitas.",
+        "en": "Equivalent to MODIS 7-2-1: water dark blue, vegetation green, burned areas reddish, clouds light blue. Wide swath: covers the planet with no gaps between orbits."
+      },
+      "engines": [
+        "map"
+      ],
+      "gibsLayer": "VIIRS_NOAA20_CorrectedReflectance_BandsM11-I2-I1",
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_NOAA20_CorrectedReflectance_BandsM11-I2-I1/default/{Time}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg",
+      "tileMatrixSet": "GoogleMapsCompatible_Level9",
+      "format": "jpg",
+      "maxZoom": 9,
+      "temporal": "daily",
+      "attribution": "NASA EOSDIS GIBS",
+      "source": "NASA GIBS · VIIRS_NOAA20_CorrectedReflectance_BandsM11-I2-I1 (verificado en WMTSCapabilities 2026-11-14; datos desde 2018-01-05)"
+    },
+    {
+      "id": "gibs-viirs-truecolor",
+      "kind": "gibs-wmts",
+      "group": "event",
+      "name": {
+        "es": "VIIRS color real",
+        "en": "VIIRS true color"
+      },
+      "description": {
+        "es": "Imagen como la vería el ojo humano, sin huecos entre órbitas.",
+        "en": "Image as the human eye would see it, with no gaps between orbits."
+      },
+      "engines": [
+        "map"
+      ],
+      "gibsLayer": "VIIRS_NOAA20_CorrectedReflectance_TrueColor",
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_NOAA20_CorrectedReflectance_TrueColor/default/{Time}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg",
+      "tileMatrixSet": "GoogleMapsCompatible_Level9",
+      "format": "jpg",
+      "maxZoom": 9,
+      "temporal": "daily",
+      "attribution": "NASA EOSDIS GIBS",
+      "source": "NASA GIBS · VIIRS_NOAA20_CorrectedReflectance_TrueColor (verificado en WMTSCapabilities 2026-11-14; datos desde 2018-01-05)"
+    },
+    {
       "id": "gibs-modis-721",
       "kind": "gibs-wmts",
       "group": "event",
@@ -237,8 +285,8 @@
         "en": "MODIS false color 7-2-1"
       },
       "description": {
-        "es": "Agua en azul oscuro, vegetación verde, áreas quemadas rojizas.",
-        "en": "Water dark blue, vegetation green, burned areas reddish."
+        "es": "Agua en azul oscuro, vegetación verde, áreas quemadas rojizas. No se usa en eventos: su imagen diaria deja franjas negras entre órbitas cerca del ecuador.",
+        "en": "Water dark blue, vegetation green, burned areas reddish. Not used in events: its daily image leaves black stripes between orbits near the equator."
       },
       "engines": [
         "map"
@@ -261,8 +309,8 @@
         "en": "MODIS true color"
       },
       "description": {
-        "es": "Imagen como la vería el ojo humano.",
-        "en": "Image as the human eye would see it."
+        "es": "Imagen como la vería el ojo humano. No se usa en eventos: su imagen diaria deja franjas negras entre órbitas cerca del ecuador.",
+        "en": "Image as the human eye would see it. Not used in events: its daily image leaves black stripes between orbits near the equator."
       },
       "engines": [
         "map"

@@ -12,7 +12,7 @@ Al mostrar un evento, la vista `events` SHALL dibujar exactamente las capas del 
 
 #### Scenario: Inundación
 - **WHEN** se muestra un evento `flood` en Cochabamba
-- **THEN** se ve la capa MODIS Flood 2-Day (celeste agua, rojo inundación, amarillo recurrente, gris sin datos) sobre el falso color 7-2-1, con su leyenda
+- **THEN** se ve la capa MODIS Flood 2-Day (celeste agua, rojo inundación, amarillo recurrente, gris sin datos) sobre el falso color de VIIRS NOAA-20 (sin franjas entre órbitas), con su leyenda
 
 #### Scenario: Las capas de la cuenca no se pierden
 - **WHEN** el usuario tiene capas GAMC en `basin`, abre un evento y vuelve a `basin`

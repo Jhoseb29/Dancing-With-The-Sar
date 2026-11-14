@@ -168,5 +168,8 @@
     "source": "Imagery: NASA EOSDIS GIBS. Hotspots: NASA FIRMS (VIIRS).",
     "verifiedDays": "Days with imagery over this place (verified):",
     "rateLimited": "NASA FIRMS reached this key's query limit (5000 per 10 minutes). What was downloaded is saved; retry in a few minutes."
+  },
+  "panel": {
+    "hide": "Hide"
   }
 }

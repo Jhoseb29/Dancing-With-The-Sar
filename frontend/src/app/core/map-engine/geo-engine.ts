@@ -40,6 +40,8 @@ export interface GeoEngineOptions {
   onViewChange: (view: { lon: number; lat: number; zoom: number }) => void;
   onLayerStatus: (presetId: string, status: 'loading' | 'ready' | 'error') => void;
   onClick: (click: MapClick) => void;
+  /** El panel lateral está visible al crear el mapa (el encuadre le deja espacio). */
+  panelOpen: boolean;
 }
 
 const OVERLAY_PREFIX = 'ov:';
@@ -47,6 +49,7 @@ const POINTS_ID = 'event-points';
 
 export class GeoEngine {
   private readonly map: MapLibreMap;
+  private panelOpen: boolean;
   private styleReady = false;
   private pendingLayers: MapOverlay[] | null = null;
   private pendingPoints: MapPoints | null | undefined;
@@ -54,12 +57,13 @@ export class GeoEngine {
 
   constructor(private readonly options: GeoEngineOptions) {
     setWorkerUrl(options.workerUrl);
+    this.panelOpen = options.panelOpen;
 
     this.map = new MapLibreMap({
       container: options.container,
       style: buildStyle(options),
       bounds: options.initialBBox,
-      fitBoundsOptions: { padding: panelAwarePadding(options.container) },
+      fitBoundsOptions: { padding: panelAwarePadding(options.container, options.panelOpen) },
       attributionControl: { compact: true },
     });
 
@@ -190,7 +194,14 @@ export class GeoEngine {
   }
 
   fitArea(bbox: BBox): void {
-    this.map.fitBounds(bbox, { padding: panelAwarePadding(this.map.getContainer()), duration: 1500 });
+    this.map.fitBounds(bbox, { padding: panelAwarePadding(this.map.getContainer(), this.panelOpen), duration: 1500 });
+  }
+
+  /** Al ocultar o mostrar el panel, el centro de la vista se desliza al área libre. */
+  setPanelOpen(open: boolean): void {
+    if (open === this.panelOpen) return;
+    this.panelOpen = open;
+    this.map.easeTo({ padding: panelAwarePadding(this.map.getContainer(), open), duration: 600 });
   }
 
   destroy(): void {
@@ -199,9 +210,12 @@ export class GeoEngine {
 }
 
 /** Deja libre el panel flotante (tercio izquierdo en escritorio, hoja inferior en móvil). */
-function panelAwarePadding(container: HTMLElement) {
+function panelAwarePadding(container: HTMLElement, panelOpen: boolean) {
   const width = container.clientWidth;
   const height = container.clientHeight;
+  if (!panelOpen) {
+    return { top: 90, left: 40, right: 40, bottom: 40 };
+  }
   if (width < 768) {
     return { top: 90, left: 20, right: 20, bottom: Math.round(height * 0.5) };
   }

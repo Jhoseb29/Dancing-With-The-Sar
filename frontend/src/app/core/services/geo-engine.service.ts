@@ -81,6 +81,7 @@ export class GeoEngineService {
       },
       onLayerStatus: (presetId, status) => this.scene.reportLayer(presetId, status),
       onClick: (click) => void this.queryFeatureInfo(click),
+      panelOpen: this.scene.panels().layerPanel,
     });
     this.ready.set(true);
     this.bindScene();
@@ -126,6 +127,10 @@ export class GeoEngineService {
           this.scene.pruneReportedLayers(overlays.map((o) => o.presetId));
           this.engine?.setOverlays(overlays);
         });
+      }, options),
+      effect(() => {
+        const open = this.scene.panels().layerPanel;
+        untracked(() => this.engine?.setPanelOpen(open));
       }, options),
       effect(() => {
         const event = this.scene.state().event;

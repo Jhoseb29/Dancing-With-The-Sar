@@ -168,5 +168,8 @@
     "source": "Imágenes: NASA EOSDIS GIBS. Focos: NASA FIRMS (VIIRS).",
     "verifiedDays": "Días con imagen sobre este lugar (verificados):",
     "rateLimited": "NASA FIRMS alcanzó el límite de consultas de esta key (5000 cada 10 minutos). Lo ya descargado quedó guardado; reintenta en unos minutos."
+  },
+  "panel": {
+    "hide": "Ocultar"
   }
 }
