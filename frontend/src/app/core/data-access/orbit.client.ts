@@ -84,3 +84,50 @@ function writeCache(elements: OrbitElements): void {
     // Sin almacenamiento disponible: se vuelve a pedir en la próxima carga.
   }
 }
+
+/** Satélites que ya no operan y se descartan de un grupo (Sentinel-1B falló en dic. 2021). */
+const INACTIVE = /SENTINEL-1B\b/i;
+
+/**
+ * Elementos orbitales de todos los satélites de un grupo (p. ej. `GET {api}/orbit/sentinel1`
+ * -> Sentinel-1A, 1C, 1D…). Igual que NISAR: TLE de CelesTrak, caché de `cacheHours` horas.
+ */
+export async function fetchOrbitGroup(apiBaseUrl: string, group: string, cacheHours: number): Promise<OrbitElements[]> {
+  const key = `dws.orbit.${group}`;
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const cached = JSON.parse(raw) as OrbitElements[];
+      if (cached.length && Date.now() - Date.parse(cached[0].fetchedAt) < cacheHours * 3_600_000) return cached;
+    }
+  } catch {
+    // Caché ilegible o bloqueada: se vuelve a pedir.
+  }
+  const response = await fetch(`${apiBaseUrl}/orbit/${group}`, { headers: { Accept: 'text/plain' } });
+  if (!response.ok) {
+    throw new Error(`orbit/${group} respondió ${response.status}`);
+  }
+  const elements = parseTleGroup(await response.text(), 'CelesTrak');
+  try {
+    localStorage.setItem(key, JSON.stringify(elements));
+  } catch {
+    // Sin almacenamiento: la próxima carga vuelve a consultar.
+  }
+  return elements;
+}
+
+/** Varios TLE de 3 líneas (nombre, línea 1, línea 2) en un mismo texto. */
+export function parseTleGroup(text: string, source: string): OrbitElements[] {
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const out: OrbitElements[] = [];
+  for (let i = 0; i + 2 < lines.length + 1; i++) {
+    if (lines[i + 1]?.startsWith('1 ') && lines[i + 2]?.startsWith('2 ') && !lines[i].startsWith('1 ') && !lines[i].startsWith('2 ')) {
+      if (!INACTIVE.test(lines[i])) {
+        out.push({ ...parseTle(lines.slice(i, i + 3).join('\n'), source), satellite: lines[i] });
+      }
+      i += 2;
+    }
+  }
+  if (!out.length) throw new Error('La respuesta no contiene TLE válidos');
+  return out;
+}

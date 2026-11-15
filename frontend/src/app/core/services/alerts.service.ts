@@ -26,7 +26,7 @@ export class AlertsService {
   readonly rainFrame = signal<number | null>(null);
   readonly rainPlaying = signal(false);
   /** Mostrar las columnas de lluvia en el mapa. */
-  readonly rainVisible = signal(true);
+  readonly rainVisible = signal(false); // Alertas usa el panel de estaciones: la grilla IMERG tapaba el mapa
   private rainTimer: ReturnType<typeof setInterval> | null = null;
   readonly selectedId = signal<string | null>(null);
   readonly selected = computed<RiskAlert | null>(() => this.alerts().find((a) => a.id === this.selectedId()) ?? this.alerts()[0] ?? null);

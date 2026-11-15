@@ -1,12 +1,10 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { AgentAnswer, answerFromData } from '../alerts/stations-agent';
 import { HarnessHttpError, runFileUrl, streamAsk, HarnessSensor } from '../harness/harness-client';
 import { HarnessEvent, HarnessMedia, HarnessPayload } from '../harness/harness.model';
 import { RuntimeConfigService } from '../config/runtime-config.service';
 import { AlertsService } from './alerts.service';
 import { HarnessGlobeService } from './harness-globe.service';
-import { StationsService } from './stations.service';
 import { VoiceService } from './voice.service';
 
 export interface HarnessTurn {
@@ -32,9 +30,8 @@ export class HarnessService {
   private readonly apiBaseUrl = inject(RuntimeConfigService).value.apiBaseUrl;
   private readonly globe = inject(HarnessGlobeService);
   private readonly voice = inject(VoiceService);
-  private readonly stations = inject(StationsService);
-  private readonly alerts = inject(AlertsService);
   private readonly router = inject(Router);
+  private readonly alerts = inject(AlertsService);
   private abort: AbortController | null = null;
   private nextId = 1;
 
@@ -70,13 +67,6 @@ export class HarnessService {
       },
     ]);
 
-    // Desbordes, estaciones y eventos históricos: se responde con los datos del sistema de alertas.
-    await this.stations.load();
-    const local = answerFromData(text, this.stations.stations(), this.stations.scenarios());
-    if (local) {
-      this.answerLocally(id, local);
-      return;
-    }
 
     this.abort = new AbortController();
     try {
@@ -167,28 +157,6 @@ export class HarnessService {
       this.showOnGlobe(turn);
     }
     void this.voice.speak(turn.payload.chat?.message ?? '');
-  }
-
-  /** Muestra en el mapa de Alertas lo que se preguntó (estación o escenario) y lo narra. */
-  private answerLocally(id: number, answer: AgentAnswer): void {
-    const payload: HarnessPayload = {
-      schema_version: 'alertas-1',
-      run_id: '',
-      status: 'complete',
-      query: null,
-      chat: { message: answer.message, alert_level: answer.level, alert_reason: 'Sistema de alertas', highlights: [] },
-      lesson_markdown: null,
-      media: [],
-      globe: null,
-    };
-    this.update(id, (t) => ({ ...t, state: 'done', progress: 1, payload }));
-    void this.router.navigate(['/riesgo'], { queryParamsHandling: 'preserve' });
-    if (answer.action.type === 'station') {
-      this.stations.focus(answer.action.id);
-    } else {
-      this.stations.showScenario(answer.action.key);
-    }
-    void this.voice.speak(answer.message);
   }
 
   private update(id: number, fn: (turn: HarnessTurn) => HarnessTurn): void {

@@ -4,12 +4,18 @@ import { UiConfigService } from '../config/ui-config.service';
 import { DETAIL_IMAGERY } from '../config/detail-imagery';
 import type { GlobeEngine, GlobeEngineLabels, ResolvedTourStep, SatelliteReadout } from '../globe-engine/globe-engine';
 import { OrbitElements } from '../data-access/orbit.model';
+import { fetchOrbitGroup } from '../data-access/orbit.client';
 import { AlertsService } from './alerts.service';
 import { BasinsService } from './basins.service';
 import { StationsService } from './stations.service';
 import { SceneStore } from '../scene/scene.store';
 import { ensureStylesheet } from './lazy-stylesheet';
 import { OrbitService } from './orbit.service';
+
+/** Sentinel-1 en tonos rosa (como en HidroGlobe); cada satélite de la constelación, uno distinto. */
+const SENTINEL1_COLORS = ['#ec4899', '#f9a8d4', '#be185d'];
+/** Barrido del modo IW de Sentinel-1. */
+const SENTINEL1_SWATH_KM = 250;
 
 declare global {
   interface Window {
@@ -69,6 +75,27 @@ export class GlobeEngineService {
     this.alerts.connect();
     void this.basins.load();
     void this.stations.load();
+    void this.loadSentinel1(cfg.apiBaseUrl, cfg.orbit.tleCacheHours);
+  }
+
+  /**
+   * Constelación Sentinel-1 (ESA, banda C): mismos dibujos que NISAR, en rosa. Si CelesTrak no
+   * responde, Órbita sigue funcionando solo con NISAR.
+   */
+  private async loadSentinel1(apiBaseUrl: string, cacheHours: number): Promise<void> {
+    try {
+      const sats = await fetchOrbitGroup(apiBaseUrl, 'sentinel1', cacheHours);
+      this.engine?.setCompanions(
+        sats.map((elements, i) => ({
+          elements,
+          label: elements.satellite.replace(/^SENTINEL/i, 'Sentinel').trim(),
+          color: SENTINEL1_COLORS[i % SENTINEL1_COLORS.length],
+          swathKm: SENTINEL1_SWATH_KM,
+        })),
+      );
+    } catch (err) {
+      console.warn('[orbita] Sentinel-1 no disponible:', err);
+    }
   }
 
   async setOrbitElements(elements: OrbitElements): Promise<void> {

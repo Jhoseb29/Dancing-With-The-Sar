@@ -31,6 +31,13 @@ export default {
     changeOrigin: true,
     rewrite: () => '/NORAD/elements/gp.php?NAME=NISAR&FORMAT=TLE',
   },
+  // Sentinel-1 (ESA): todos los de la constelación; el cliente descarta los que ya no operan.
+  '/api/orbit/sentinel1': {
+    target: 'https://celestrak.org',
+    secure: true,
+    changeOrigin: true,
+    rewrite: () => '/NORAD/elements/gp.php?NAME=SENTINEL-1&FORMAT=TLE',
+  },
   '/api/gamc/wms': {
     target: GAMC_UPSTREAM,
     secure: true,

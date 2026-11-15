@@ -65,6 +65,15 @@ export interface GlobeAlertLayers {
   stations?: Station[];
 }
 
+/** Satélite acompañante (constelación Sentinel-1, etc.). */
+export interface CompanionConfig {
+  elements: OrbitElements;
+  label: string;
+  /** Color del satélite (dato, no interfaz). */
+  color: string;
+  swathKm: number;
+}
+
 export interface GlobeEngineOptions {
   container: HTMLElement;
   basemap: BasemapConfig;
@@ -107,6 +116,7 @@ export class GlobeEngine {
   private readonly futureTrackEntity: Entity;
   private readonly swathEntity: Entity;
   private alertEntities: Entity[] = [];
+  private companions: CompanionSatellite[] = [];
   private pastTrack: Cartesian3[] = [];
   private futureTrack: Cartesian3[] = [];
   private swath: Cartesian3[] = [];
@@ -399,6 +409,18 @@ export class GlobeEngine {
     }
   }
 
+  /**
+   * Otros satélites radar (p. ej. Sentinel-1A/1C) con su anillo, traza, haz y huella, dibujados
+   * igual que NISAR pero en su propio color. Reemplaza los anteriores.
+   */
+  setCompanions(sats: CompanionConfig[]): void {
+    if (this.destroyed) return;
+    this.companions.forEach((c) => c.remove());
+    this.companions = sats.map((cfg) => new CompanionSatellite(this.widget, this.options.orbit, cfg));
+    const now = this.simTimeMs();
+    this.companions.forEach((c) => void c.refresh(now));
+  }
+
   destroy(): void {
     if (this.destroyed) {
       return;
@@ -456,6 +478,10 @@ export class GlobeEngine {
   }
 
   private onTick(): void {
+    const sim = this.simTimeMs();
+    for (const c of this.companions) {
+      if (Math.abs(sim - c.centerMs) > TRACK_REFRESH_SIM_MS) void c.refresh(sim);
+    }
     if (!this.satrec || this.destroyed) {
       return;
     }
@@ -572,4 +598,128 @@ function labelOptions(text: string, font: string, range: DistanceDisplayConditio
     distanceDisplayCondition: range,
     disableDepthTestDistance: Number.POSITIVE_INFINITY,
   };
+}
+
+/** Un satélite extra en el globo: punto + etiqueta, anillo orbital, traza de una vuelta, haz y huella. */
+class CompanionSatellite {
+  centerMs = 0;
+  private readonly satrec: SatRec;
+  private ring: EciSample[] = [];
+  private track: Cartesian3[] = [];
+  private readonly entities: Entity[] = [];
+  private refreshing = false;
+  private removed = false;
+
+  constructor(
+    private readonly widget: CesiumWidget,
+    private readonly orbit: Remote<OrbitWorkerApi>,
+    private readonly cfg: CompanionConfig,
+  ) {
+    this.satrec = twoline2satrec(cfg.elements.line1, cfg.elements.line2);
+    const color = Color.fromCssColorString(cfg.color);
+    const add = (e: Entity.ConstructorOptions) => this.entities.push(widget.entities.add(e));
+    add({
+      polyline: {
+        positions: new CallbackProperty(() => this.ringFixed(), false),
+        width: 1.5,
+        arcType: ArcType.NONE,
+        material: color.withAlpha(0.55),
+      },
+    });
+    add({
+      polyline: {
+        positions: new CallbackProperty(() => this.track, false),
+        width: 1.5,
+        arcType: ArcType.GEODESIC,
+        material: color.withAlpha(0.75),
+      },
+    });
+    add({
+      polyline: {
+        positions: new CallbackProperty(() => this.beam(), false),
+        width: 1.5,
+        arcType: ArcType.NONE,
+        material: color.withAlpha(0.5),
+      },
+    });
+    add({
+      position: new CallbackPositionProperty((time, result) => this.nadir(time, result), false),
+      ellipse: {
+        semiMajorAxis: (cfg.swathKm * 1000) / 2,
+        semiMinorAxis: (cfg.swathKm * 1000) / 3,
+        material: color.withAlpha(0.14),
+        outline: true,
+        outlineColor: color.withAlpha(0.7),
+        height: 0,
+      },
+    });
+    add({
+      position: new CallbackPositionProperty((time, result) => this.position(time, result), false),
+      point: { pixelSize: 9, color, outlineColor: Color.BLACK, outlineWidth: 2 },
+      label: {
+        text: cfg.label,
+        font: FONT,
+        fillColor: color,
+        outlineColor: Color.BLACK,
+        outlineWidth: 3,
+        style: LabelStyle.FILL_AND_OUTLINE,
+        verticalOrigin: VerticalOrigin.BOTTOM,
+        pixelOffset: new Cartesian2(0, -14),
+      },
+    });
+  }
+
+  async refresh(centerMs: number): Promise<void> {
+    if (this.refreshing || this.removed) return;
+    this.refreshing = true;
+    this.centerMs = centerMs;
+    try {
+      const { line1, line2 } = this.cfg.elements;
+      const periodMs = (await this.orbit.periodMinutes(line1, line2)) * 60_000;
+      const [ring, track] = await Promise.all([
+        this.orbit.orbitRing(line1, line2, centerMs, 240),
+        this.orbit.groundTrack(line1, line2, centerMs, centerMs + periodMs, 30),
+      ]);
+      if (this.removed) return;
+      this.ring = ring;
+      this.track = toCartesians(track);
+    } finally {
+      this.refreshing = false;
+    }
+  }
+
+  remove(): void {
+    this.removed = true;
+    this.entities.forEach((e) => this.widget.entities.remove(e));
+  }
+
+  private position(time: JulianDate | undefined, result?: Cartesian3): Cartesian3 | undefined {
+    const date = time ? JulianDate.toDate(time) : new Date();
+    const state = propagate(this.satrec, date);
+    if (!state) return undefined;
+    const ecf = eciToEcf(state.position, gstime(date));
+    return Cartesian3.fromElements(ecf.x * 1000, ecf.y * 1000, ecf.z * 1000, result);
+  }
+
+  private nadir(time: JulianDate | undefined, result?: Cartesian3): Cartesian3 | undefined {
+    const position = this.position(time);
+    const carto = position && Cartographic.fromCartesian(position);
+    return carto ? Cartesian3.fromRadians(carto.longitude, carto.latitude, 0, undefined, result) : undefined;
+  }
+
+  private beam(): Cartesian3[] {
+    const time = this.widget.clock.currentTime;
+    const sat = this.position(time);
+    const ground = this.nadir(time);
+    return sat && ground ? [sat, ground] : [];
+  }
+
+  /** El anillo es fijo en el espacio inercial: se rota con el GMST del instante actual. */
+  private ringFixed(): Cartesian3[] {
+    if (!this.ring.length) return [];
+    const g = gstime(JulianDate.toDate(this.widget.clock.currentTime));
+    const cos = Math.cos(g);
+    const sin = Math.sin(g);
+    return this.ring.map(([x, y, z]) => new Cartesian3((x * cos + y * sin) * 1000, (-x * sin + y * cos) * 1000, z * 1000));
+  }
 }
