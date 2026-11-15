@@ -2,7 +2,7 @@
 name = "dws-compute-py"
 version = "0.1.0"
 description = "Dancing with the SARs · runtime Python (FastAPI): eventos, geoprocesamiento y puente al harness NISAR"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
   "fastapi==0.163.0",
   "uvicorn[standard]==0.54.0",
