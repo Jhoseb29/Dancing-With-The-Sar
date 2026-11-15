@@ -6,7 +6,8 @@
 export type AppLang = 'es' | 'en';
 export const AVAILABLE_LANGS: readonly AppLang[] = ['es', 'en'];
 
-export type RouteId = 'orbit' | 'basin' | 'events' | 'temporal' | 'risk' | 'insights' | 'provenance';
+export type RouteId =
+  'orbit' | 'basin' | 'events' | 'temporal' | 'risk' | 'insights' | 'provenance';
 
 export interface SceneEvent {
   type: string;
@@ -26,14 +27,20 @@ export interface SceneState {
   route: RouteId;
   lang: AppLang;
   camera: { placeId: string | null; tourId: string | null; follow: boolean };
-  time: { mode: 'live' | 'range'; start: string | null; end: string | null; date: string | null; speed: number };
+  time: {
+    mode: 'live' | 'range';
+    start: string | null;
+    end: string | null;
+    date: string | null;
+    speed: number;
+  };
   event: SceneEvent | null;
   layers: LayerState[];
   search: { query: string; selectedPlaceId: string | null };
-  panels: { layerPanel: boolean; agentDock: 'open' | 'closed'; voice: { output: boolean; handsFree: boolean } };
+  panels: { layerPanel: boolean };
 }
 
-export type PatchOrigin = 'user' | 'url' | 'agent';
+export type PatchOrigin = 'user' | 'url';
 
 export interface PatchOp {
   op: 'replace' | 'add' | 'remove';
@@ -68,9 +75,17 @@ export interface ReportedState {
 
 /** Igual que el `pattern` de scene-patch.schema.json. */
 export const PATCHABLE_PATH =
-  /^\/(route|lang|camera\/(placeId|tourId|follow)|time\/(mode|start|end|date|speed)|event(\/(type|placeId|start|end))?|layers(\/(\d+|-)(\/(presetId|visible|opacity))?)?|search\/(query|selectedPlaceId)|panels\/(layerPanel|agentDock|voice\/(output|handsFree)))$/;
+  /^\/(route|lang|camera\/(placeId|tourId|follow)|time\/(mode|start|end|date|speed)|event(\/(type|placeId|start|end))?|layers(\/(\d+|-)(\/(presetId|visible|opacity))?)?|search\/(query|selectedPlaceId)|panels\/layerPanel)$/;
 
-export const ROUTE_IDS: readonly RouteId[] = ['orbit', 'basin', 'events', 'temporal', 'risk', 'insights', 'provenance'];
+export const ROUTE_IDS: readonly RouteId[] = [
+  'orbit',
+  'basin',
+  'events',
+  'temporal',
+  'risk',
+  'insights',
+  'provenance',
+];
 
 export function isAppLang(value: unknown): value is AppLang {
   return typeof value === 'string' && (AVAILABLE_LANGS as readonly string[]).includes(value);
@@ -89,6 +104,6 @@ export function initialScene(): SceneState {
       { presetId: 'gamc-emergencias', visible: true, opacity: 1 },
     ],
     search: { query: '', selectedPlaceId: null },
-    panels: { layerPanel: true, agentDock: 'closed', voice: { output: true, handsFree: false } },
+    panels: { layerPanel: true },
   };
 }

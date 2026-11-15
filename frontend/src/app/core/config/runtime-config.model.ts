@@ -13,7 +13,7 @@ export interface OrbitConfig {
 
 /**
  * Configuración de despliegue (12-Factor III): assets/runtime-config.json.
- * Lo editable por el usuario o el agente vive en assets/config/*.json.
+ * Lo editable por el usuario vive en assets/config/*.json.
  */
 export interface RuntimeConfig {
   apiBaseUrl: string;

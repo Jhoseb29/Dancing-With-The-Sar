@@ -15,7 +15,6 @@ export interface RouteConfig {
   titleKey: string;
   engine: EngineKind;
   status?: 'ready' | 'pending-backend';
-  agentDescription: I18nText;
 }
 
 export interface PlaceConfig {

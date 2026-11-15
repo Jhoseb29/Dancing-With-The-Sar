@@ -20,7 +20,7 @@ export class SidePanelComponent {
 
   private readonly hideButton = viewChild<ElementRef<HTMLButtonElement>>('hide');
   private readonly reopenButton = viewChild<ElementRef<HTMLButtonElement>>('reopen');
-  /** Solo se mueve el foco cuando el usuario usó estos botones (no si el agente cambia el estado). */
+  /** Solo se mueve el foco cuando el usuario usó estos botones (no si el estado cambia por URL). */
   private focusPending = false;
 
   constructor() {

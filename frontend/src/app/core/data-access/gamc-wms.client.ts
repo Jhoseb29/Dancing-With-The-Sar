@@ -71,7 +71,7 @@ export async function gamcFeatureInfo(apiBaseUrl: string, serviceId: string, que
   return body.features ?? [];
 }
 
-/** Campos que nunca se muestran ni se entregan al agente (datos personales). */
+/** Campos que nunca se muestran (datos personales). */
 const PERSONAL_DATA = /(denunciante|celular|telefono|tel[eé]fono|nombre|apellido|correo|email|^ci$|carnet|direccion_particular)/i;
 
 /**

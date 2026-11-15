@@ -14,8 +14,7 @@
       "type": "string",
       "enum": [
         "user",
-        "url",
-        "agent"
+        "url"
       ]
     },
     "baseVersion": {
@@ -45,7 +44,7 @@
           },
           "path": {
             "type": "string",
-            "pattern": "^/(route|lang|camera/(placeId|tourId|follow)|time/(mode|start|end|date|speed)|event(/(type|placeId|start|end))?|layers(/(\\d+|-)(/(presetId|visible|opacity))?)?|search/(query|selectedPlaceId)|panels/(layerPanel|agentDock|voice/(output|handsFree)))$"
+            "pattern": "^/(route|lang|camera/(placeId|tourId|follow)|time/(mode|start|end|date|speed)|event(/(type|placeId|start|end))?|layers(/(\\d+|-)(/(presetId|visible|opacity))?)?|search/(query|selectedPlaceId)|panels/layerPanel)$"
           },
           "value": {}
         }

@@ -53,11 +53,13 @@ export default {
       return `/api/gs/wms?${query.toString()}`;
     },
   },
-  // Agente de la UI (OpenSpec 08): compute-py en desarrollo; gateway-ts en producción.
-  '/api/agent': {
+  // Harness NISAR: compute-py en desarrollo; gateway-ts en producción.
+  // Respuesta en streaming (NDJSON): el proxy no debe bufferizar.
+  '/api/harness': {
     target: 'http://localhost:8000',
-    ws: true,
     changeOrigin: true,
+    timeout: 1_300_000,
+    proxyTimeout: 1_300_000,
   },
   // Eventos (OpenSpec 09): estadísticas FIRMS en compute-py.
   '/api/events': {

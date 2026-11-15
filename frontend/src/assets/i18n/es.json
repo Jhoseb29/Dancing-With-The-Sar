@@ -96,53 +96,46 @@
       "zone": "Zona"
     }
   },
-  "agent": {
-    "title": "Agente · Control de misión",
-    "name": "Guía",
+  "harness": {
+    "title": "Análisis NISAR",
+    "subtitle": "Radar satelital NASA/ISRO · datos en vivo desde AWS",
+    "name": "NISAR",
     "you": "Tú",
-    "open": "Hablar con el agente",
+    "open": "Pregúntale al satélite",
     "close": "Cerrar",
-    "send": "Enviar",
-    "placeholder": "Escribe tu pregunta… (Enter para enviar)",
-    "online": "En línea",
-    "connecting": "Conectando…",
-    "offline": "Desconectado",
-    "thinking": "Pensando…",
-    "acting": "Moviendo la vista…",
+    "send": "Analizar",
+    "cancel": "Cancelar",
     "retry": "Reintentar",
-    "errors": {
-      "llm_not_configured": "El agente no está configurado: falta GEMINI_API_KEY en el backend.",
-      "llm_error": "El agente no pudo responder. Intenta de nuevo.",
-      "rate_limited": "Demasiados mensajes seguidos; espera unos segundos.",
-      "too_long": "El mensaje es demasiado largo (máx. 500 caracteres).",
-      "bad_message": "Mensaje no válido.",
-      "disconnected": "Agente no disponible: el servicio no responde.",
-      "no_speech": "No se entendió lo que dijiste. Intenta de nuevo, un poco más cerca del micrófono.",
-      "stt_error": "No se pudo transcribir el audio. Intenta de nuevo.",
-      "audio_too_large": "El audio es demasiado largo; habla en frases más cortas."
+    "running": "Analizando…",
+    "starting": "Iniciando el análisis…",
+    "placeholder": "Ej.: ¿Hubo incendios recientes en la Chiquitania? (Enter para enviar)",
+    "intro": "Pregunta sobre cualquier lugar: incendios, inundaciones, cuencas, bosques o ciudades. Leo las imágenes del radar NISAR directamente desde AWS, así que el análisis tarda unos minutos.",
+    "examples": {
+      "fires": "¿Hubo incendios recientes en la Chiquitania?",
+      "basin": "¿Cómo están las lagunas de la cuenca de Cochabamba?",
+      "flood": "¿Hay inundaciones en La Mojana, Colombia?"
     },
-    "voice": {
-      "settings": "Ajustes de voz",
-      "readReplies": "Leer respuestas",
-      "handsFree": "Manos libres",
-      "stop": "Callar",
-      "talk": "Hablar",
-      "stopListening": "Detener",
-      "listening": "Escuchando…",
-      "speaking": "Hablando…",
-      "speakNow": "Habla ahora…",
-      "privacy": "Tu voz se graba solo mientras el micrófono está activo y se envía al servidor del proyecto, que la transcribe con Gemini (Google). No se guarda. El micrófono solo se activa cuando lo pulsas.",
-      "privacyOk": "Entendido, hablar",
-      "errors": {
-        "not-supported": "Tu navegador no reconoce voz (prueba Chrome o Edge). Puedes seguir escribiendo.",
-        "not-allowed": "No hay permiso para usar el micrófono. Actívalo en el navegador.",
-        "service-not-allowed": "El navegador no permite el reconocimiento de voz aquí.",
-        "audio-capture": "No se encontró un micrófono.",
-        "network": "El reconocimiento de voz necesita conexión a internet.",
-        "language-not-supported": "El navegador no reconoce voz en este idioma.",
-        "start-failed": "No se pudo iniciar el micrófono. Intenta de nuevo."
-      },
-      "transcribing": "Transcribiendo…"
+    "learnMore": "Aprende más",
+    "hideLesson": "Ocultar lección",
+    "downloads": "Descargas",
+    "dataOnly": "Te muestro los mapas y datos; la explicación no estuvo disponible esta vez.",
+    "alert": {
+      "verde": "Sin alerta",
+      "amarillo": "Vigilar",
+      "naranja": "Alerta",
+      "rojo": "Alerta alta",
+      "sin_datos": "Sin datos"
+    },
+    "errors": {
+      "busy": "Hay demasiados análisis en curso. Intenta en unos minutos.",
+      "too_long": "La pregunta es demasiado larga (máx. 500 caracteres).",
+      "empty_question": "Escribe una pregunta.",
+      "harness_missing": "El harness NISAR no está disponible en el servidor.",
+      "timeout": "El análisis tardó demasiado y se canceló.",
+      "harness_failed": "No se pudo completar el análisis. Intenta de nuevo.",
+      "cancelled": "Cancelaste el análisis.",
+      "network": "No hay conexión con el servidor.",
+      "unknown": "Ocurrió un error inesperado."
     }
   },
   "events": {

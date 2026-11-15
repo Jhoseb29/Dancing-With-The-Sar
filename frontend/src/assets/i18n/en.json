@@ -96,53 +96,46 @@
       "zone": "Zone"
     }
   },
-  "agent": {
-    "title": "Agent · Mission control",
-    "name": "Guide",
+  "harness": {
+    "title": "NISAR analysis",
+    "subtitle": "NASA/ISRO satellite radar · live data from AWS",
+    "name": "NISAR",
     "you": "You",
-    "open": "Talk to the agent",
+    "open": "Ask the satellite",
     "close": "Close",
-    "send": "Send",
-    "placeholder": "Type your question… (Enter to send)",
-    "online": "Online",
-    "connecting": "Connecting…",
-    "offline": "Offline",
-    "thinking": "Thinking…",
-    "acting": "Moving the view…",
+    "send": "Analyze",
+    "cancel": "Cancel",
     "retry": "Retry",
-    "errors": {
-      "llm_not_configured": "The agent is not configured: GEMINI_API_KEY is missing in the backend.",
-      "llm_error": "The agent could not answer. Try again.",
-      "rate_limited": "Too many messages in a row; wait a few seconds.",
-      "too_long": "The message is too long (max 500 characters).",
-      "bad_message": "Invalid message.",
-      "disconnected": "Agent unavailable: the service is not responding.",
-      "no_speech": "Your speech was not understood. Try again, a bit closer to the microphone.",
-      "stt_error": "The audio could not be transcribed. Try again.",
-      "audio_too_large": "The audio is too long; speak in shorter sentences."
+    "running": "Analyzing…",
+    "starting": "Starting the analysis…",
+    "placeholder": "E.g.: Were there recent fires in the Chiquitania? (Enter to send)",
+    "intro": "Ask about any place: fires, floods, watersheds, forests or cities. I read NISAR radar images directly from AWS, so the analysis takes a few minutes.",
+    "examples": {
+      "fires": "Were there recent fires in the Chiquitania?",
+      "basin": "How are the lagoons of the Cochabamba basin?",
+      "flood": "Is there flooding in La Mojana, Colombia?"
     },
-    "voice": {
-      "settings": "Voice settings",
-      "readReplies": "Read replies",
-      "handsFree": "Hands-free",
-      "stop": "Stop talking",
-      "talk": "Talk",
-      "stopListening": "Stop",
-      "listening": "Listening…",
-      "speaking": "Speaking…",
-      "speakNow": "Speak now…",
-      "privacy": "Your voice is recorded only while the microphone is on and sent to the project server, which transcribes it with Gemini (Google). It is not stored. The microphone only turns on when you press it.",
-      "privacyOk": "Got it, talk",
-      "errors": {
-        "not-supported": "Your browser does not support speech recognition (try Chrome or Edge). You can keep typing.",
-        "not-allowed": "No permission to use the microphone. Enable it in the browser.",
-        "service-not-allowed": "The browser does not allow speech recognition here.",
-        "audio-capture": "No microphone was found.",
-        "network": "Speech recognition needs an internet connection.",
-        "language-not-supported": "The browser does not recognize speech in this language.",
-        "start-failed": "Could not start the microphone. Try again."
-      },
-      "transcribing": "Transcribing…"
+    "learnMore": "Learn more",
+    "hideLesson": "Hide lesson",
+    "downloads": "Downloads",
+    "dataOnly": "Here are the maps and data; the explanation was not available this time.",
+    "alert": {
+      "verde": "No alert",
+      "amarillo": "Watch",
+      "naranja": "Alert",
+      "rojo": "High alert",
+      "sin_datos": "No data"
+    },
+    "errors": {
+      "busy": "Too many analyses running. Try again in a few minutes.",
+      "too_long": "The question is too long (max. 500 characters).",
+      "empty_question": "Type a question.",
+      "harness_missing": "The NISAR harness is not available on the server.",
+      "timeout": "The analysis took too long and was cancelled.",
+      "harness_failed": "The analysis could not be completed. Try again.",
+      "cancelled": "You cancelled the analysis.",
+      "network": "No connection to the server.",
+      "unknown": "An unexpected error occurred."
     }
   },
   "events": {

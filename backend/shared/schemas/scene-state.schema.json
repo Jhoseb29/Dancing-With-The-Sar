@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://dancing-with-the-sars/schemas/scene-state.schema.json",
   "title": "SceneState",
-  "description": "Shadow del estado modificable de la UI (OpenSpec 07). Lo modifican el usuario, la URL y el agente mediante ScenePatch.",
+  "description": "Shadow del estado modificable de la UI (OpenSpec 07). Lo modifican el usuario y la URL mediante ScenePatch.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -206,39 +206,11 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "layerPanel",
-        "agentDock",
-        "voice"
+        "layerPanel"
       ],
       "properties": {
         "layerPanel": {
           "type": "boolean"
-        },
-        "agentDock": {
-          "type": "string",
-          "enum": [
-            "open",
-            "closed"
-          ]
-        },
-        "voice": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "output",
-            "handsFree"
-          ],
-          "description": "Voz del agente (OpenSpec 10). El micrófono solo lo activa el usuario.",
-          "properties": {
-            "output": {
-              "type": "boolean",
-              "description": "Leer en voz alta las respuestas del agente."
-            },
-            "handsFree": {
-              "type": "boolean",
-              "description": "Volver a escuchar al terminar cada respuesta."
-            }
-          }
         }
       }
     }

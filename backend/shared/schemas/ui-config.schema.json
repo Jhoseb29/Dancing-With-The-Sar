@@ -44,8 +44,7 @@
               "id",
               "path",
               "titleKey",
-              "engine",
-              "agentDescription"
+              "engine"
             ],
             "properties": {
               "id": {
@@ -64,9 +63,6 @@
                   "map",
                   "none"
                 ]
-              },
-              "agentDescription": {
-                "$ref": "#/definitions/i18nText"
               },
               "status": {
                 "type": "string",
@@ -230,7 +226,7 @@
                 "items": {
                   "type": "string"
                 },
-                "description": "Lista blanca de atributos de GetFeatureInfo que se pueden mostrar (y entregar al agente). Si falta, se muestran todos salvo datos personales."
+                "description": "Lista blanca de atributos de GetFeatureInfo que se pueden mostrar. Si falta, se muestran todos salvo datos personales."
               },
               "gibsLayer": {
                 "type": "string",

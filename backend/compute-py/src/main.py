@@ -10,7 +10,7 @@ from fastapi import FastAPI
 
 from config.settings import get_settings
 from modules.events.adapters.http import router as events_router
-from modules.ui_agent.adapters.websocket import router as agent_router
+from modules.harness.adapters.http import router as harness_router
 
 # 12-Factor XI: logs a stdout. Nunca se registran keys.
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 app = FastAPI(title="Dancing with the SARs · compute-py")
-app.include_router(agent_router)
+app.include_router(harness_router)
 app.include_router(events_router)
 
 
@@ -27,6 +27,6 @@ def health() -> dict[str, object]:
     settings = get_settings()
     return {
         "status": "ok",
-        "agent": {"llm_configured": bool(settings.gemini_api_key), "model": settings.gemini_model},
+        "harness": {"available": (settings.harness_dir / "run.py").is_file()},
         "events": {"firms_configured": bool(settings.firms_map_key)},
     }

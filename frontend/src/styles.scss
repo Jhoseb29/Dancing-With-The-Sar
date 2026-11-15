@@ -124,3 +124,60 @@ a {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+// Texto renderizado desde Markdown (MarkdownPipe): lecciones del harness NISAR.
+.prose {
+  line-height: var(--leading-body);
+
+  :is(h3, h4, h5, h6) {
+    margin: var(--spacing-18) 0 var(--spacing-10);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  p,
+  ul,
+  ol,
+  blockquote,
+  table {
+    margin: 0 0 var(--spacing-10);
+  }
+
+  ul,
+  ol {
+    padding-left: var(--spacing-18);
+  }
+
+  blockquote {
+    padding-left: var(--spacing-12);
+    border-left: 2px solid var(--color-dim-steel);
+    color: var(--color-muted-text);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-label);
+  }
+
+  th,
+  td {
+    padding: var(--spacing-4) var(--spacing-10);
+    border-bottom: var(--border-hairline) solid var(--color-dark-gunmetal);
+    text-align: left;
+  }
+
+  code {
+    font-size: 0.95em;
+    color: var(--color-muted-text);
+  }
+
+  a {
+    color: var(--color-star-white);
+  }
+}

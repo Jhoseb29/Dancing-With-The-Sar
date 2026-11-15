@@ -11,7 +11,7 @@ const URL_DEBOUNCE_MS = 300;
 /**
  * Sincroniza el shadow con el router, la URL (lang, place, layers) y Transloco.
  * - Router → shadow: cada navegación actualiza /route (origen `url`).
- * - Shadow → router: si /route cambia (usuario o agente), se navega.
+ * - Shadow → router: si /route cambia (usuario o URL), se navega.
  * - URL inicial y atrás/adelante → shadow (origen `url`).
  * - Shadow → URL: query params con debounce y replaceUrl.
  */
@@ -44,7 +44,7 @@ export class SceneSyncService {
       document.documentElement.lang = lang;
     });
 
-    // Shadow → router: solo cuando un parche (usuario o agente) cambia /route.
+    // Shadow → router: solo cuando un parche (usuario o URL) cambia /route.
     // El valor inicial no navega: la URL de entrada manda.
     effect(() => {
       const patch = this.store.lastPatch();

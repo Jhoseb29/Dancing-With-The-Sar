@@ -78,7 +78,7 @@ export class BasinMapPageComponent {
       .map(([key, value]) => ({ key, value: String(value) }));
   }
 
-  /** Ocultar o mostrar el panel (mismo flag del shadow que usa el agente con set_side_panel). */
+  /** Ocultar o mostrar el panel (flag /panels/layerPanel del shadow). */
   protected setPanelOpen(open: boolean): void {
     void this.scene.set('/panels/layerPanel', open);
   }

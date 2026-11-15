@@ -1,0 +1,199 @@
+@if (open()) {
+  <section class="dock" role="dialog" [attr.aria-label]="'harness.title' | transloco">
+    <header class="head">
+      <div>
+        <p class="label">{{ 'harness.title' | transloco }}</p>
+        <p class="caption">
+          {{ (harness.busy() ? 'harness.running' : 'harness.subtitle') | transloco }}
+        </p>
+      </div>
+      <button class="btn-secondary small" type="button" (click)="toggle()">
+        {{ 'harness.close' | transloco }}
+      </button>
+    </header>
+
+    <ol #log class="log" aria-live="polite">
+      @if (harness.turns().length === 0) {
+        <li class="intro">
+          <p class="muted">{{ 'harness.intro' | transloco }}</p>
+          <div class="chips">
+            @for (key of examples; track key) {
+              <button class="btn-pill small" type="button" (click)="sendExample(key)">
+                {{ key | transloco }}
+              </button>
+            }
+          </div>
+        </li>
+      }
+
+      @for (turn of harness.turns(); track turn.id) {
+        <li class="user">
+          <span class="who caption">{{ 'harness.you' | transloco }}</span>
+          <p>{{ turn.question }}</p>
+        </li>
+
+        <li class="reply">
+          <span class="who caption">{{ 'harness.name' | transloco }}</span>
+
+          @switch (turn.state) {
+            @case ('running') {
+              <div
+                class="progress"
+                role="progressbar"
+                [attr.aria-valuenow]="percent(turn)"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                <span class="progress-fill" [style.width.%]="percent(turn)"></span>
+              </div>
+              <ul class="steps">
+                @for (step of turn.steps; track $index; let last = $last) {
+                  <li [class.current]="last">{{ step }}</li>
+                } @empty {
+                  <li class="current">{{ 'harness.starting' | transloco }}</li>
+                }
+              </ul>
+              <button class="btn-secondary small" type="button" (click)="harness.cancel()">
+                {{ 'harness.cancel' | transloco }}
+              </button>
+            }
+
+            @case ('error') {
+              <div class="notice" role="alert">
+                <p>{{ 'harness.errors.' + (turn.errorCode ?? 'unknown') | transloco }}</p>
+                <button
+                  class="btn-secondary small"
+                  type="button"
+                  [disabled]="harness.busy()"
+                  (click)="send(turn.question)"
+                >
+                  {{ 'harness.retry' | transloco }}
+                </button>
+              </div>
+            }
+
+            @case ('done') {
+              @if (turn.payload; as payload) {
+                @if (payload.chat; as chat) {
+                  @if (payload.status === 'complete' || payload.status === 'data_only') {
+                    <span
+                      class="alert"
+                      [attr.data-level]="chat.alert_level"
+                      [title]="chat.alert_reason"
+                    >
+                      {{ 'harness.alert.' + chat.alert_level | transloco }}
+                    </span>
+                  }
+                  <p class="message">{{ chat.message }}</p>
+                  @if (chat.highlights.length) {
+                    <ul class="highlights">
+                      @for (h of chat.highlights; track $index) {
+                        <li>{{ h }}</li>
+                      }
+                    </ul>
+                  }
+                } @else {
+                  <p class="muted">{{ 'harness.dataOnly' | transloco }}</p>
+                }
+
+                @if (payload.query; as query) {
+                  <p class="caption">
+                    {{ query.place_name }} · {{ query.start_date }} → {{ query.end_date }}
+                  </p>
+                }
+
+                @if (images(turn).length) {
+                  <div class="gallery">
+                    @for (m of images(turn); track m.path) {
+                      <figure>
+                        <a [href]="harness.fileUrl(turn, m)" target="_blank" rel="noopener">
+                          <img [src]="harness.fileUrl(turn, m)" [alt]="m.title" loading="lazy" />
+                        </a>
+                        <figcaption>
+                          <span class="label">{{ m.title }}</span>
+                          <span class="caption">{{ m.date }}</span>
+                          <span class="muted">{{ m.caption }}</span>
+                        </figcaption>
+                      </figure>
+                    }
+                  </div>
+                }
+
+                @if (payload.lesson_markdown) {
+                  <button
+                    class="btn-ghost small"
+                    type="button"
+                    [attr.aria-expanded]="expanded().has(turn.id)"
+                    (click)="toggleLesson(turn.id)"
+                  >
+                    {{
+                      (expanded().has(turn.id) ? 'harness.hideLesson' : 'harness.learnMore')
+                        | transloco
+                    }}
+                  </button>
+                  @if (expanded().has(turn.id)) {
+                    <article
+                      class="lesson prose"
+                      [innerHTML]="payload.lesson_markdown | markdown"
+                    ></article>
+                  }
+                }
+
+                @if (downloads(turn).length) {
+                  <div class="downloads">
+                    <span class="caption">{{ 'harness.downloads' | transloco }}</span>
+                    @for (m of downloads(turn); track m.path) {
+                      <a
+                        class="btn-pill small"
+                        [href]="harness.fileUrl(turn, m)"
+                        [title]="m.caption"
+                        download
+                        >{{ m.title }} · {{ m.date }}</a
+                      >
+                    }
+                  </div>
+                }
+
+                @if (payload.chat?.follow_up_questions; as followUps) {
+                  <div class="chips">
+                    @for (q of followUps; track $index) {
+                      <button
+                        class="btn-pill small"
+                        type="button"
+                        [disabled]="harness.busy()"
+                        (click)="send(q)"
+                      >
+                        {{ q }}
+                      </button>
+                    }
+                  </div>
+                }
+              }
+            }
+          }
+        </li>
+      }
+    </ol>
+
+    <form class="composer" (submit)="$event.preventDefault(); send()">
+      <label class="sr-only" for="harness-input">{{ 'harness.placeholder' | transloco }}</label>
+      <textarea
+        #input
+        id="harness-input"
+        rows="2"
+        maxlength="500"
+        [value]="draft()"
+        [placeholder]="'harness.placeholder' | transloco"
+        (input)="draft.set($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+      ></textarea>
+      <button class="btn-ghost" type="submit" [disabled]="harness.busy() || !draft().trim()">
+        {{ 'harness.send' | transloco }}
+      </button>
+    </form>
+  </section>
+} @else {
+  <button class="btn-ghost launcher" type="button" (click)="toggle()">
+    {{ (harness.busy() ? 'harness.running' : 'harness.open') | transloco }}
+  </button>
+}

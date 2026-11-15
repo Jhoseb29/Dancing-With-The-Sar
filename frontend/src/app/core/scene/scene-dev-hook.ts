@@ -15,9 +15,9 @@ declare global {
 }
 
 /**
- * Solo en desarrollo: expone el shadow en `window.dwsScene` para simular al
- * agente desde la consola, p. ej.:
- *   dwsScene.patch([{ op: 'replace', path: '/route', value: 'basin' }], 'agent')
+ * Solo en desarrollo: expone el shadow en `window.dwsScene` para depurar
+ * desde la consola, p. ej.:
+ *   dwsScene.patch([{ op: 'replace', path: '/route', value: 'basin' }])
  */
 export function installSceneDevHook(store: SceneStore): void {
   // `ngDevMode` es false en producción y el optimizador elimina todo este bloque.
@@ -27,7 +27,7 @@ export function installSceneDevHook(store: SceneStore): void {
   window.dwsScene = {
     get: () => store.state(),
     reported: () => store.reported(),
-    patch: (ops, origin = 'agent', baseVersion) => store.patch({ origin, ops, baseVersion }),
+    patch: (ops, origin = 'user', baseVersion) => store.patch({ origin, ops, baseVersion }),
     history: () => store.recentPatches(),
   };
 }

@@ -7,11 +7,11 @@ import { SceneStore } from '../../core/scene/scene.store';
 import { OrbitService } from '../../core/services/orbit.service';
 import { PassCountdownComponent } from '../../shared/components/pass-countdown/pass-countdown.component';
 import { PlaceSearchComponent } from '../../shared/components/place-search/place-search.component';
-import { AgentDockComponent } from '../agent-dock/agent-dock.component';
+import { HarnessDockComponent } from '../harness-dock/harness-dock.component';
 
 @Component({
   selector: 'app-main-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslocoPipe, PassCountdownComponent, PlaceSearchComponent, AgentDockComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslocoPipe, PassCountdownComponent, PlaceSearchComponent, HarnessDockComponent],
   templateUrl: './main-shell.component.html',
   styleUrl: './main-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
