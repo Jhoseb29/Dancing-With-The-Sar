@@ -473,5 +473,15 @@
     "none": "No rain data for this area yet.",
     "radarDone": "{{m}} already passed on {{d}}: radar can check for mud or water left behind.",
     "radarNext": "Radar hasn't passed since the rain. {{m}} returns ~{{d}}: then we'll see if it left mud or water."
+  },
+  "mascot": {
+    "name": "Jucu",
+    "role": "Jucumari · Tunari Radar Guardian",
+    "greeting": "Welcome to Dancing with the SARs!",
+    "subtitle": "Together we monitor water, soil, and Cochabamba's basins with the NISAR satellite radar.",
+    "skip": "Go to corner →",
+    "replay": "Replay welcome",
+    "speak": "Play voice",
+    "dockHint": "Welcome to Dancing with the SARs! · Tap Jucu to greet"
   }
 }

@@ -114,6 +114,29 @@ export class VoiceService {
     });
   }
 
+  /** Reproduce una frase de bienvenida (como la mascota Jucu) sin depender de `readReplies`. */
+  async speakAnnouncement(
+    text: string,
+    callbacks?: { onDone?: () => void; onBlocked?: () => void },
+  ): Promise<void> {
+    if (!this.outputSupported || !text) {
+      callbacks?.onDone?.();
+      return;
+    }
+    const { output } = await this.load();
+    output.speak(text, this.scene.lang(), {
+      onStart: () => this.speaking.set(true),
+      onEnd: () => {
+        this.speaking.set(false);
+        callbacks?.onDone?.();
+      },
+      onBlocked: () => {
+        this.speaking.set(false);
+        callbacks?.onBlocked?.();
+      },
+    });
+  }
+
   interrupt(): void {
     void this.engines?.then(({ output }) => output.cancel());
     this.speaking.set(false);
