@@ -11,7 +11,7 @@ from dataclasses import asdict, dataclass, field, fields
 from datetime import date, timedelta
 from typing import Any
 
-from . import exporters, interpreter
+from . import alerts_bridge, exporters, interpreter
 from .access import GranuleSource, open_granule
 from .catalog import CatalogQuery, CatalogResult, Granule, search_granules
 from .catalog_sentinel1 import search_sentinel1
@@ -71,7 +71,8 @@ class PipelineRequest:
         self.bbox = self.bbox or intent.bbox
         self.temporal = self.temporal or intent.temporal
         self.theme = self.theme or intent.theme
-
+        if self.sensor == "auto" and intent.sensor != "auto":
+            self.sensor = intent.sensor  # "con Sentinel-1" in the question
     @property
     def granules_to_process(self) -> int:
         return self.max_granules or get_theme(self.theme).granules
@@ -300,6 +301,38 @@ def step_interpret(run: RunContext, settings: Settings, req: PipelineRequest) ->
     return payload
 
 
+# ------------------------------------------------------------------ alert mode
+def step_alerts(run: RunContext, settings: Settings, req: PipelineRequest, intent: Intent) -> dict[str, Any]:
+    """Same chat, no radar download: explain Centinela's current alerts with its own data."""
+    started = time.monotonic()
+    root = settings.alert_harness_dir
+    if not alerts_bridge.available(root):
+        msg = "Centinela todavía no publicó alertas (corre el monitor de alertas)."
+        interpreter.clarification_payload(run, msg)
+        run.record_step("alerts", "no_data", started)
+        return {"status": "no_data", "message": msg}
+    run.emit("alerts", "Leyendo las alertas vigentes de Centinela…", 0.3)
+    context = alerts_bridge.build_context(intent.text, root)
+    write_json(run.context_json, context)
+    focus = ", ".join(f"{d['id']} {d.get('nivel')}" for d in context["focus"])
+    run.emit("alerts", f"Distritos a explicar: {focus}", 0.45)
+    usage = [run.manifest.get("steps", {}).get("intent", {}).get("usage")]
+    explain_usage, status = None, "skipped"
+    if req.interpret:
+        run.emit("interpret", "Preparando la explicación…", 0.6)
+        try:
+            explain_usage = interpreter.explain(run, settings, alerts_bridge.role(root), context, req.model,
+                                                level=alerts_bridge.level_for(context))
+            usage.append(explain_usage)
+            status = "ok"
+        except Exception as exc:  # noqa: BLE001 - the data is still shown on the alerts map
+            log.error("Explicación de alertas: %s", exc)
+            status = "error"
+    payload = interpreter.assemble_alerts_payload(run, context, [u for u in usage if u])
+    run.record_step("alerts", status, started, focus=[d["id"] for d in context["focus"]], usage=explain_usage)
+    return payload
+
+
 # ------------------------------------------------------------------ full run
 def run_pipeline(req: PipelineRequest, settings: Settings, echo_events: bool = False) -> RunContext:
     run = RunContext.create(settings.output_dir, req.to_dict())
@@ -311,6 +344,13 @@ def run_pipeline(req: PipelineRequest, settings: Settings, echo_events: bool = F
                 interpreter.clarification_payload(run, intent.clarification_question)
                 run.emit("done", intent.clarification_question, 1.0, status="needs_clarification")
                 run.finish("needs_clarification")
+                return run
+            if intent.mode == "alertas":
+                payload = step_alerts(run, settings, req, intent)
+                status = "ok" if payload["status"] == "complete" else payload["status"]
+                run.emit("done", "Explicación lista." if status == "ok" else payload.get("message", "Listo."), 1.0,
+                         status=status, payload=run.rel(run.ui_payload_json))
+                run.finish(status)
                 return run
         req.bbox = req.bbox or settings.default_bbox
         run.manifest["request"] = req.to_dict()

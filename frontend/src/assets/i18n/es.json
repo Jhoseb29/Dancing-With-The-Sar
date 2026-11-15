@@ -190,7 +190,7 @@
   },
   "harness": {
     "title": "Ecos del radar",
-    "subtitle": "Radar satelital NASA/ISRO · datos en vivo desde AWS",
+    "subtitle": "Alertas de Centinela y radar NISAR / Sentinel-1 · datos en vivo",
     "name": "Ecos",
     "you": "Tú",
     "open": "Pregúntale al satélite",
@@ -201,8 +201,9 @@
     "running": "Analizando…",
     "starting": "Iniciando el análisis…",
     "placeholder": "Ej.: ¿Hubo incendios recientes en la Chiquitania? (Enter para enviar)",
-    "intro": "Pregunta sobre cualquier lugar: incendios, inundaciones, cuencas, bosques o ciudades. Leo las imágenes del radar NISAR directamente desde AWS, así que el análisis tarda unos minutos.",
+    "intro": "Pregunta por las alertas o pide al satélite que mire un lugar o una fecha.",
     "examples": {
+      "yesterday": "¿Qué pasó ayer en la torrentera Taquiña?",
       "fires": "¿Hubo incendios recientes en la Chiquitania?",
       "basin": "¿Cómo están las lagunas de la cuenca de Cochabamba?",
       "flood": "¿Hay inundaciones en La Mojana, Colombia?"
@@ -248,7 +249,25 @@
         "no-speech": "No te escuché. Toca Hablar e intenta de nuevo.",
         "stt-failed": "No se pudo transcribir el audio. Intenta de nuevo o escribe tu pregunta."
       }
-    }
+    },
+    "sensor": {
+      "label": "Satélite:",
+      "auto": "Auto",
+      "sentinel-1": "Sentinel-1",
+      "nisar": "NISAR",
+      "hint": {
+        "auto": "NISAR y, si no cubre la zona, Sentinel-1",
+        "sentinel-1": "Sentinel-1 (ESA, banda C): pasa cada ~6 días, ideal para vigilar",
+        "nisar": "NISAR (NASA-ISRO, banda L): ve bajo la vegetación, ideal para confirmar"
+      }
+    },
+    "alertsBox": {
+      "title": "Alertas ahora",
+      "explainToday": "Explícame las alertas de hoy",
+      "why": "¿Por qué {{id}} está en {{nivel}}?",
+      "basins": "¿Qué quebradas bajan a {{id}}?"
+    },
+    "showOnAlerts": "Ver {{ids}} en el mapa de alertas"
   },
   "events": {
     "kicker": "Eventos · Imágenes NASA por día",
@@ -463,7 +482,8 @@
     "basins": {
       "title": "Cuencas que bajan aquí",
       "rain": "{{mm}} mm/h a las {{t}}"
-    }
+    },
+    "askEcos": "Pregúntale a Ecos por qué {{id}} tiene este nivel"
   },
   "satSaw": {
     "title": "Lo que vio el satélite (últimas 24 h)",

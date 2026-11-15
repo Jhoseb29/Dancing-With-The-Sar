@@ -46,8 +46,19 @@ export interface HarnessDateMetrics {
   pixel_spacing_m: number | null;
 }
 
+/** Respuesta sobre las alertas de Centinela (mismo chat, sin radar). */
+export interface HarnessAlertsRef {
+  /** Distritos que explica la respuesta (el primero se muestra en el mapa). */
+  focus: string[];
+  asked: string[];
+  levels: Record<string, number>;
+}
+
 export interface HarnessPayload {
   schema_version: string;
+  /** radar = análisis de tomas del satélite; alertas = explicación de las alertas vigentes. */
+  mode?: 'radar' | 'alertas';
+  alerts?: HarnessAlertsRef | null;
   run_id: string;
   status: PayloadStatus;
   query: HarnessQuery | null;
@@ -127,7 +138,7 @@ export interface GlobeGrid {
 /** Una línea del stream NDJSON de POST /api/harness/ask. */
 export interface HarnessEvent {
   ts: string;
-  stage: 'intent' | 'query' | 'process' | 'change' | 'interpret' | 'done' | 'result' | 'error';
+  stage: 'intent' | 'alerts' | 'query' | 'process' | 'change' | 'interpret' | 'done' | 'result' | 'error';
   message: string;
   progress?: number | null;
   run_id?: string;

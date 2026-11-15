@@ -57,10 +57,12 @@ class Settings:
     cmr_url: str
     cmr_client_id: str
     default_bbox: tuple[float, ...]
+    claude_backend: str  # auto | cli (Claude Code subscription) | api (ANTHROPIC_API_KEY)
     claude_bin: str
     intent_model: str
     interpret_model: str
     claude_timeout_s: int
+    alert_harness_dir: Path  # Centinela outputs, read-only (single chat explains its alerts)
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -78,10 +80,12 @@ class Settings:
             cmr_url=os.environ.get("CMR_GRANULES_URL", "https://cmr.earthdata.nasa.gov/search/granules.json"),
             cmr_client_id=os.environ.get("CMR_CLIENT_ID", "nisar-harness"),
             default_bbox=_env_bbox("NISAR_DEFAULT_BBOX", COCHABAMBA_BBOX),
+            claude_backend=os.environ.get("CLAUDE_BACKEND", "auto").lower(),
             claude_bin=os.environ.get("CLAUDE_BIN", "claude"),
             intent_model=os.environ.get("CLAUDE_INTENT_MODEL", "haiku"),
-            interpret_model=os.environ.get("CLAUDE_INTERPRET_MODEL", "sonnet"),
+            interpret_model=os.environ.get("CLAUDE_INTERPRET_MODEL", "haiku"),
             claude_timeout_s=int(os.environ.get("CLAUDE_TIMEOUT_S", "300")),
+            alert_harness_dir=_env_path("ALERT_HARNESS_DIR", PROJECT_ROOT / "alert-harness"),
         )
 
 

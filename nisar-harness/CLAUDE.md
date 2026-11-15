@@ -6,9 +6,10 @@ Pregunta en lenguaje natural → datos radar **NISAR L2 GCOV** leídos directame
 
 | Capa | Qué hace | Dónde |
 |------|----------|-------|
-| Intención (Claude Haiku, 1 turno) | Texto → lugar, bbox, tema y fechas; Python valida | `lib/intent.py`, `lib/prompts/intent_parser.md`, `lib/themes.py` |
+| Intención (Claude Haiku, 1 turno, effort low) | Texto → lugar, bbox, tema y fechas; Python valida | `lib/intent.py`, `lib/prompts/intent_parser.md`, `lib/themes.py` |
 | Determinista (Python/uv) | CMR → streaming S3/HTTPS (NISAR; Sentinel-1 OPERA RTC como respaldo) → recorte AOI + multilook → formatos → métricas → cambios | `lib/` (`sensors.py`, `catalog_sentinel1.py`, `sentinel1.py`) |
-| Explicación (Claude Sonnet, 1 turno) | Contexto compacto → chat corto + lección | `lib/interpreter.py` + skill `nisar-didactic-interpreter` |
+| Explicación (Claude Haiku, 1 turno, effort medium) | Contexto compacto → chat corto + lección | `lib/interpreter.py` + skill `nisar-didactic-interpreter` |
+| Modo alertas (mismo chat) | La intención decide `mode: alertas` → lee lo que publicó Centinela (sin radar) → explica con la skill `alert-advisor`; el nivel lo reimpone Python | `lib/alerts_bridge.py` (solo lectura de `../alert-harness/output` y `data/`) |
 
 Todo número sale de Python. El modelo **no calcula, no descarga y no ve imágenes**: las imágenes se muestran al usuario, no se interpretan. No hay datos locales: todo se lee por streaming desde AWS.
 
@@ -37,6 +38,8 @@ interpretacion_didactica_nisar.json   # payload final para Angular
 - Nueva región curada → `REGIONS` (`lib/regions.py`) con `aliases`.
 - Nuevo formato → función en `lib/exporters.py` + `EXPORTERS` + `MEDIA_CATALOG` (`lib/interpreter.py`).
 - El globo web no usa imágenes del harness: colorea `*_globe.json` en el navegador (`frontend/src/app/core/harness/globe-grid.ts`).
-- Llamadas a Claude solo por `lib/claude_cli.py` (1 turno, sin tools, JSON schema).
+- Llamadas a Claude solo por `lib/claude_cli.ask_structured` (1 turno, sin tools, JSON schema). Backend `CLAUDE_BACKEND`: `cli` (suscripción, Claude Code) o `api` (`lib/claude_api.py`, SDK `anthropic`, `ANTHROPIC_API_KEY`); `auto` elige api si hay key.
+- Fechas: "hoy/ayer/anoche/el 14" → `event_date` y ventana ±14 días (una toma antes y la más reciente después); `sensor` se elige en la UI o en la pregunta.
+- Horas que ve el modelo: ya convertidas a hora de Bolivia en Python (no le pidas convertir zonas).
 - Configuración por variables de entorno (`lib/settings.py`).
 - No ejecutes el pipeline completo para probar: tarda varios minutos y consume datos remotos. Prueba funciones puras (`intent.normalise`, `change.compare`) o `scripts/interpret.py --no-interpret` sobre una corrida existente.

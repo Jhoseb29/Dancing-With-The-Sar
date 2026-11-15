@@ -56,6 +56,10 @@
     </div>
   }
 
+  <button class="btn-ghost small ask" type="button" (click)="ask.emit()">
+    {{ 'risk.askEcos' | transloco: { id: district().id } }}
+  </button>
+
   <div class="todo">
     <app-risk-icon name="aviso" />
     <p>{{ 'risk.todo.' + level() | transloco }}</p>

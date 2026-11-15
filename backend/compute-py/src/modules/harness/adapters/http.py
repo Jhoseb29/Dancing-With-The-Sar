@@ -7,6 +7,8 @@ GET  /api/harness/runs/{run_id}/files/{path}  imágenes y descargas de la corrid
 
 from __future__ import annotations
 
+from typing import Literal
+
 import json
 from collections.abc import Iterator
 from functools import lru_cache
@@ -29,6 +31,8 @@ _STATUS = {
 
 class AskBody(BaseModel):
     text: str
+    # Satélite para aprender/navegar: auto (NISAR y, si no cubre, Sentinel-1) | nisar | sentinel-1
+    sensor: Literal["auto", "nisar", "sentinel-1"] = "auto"
 
 
 @lru_cache
@@ -50,7 +54,7 @@ def _ndjson(events: Iterator[dict]) -> Iterator[str]:
 def ask(body: AskBody) -> StreamingResponse:
     try:
         question = clean_question(body.text, get_settings().harness_max_text_chars)
-        run = runner().start(question)
+        run = runner().start(question, body.sensor)
     except HarnessError as err:
         raise _http_error(err) from err
     return StreamingResponse(
