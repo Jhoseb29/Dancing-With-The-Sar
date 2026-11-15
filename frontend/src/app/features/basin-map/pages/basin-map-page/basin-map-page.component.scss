@@ -23,6 +23,10 @@ p {
   }
 }
 
+.more summary {
+  cursor: pointer;
+}
+
 .row {
   display: flex;
   flex-wrap: wrap;
@@ -89,120 +93,7 @@ p {
   padding: var(--spacing-4) var(--spacing-10);
 }
 
-.subnote {
-  margin: var(--spacing-4) 0 0 var(--spacing-24);
-}
-
-.subcontrol {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-10);
-  margin: var(--spacing-4) 0 0 var(--spacing-24);
-}
-
-.select-date {
-  background: var(--color-void-black);
-  color: var(--color-star-white);
-  border: var(--border-hairline) solid var(--color-dim-steel);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-4) var(--spacing-10);
-  font-family: var(--font-primary);
-  font-size: var(--text-label);
-}
-
-.ramp-legend {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-10);
-  margin: var(--spacing-4) 0 0 var(--spacing-24);
-  flex-wrap: wrap;
-}
-
-.ramp {
-  width: 72px;
-  height: 8px;
-  border-radius: var(--radius-md);
-  display: inline-block;
-}
-
-.slope-ramp {
-  background: linear-gradient(90deg, #ffb000, #ff5a00, #d1002b);
-}
-
-.swatch {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  display: inline-block;
-}
-
-.slope-swatch {
-  background: #ff6a18;
-}
-
-.flood-swatch {
-  background: #14c8ff;
-}
-
-.cota-swatch {
-  background: #56eb8c;
-}
-
-.drainage-swatch {
-  background: #30d7f5;
-}
-
-.caution-swatch {
-  background: #c084fc;
-}
-
-.wrap {
-  flex-wrap: wrap;
-}
-
 // Enlaces y botones sueltos del panel: ancho de su contenido, no de todo el panel.
 a.btn-ghost {
   align-self: flex-start;
-}
-
-.mode-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-8, 8px);
-}
-
-.mode-btn {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-  text-align: left;
-  width: 100%;
-  background: transparent;
-  color: var(--color-star-white);
-  border: var(--border-hairline) solid var(--color-dark-gunmetal);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-10) var(--spacing-12);
-  cursor: pointer;
-
-  &:hover {
-    background: var(--color-hover-fill);
-  }
-
-  &.active {
-    border-color: var(--color-star-white);
-    background: var(--color-hover-fill);
-  }
-}
-
-.advanced-layers {
-  margin-top: var(--spacing-4);
-
-  summary {
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .layers {
-    margin-top: var(--spacing-10);
-  }
 }
