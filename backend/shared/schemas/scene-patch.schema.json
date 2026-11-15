@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dancing-with-the-sars/schemas/scene-patch.schema.json",
+  "title": "ScenePatch",
+  "description": "Cambio sobre SceneState. Subconjunto de JSON Patch (RFC 6902) limitado a rutas permitidas.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "origin",
+    "ops"
+  ],
+  "properties": {
+    "origin": {
+      "type": "string",
+      "enum": [
+        "user",
+        "url",
+        "agent"
+      ]
+    },
+    "baseVersion": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Versión del SceneState sobre la que se calculó el parche."
+    },
+    "ops": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "op",
+          "path"
+        ],
+        "properties": {
+          "op": {
+            "type": "string",
+            "enum": [
+              "replace",
+              "add",
+              "remove"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^/(route|lang|camera/(placeId|tourId|follow)|time/(mode|start|end|date|speed)|event(/(type|placeId|start|end))?|layers(/(\\d+|-)(/(presetId|visible|opacity))?)?|search/(query|selectedPlaceId)|panels/(layerPanel|agentDock|voice/(output|handsFree)))$"
+          },
+          "value": {}
+        }
+      }
+    }
+  }
+}

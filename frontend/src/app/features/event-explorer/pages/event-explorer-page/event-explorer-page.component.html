@@ -1,0 +1,139 @@
+<app-map-canvas (ready)="onCanvasReady($event)" />
+
+<app-side-panel
+  [open]="scene.panels().layerPanel"
+  [label]="active()?.config ? name(active()?.config?.name) : ('events.title' | transloco)"
+  [hideLabel]="'panel.hide' | transloco"
+  (openChange)="setPanelOpen($event)"
+>
+  <p class="caption">{{ 'events.kicker' | transloco }}</p>
+  <h1 class="headline">{{ active()?.config ? name(active()?.config?.name) : ('events.title' | transloco) }}</h1>
+
+  <section class="block">
+    <h2 class="label">{{ 'events.type' | transloco }}</h2>
+    <div class="row">
+      @for (type of eventTypes; track type.id) {
+        <button
+          class="btn-pill"
+          type="button"
+          [disabled]="!type.available"
+          [attr.aria-pressed]="active()?.state?.type === type.id"
+          [title]="type.available ? '' : name(type.unavailableReason)"
+          (click)="selectEvent(type.id)"
+        >
+          {{ name(type.name) }}
+        </button>
+      }
+    </div>
+  </section>
+
+  @if (active(); as a) {
+    <section class="block">
+      <h2 class="label">{{ 'events.place' | transloco }}</h2>
+      <div class="row">
+        @for (placeId of placeIds; track placeId) {
+          <button class="btn-pill" type="button" [attr.aria-pressed]="a.state.placeId === placeId" (click)="selectPlace(placeId)">
+            {{ placeName(placeId) }}
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="label">{{ 'events.day' | transloco }}</h2>
+      <div class="row center">
+        <button class="btn-secondary small" type="button" [disabled]="scene.time().date === a.state.start" (click)="step(-1)" [attr.aria-label]="'events.prev' | transloco">‹</button>
+        <input
+          class="date tabular"
+          type="date"
+          [min]="a.state.start"
+          [max]="a.state.end"
+          [value]="scene.time().date"
+          (change)="setDate($any($event.target).value)"
+        />
+        <button class="btn-secondary small" type="button" [disabled]="scene.time().date === a.state.end" (click)="step(1)" [attr.aria-label]="'events.next' | transloco">›</button>
+      </div>
+      <p class="caption tabular">{{ 'events.range' | transloco: { start: a.state.start, end: a.state.end } }}</p>
+      @if (verifiedDays().length) {
+        <p class="caption">{{ 'events.verifiedDays' | transloco }}</p>
+        <div class="row">
+          @for (day of verifiedDays(); track day) {
+            <button class="btn-pill small tabular" type="button" [attr.aria-pressed]="scene.time().date === day" (click)="setDate(day)">
+              {{ day }}
+            </button>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="block">
+      <h2 class="label">{{ 'events.howToRead' | transloco }}</h2>
+      <p>{{ name(a.config?.howToRead) }}</p>
+    </section>
+
+    @if (a.config?.stats === 'firms') {
+      <section class="block" aria-live="polite">
+        <h2 class="label">{{ 'events.fireStats' | transloco }}</h2>
+        @switch (stats().status) {
+          @case ('loading') {
+            <p class="muted">{{ 'events.statsLoading' | transloco }}</p>
+          }
+          @case ('unavailable') {
+            <p class="notice">{{ 'events.firmsUnavailable' | transloco }}</p>
+          }
+          @case ('rate_limited') {
+            <p class="notice">{{ 'events.rateLimited' | transloco }}</p>
+          }
+          @case ('error') {
+            <p class="notice">{{ 'events.statsError' | transloco }}</p>
+          }
+        }
+        @if (stats(); as s) {
+          @if (s.status === 'ready') {
+            <p class="tabular">
+              <span class="big">{{ s.stats.total.toLocaleString(scene.lang() === 'es' ? 'es-BO' : 'en-US') }}</span>
+              {{ 'events.hotspots' | transloco }}
+            </p>
+            @if (s.stats.peak_day; as peak) {
+              <button class="btn-ghost small" type="button" (click)="setDate(peak.date)">
+                {{ 'events.peak' | transloco: { date: peak.date, count: peak.count } }}
+              </button>
+            }
+            <ol class="bars" [attr.aria-label]="'events.monthly' | transloco">
+              @for (m of s.stats.monthly; track m.month) {
+                <li [title]="m.month + ': ' + m.count">
+                  <span class="bar" [style.height.%]="(m.count / maxMonthly()) * 100"></span>
+                </li>
+              }
+            </ol>
+            <p class="caption">{{ s.stats.source }}</p>
+          }
+        }
+        @if (map.fires(); as f) {
+          @if (f.status === 'ready') {
+            <p class="caption tabular">{{ 'events.dayHotspots' | transloco: { count: f.day.count, date: f.date } }}</p>
+          }
+        }
+      </section>
+    }
+
+    <section class="block">
+      <h2 class="label">{{ 'events.layers' | transloco }}</h2>
+      <ul class="layers">
+        @for (layer of eventLayers(); track layer.id) {
+          <li>
+            <span>{{ name(layer.name) }}</span>
+            @if (layerStatus(layer.id) === 'error') {
+              <span class="caption">{{ 'events.noCoverage' | transloco }}</span>
+            }
+            <span class="caption">{{ name(layer.description) }}</span>
+            @if (layer.legendUrl) {
+              <img class="legend" [src]="layer.legendUrl" [alt]="'basin.legendOf' | transloco: { name: name(layer.name) }" loading="lazy" />
+            }
+          </li>
+        }
+      </ul>
+      <p class="caption">{{ 'events.source' | transloco }}</p>
+    </section>
+  }
+</app-side-panel>

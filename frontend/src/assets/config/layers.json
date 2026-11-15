@@ -1,0 +1,431 @@
+{
+  "layers": [
+    {
+      "id": "basemap-blue-marble",
+      "kind": "gibs-xyz",
+      "group": "basemap",
+      "name": {
+        "es": "Blue Marble (NASA)",
+        "en": "Blue Marble (NASA)"
+      },
+      "engines": [
+        "globe",
+        "map"
+      ],
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg",
+      "maxZoom": 8,
+      "attribution": "NASA EOSDIS GIBS · Blue Marble",
+      "source": "NASA GIBS WMTS (público, sin credenciales)"
+    },
+    {
+      "id": "gamc-cuencas-uh8",
+      "kind": "gamc-wms",
+      "group": "gamc",
+      "name": {
+        "es": "Cuencas UH 8",
+        "en": "Basins UH 8"
+      },
+      "description": {
+        "es": "Unidades hidrográficas nivel 8, coloreadas por categoría.",
+        "en": "Level-8 hydrographic units, colored by category."
+      },
+      "engines": [
+        "map"
+      ],
+      "serviceId": "4499e961-2b2e-4cf3-84dd-30789c31ec96",
+      "representation": "categorized",
+      "bbox": [
+        -66.433583,
+        -17.677893,
+        -65.844154,
+        -17.186852
+      ],
+      "defaultOpacity": 0.7,
+      "legend": true,
+      "featureInfo": true,
+      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
+      "source": "data-map.json → gamc_wms"
+    },
+    {
+      "id": "gamc-cuencas-uh7",
+      "kind": "gamc-wms",
+      "group": "gamc",
+      "name": {
+        "es": "Cuencas UH 7",
+        "en": "Basins UH 7"
+      },
+      "description": {
+        "es": "Unidades hidrográficas nivel 7, coloreadas por categoría.",
+        "en": "Level-7 hydrographic units, colored by category."
+      },
+      "engines": [
+        "map"
+      ],
+      "serviceId": "fb368617-f2fd-43e8-867a-4456364efb52",
+      "representation": "categorized",
+      "bbox": [
+        -66.536394,
+        -17.870027,
+        -65.574648,
+        -17.231247
+      ],
+      "defaultOpacity": 0.7,
+      "legend": true,
+      "featureInfo": true,
+      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
+      "source": "data-map.json → gamc_wms"
+    },
+    {
+      "id": "gamc-cuencas-influencia",
+      "kind": "gamc-wms",
+      "group": "gamc",
+      "name": {
+        "es": "Cuencas de influencia",
+        "en": "Influence basins"
+      },
+      "description": {
+        "es": "Cuencas que drenan hacia el área urbana.",
+        "en": "Basins draining into the urban area."
+      },
+      "engines": [
+        "map"
+      ],
+      "serviceId": "02ddf5a6-4d80-4ed3-8c73-b531b0574e81",
+      "representation": "categorized",
+      "bbox": [
+        -66.278147,
+        -17.53119,
+        -66.064787,
+        -17.24657
+      ],
+      "defaultOpacity": 0.7,
+      "legend": true,
+      "featureInfo": true,
+      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
+      "source": "data-map.json → gamc_wms"
+    },
+    {
+      "id": "gamc-drenaje",
+      "kind": "gamc-wms",
+      "group": "gamc",
+      "name": {
+        "es": "Drenaje e influencia",
+        "en": "Drainage and influence"
+      },
+      "description": {
+        "es": "Red de drenaje y su área de influencia.",
+        "en": "Drainage network and its area of influence."
+      },
+      "engines": [
+        "map"
+      ],
+      "serviceId": "d4cea6e3-fc7f-482a-94ad-bd377df78886",
+      "representation": "simple",
+      "bbox": [
+        -66.269936,
+        -17.530591,
+        -66.045853,
+        -17.260142
+      ],
+      "defaultOpacity": 0.9,
+      "legend": true,
+      "featureInfo": true,
+      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
+      "source": "data-map.json → gamc_wms"
+    },
+    {
+      "id": "gamc-cota-2750",
+      "kind": "gamc-wms",
+      "group": "gamc",
+      "name": {
+        "es": "Cota 2750",
+        "en": "2750 m contour"
+      },
+      "description": {
+        "es": "Línea de cota 2750 m (límite de crecimiento urbano hacia el Tunari).",
+        "en": "2750 m contour line (urban growth limit toward the Tunari)."
+      },
+      "engines": [
+        "map"
+      ],
+      "serviceId": "297cefa4-0832-42bb-a98e-2cbea989fd9d",
+      "representation": "categorized",
+      "bbox": [
+        -66.193763,
+        -17.367136,
+        -66.103902,
+        -17.257306
+      ],
+      "defaultOpacity": 0.9,
+      "legend": true,
+      "featureInfo": true,
+      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
+      "source": "data-map.json → gamc_wms"
+    },
+    {
+      "id": "gamc-distritos",
+      "kind": "gamc-wms",
+      "group": "gamc",
+      "name": {
+        "es": "Límite de distritos",
+        "en": "District boundaries"
+      },
+      "description": {
+        "es": "Distritos municipales de Cochabamba.",
+        "en": "Cochabamba municipal districts."
+      },
+      "engines": [
+        "map"
+      ],
+      "serviceId": "7eb13092-bf0e-493b-aae6-03c43eedda2c",
+      "representation": "categorized",
+      "bbox": [
+        -66.280703,
+        -17.53119,
+        -66.06952,
+        -17.257306
+      ],
+      "defaultOpacity": 0.6,
+      "legend": true,
+      "featureInfo": true,
+      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
+      "source": "data-map.json → gamc_wms (bbox tomado del proyecto 03; el portal repite el de Cota 2750)"
+    },
+    {
+      "id": "gamc-emergencias",
+      "kind": "gamc-wms",
+      "group": "gamc",
+      "name": {
+        "es": "Emergencias",
+        "en": "Emergencies"
+      },
+      "description": {
+        "es": "Emergencias registradas por el municipio.",
+        "en": "Emergencies recorded by the municipality."
+      },
+      "engines": [
+        "map"
+      ],
+      "serviceId": "e105a6ed-74bb-41a5-8c85-9360711ddf69",
+      "representation": "simple",
+      "bbox": [
+        -66.280703,
+        -17.53119,
+        -66.06952,
+        -17.257306
+      ],
+      "defaultOpacity": 1,
+      "legend": true,
+      "featureInfo": true,
+      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
+      "source": "data-map.json → gamc_wms",
+      "featureInfoFields": [
+        "Numero",
+        "Fecha",
+        "Descripción",
+        "Unidad Registro",
+        "Unidad Responsable",
+        "Estado"
+      ]
+    },
+    {
+      "id": "gibs-viirs-falsecolor",
+      "kind": "gibs-wmts",
+      "group": "event",
+      "name": {
+        "es": "VIIRS falso color (M11-I2-I1)",
+        "en": "VIIRS false color (M11-I2-I1)"
+      },
+      "description": {
+        "es": "Equivalente al 7-2-1 de MODIS: agua azul oscuro, vegetación verde, áreas quemadas rojizas, nubes celestes. Franja ancha: cubre el planeta sin huecos entre órbitas.",
+        "en": "Equivalent to MODIS 7-2-1: water dark blue, vegetation green, burned areas reddish, clouds light blue. Wide swath: covers the planet with no gaps between orbits."
+      },
+      "engines": [
+        "map"
+      ],
+      "gibsLayer": "VIIRS_NOAA20_CorrectedReflectance_BandsM11-I2-I1",
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_NOAA20_CorrectedReflectance_BandsM11-I2-I1/default/{Time}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg",
+      "tileMatrixSet": "GoogleMapsCompatible_Level9",
+      "format": "jpg",
+      "maxZoom": 9,
+      "temporal": "daily",
+      "attribution": "NASA EOSDIS GIBS",
+      "source": "NASA GIBS · VIIRS_NOAA20_CorrectedReflectance_BandsM11-I2-I1 (verificado en WMTSCapabilities 2026-11-14; datos desde 2018-01-05)"
+    },
+    {
+      "id": "gibs-viirs-truecolor",
+      "kind": "gibs-wmts",
+      "group": "event",
+      "name": {
+        "es": "VIIRS color real",
+        "en": "VIIRS true color"
+      },
+      "description": {
+        "es": "Imagen como la vería el ojo humano, sin huecos entre órbitas.",
+        "en": "Image as the human eye would see it, with no gaps between orbits."
+      },
+      "engines": [
+        "map"
+      ],
+      "gibsLayer": "VIIRS_NOAA20_CorrectedReflectance_TrueColor",
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_NOAA20_CorrectedReflectance_TrueColor/default/{Time}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg",
+      "tileMatrixSet": "GoogleMapsCompatible_Level9",
+      "format": "jpg",
+      "maxZoom": 9,
+      "temporal": "daily",
+      "attribution": "NASA EOSDIS GIBS",
+      "source": "NASA GIBS · VIIRS_NOAA20_CorrectedReflectance_TrueColor (verificado en WMTSCapabilities 2026-11-14; datos desde 2018-01-05)"
+    },
+    {
+      "id": "gibs-modis-721",
+      "kind": "gibs-wmts",
+      "group": "event",
+      "name": {
+        "es": "MODIS falso color 7-2-1",
+        "en": "MODIS false color 7-2-1"
+      },
+      "description": {
+        "es": "Agua en azul oscuro, vegetación verde, áreas quemadas rojizas. No se usa en eventos: su imagen diaria deja franjas negras entre órbitas cerca del ecuador.",
+        "en": "Water dark blue, vegetation green, burned areas reddish. Not used in events: its daily image leaves black stripes between orbits near the equator."
+      },
+      "engines": [
+        "map"
+      ],
+      "gibsLayer": "MODIS_Terra_CorrectedReflectance_Bands721",
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_Bands721/default/{Time}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg",
+      "tileMatrixSet": "GoogleMapsCompatible_Level9",
+      "format": "jpg",
+      "maxZoom": 9,
+      "temporal": "daily",
+      "attribution": "NASA EOSDIS GIBS",
+      "source": "NASA GIBS · MODIS_Terra_CorrectedReflectance_Bands721 (verificado en WMTSCapabilities 2026-11-14)"
+    },
+    {
+      "id": "gibs-modis-truecolor",
+      "kind": "gibs-wmts",
+      "group": "event",
+      "name": {
+        "es": "MODIS color real",
+        "en": "MODIS true color"
+      },
+      "description": {
+        "es": "Imagen como la vería el ojo humano. No se usa en eventos: su imagen diaria deja franjas negras entre órbitas cerca del ecuador.",
+        "en": "Image as the human eye would see it. Not used in events: its daily image leaves black stripes between orbits near the equator."
+      },
+      "engines": [
+        "map"
+      ],
+      "gibsLayer": "MODIS_Terra_CorrectedReflectance_TrueColor",
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/{Time}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg",
+      "tileMatrixSet": "GoogleMapsCompatible_Level9",
+      "format": "jpg",
+      "maxZoom": 9,
+      "temporal": "daily",
+      "attribution": "NASA EOSDIS GIBS",
+      "source": "NASA GIBS · MODIS_Terra_CorrectedReflectance_TrueColor (verificado en WMTSCapabilities 2026-11-14)"
+    },
+    {
+      "id": "gibs-modis-flood",
+      "kind": "gibs-wmts",
+      "group": "event",
+      "name": {
+        "es": "Inundación MODIS (2 días)",
+        "en": "MODIS flood (2-day)"
+      },
+      "description": {
+        "es": "Agua detectada por MODIS Terra+Aqua en una ventana de 2 días.",
+        "en": "Water detected by MODIS Terra+Aqua over a 2-day window."
+      },
+      "engines": [
+        "map"
+      ],
+      "gibsLayer": "MODIS_Combined_Flood_2-Day",
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Combined_Flood_2-Day/default/{Time}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png",
+      "tileMatrixSet": "GoogleMapsCompatible_Level9",
+      "format": "png",
+      "maxZoom": 9,
+      "temporal": "daily",
+      "legendUrl": "https://gibs.earthdata.nasa.gov/legends/MODIS_Flood_H.svg",
+      "coverageFrom": "2021-01-01",
+      "attribution": "NASA EOSDIS GIBS",
+      "source": "NASA GIBS · MODIS_Combined_Flood_2-Day (verificado en WMTSCapabilities 2026-11-14)"
+    },
+    {
+      "id": "gibs-opera-dswx-s1",
+      "kind": "gibs-wmts",
+      "group": "event",
+      "name": {
+        "es": "Agua superficial por radar (OPERA DSWx-S1)",
+        "en": "Surface water from radar (OPERA DSWx-S1)"
+      },
+      "description": {
+        "es": "Agua detectada por el radar Sentinel-1 a 30 m; ve a través de nubes.",
+        "en": "Water detected by the Sentinel-1 radar at 30 m; sees through clouds."
+      },
+      "engines": [
+        "map"
+      ],
+      "gibsLayer": "OPERA_L3_Dynamic_Surface_Water_Extent-Sentinel-1",
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/OPERA_L3_Dynamic_Surface_Water_Extent-Sentinel-1/default/{Time}/GoogleMapsCompatible_Level12/{z}/{y}/{x}.png",
+      "tileMatrixSet": "GoogleMapsCompatible_Level12",
+      "format": "png",
+      "maxZoom": 12,
+      "temporal": "daily",
+      "legendUrl": "https://gibs.earthdata.nasa.gov/legends/OPERA_Dynamic_Surface_Water_Extent_S1_H.svg",
+      "coverageFrom": "2023-12-15",
+      "attribution": "NASA EOSDIS GIBS",
+      "source": "NASA GIBS · OPERA_L3_Dynamic_Surface_Water_Extent-Sentinel-1 (verificado en WMTSCapabilities 2026-11-14)"
+    },
+    {
+      "id": "gibs-nisar-gcov",
+      "kind": "gibs-wmts",
+      "group": "event",
+      "name": {
+        "es": "Radar NISAR (GCOV falso color)",
+        "en": "NISAR radar (GCOV false color)"
+      },
+      "description": {
+        "es": "Retrodispersión normalizada del radar banda L de NISAR, en falso color por polarización.",
+        "en": "Normalized backscatter from the NISAR L-band radar, false color by polarization."
+      },
+      "engines": [
+        "map"
+      ],
+      "gibsLayer": "NISAR_L2_Geocoded_Polarimetric_Covariance",
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/NISAR_L2_Geocoded_Polarimetric_Covariance/default/{Time}/GoogleMapsCompatible_Level13/{z}/{y}/{x}.png",
+      "tileMatrixSet": "GoogleMapsCompatible_Level13",
+      "format": "png",
+      "maxZoom": 13,
+      "temporal": "daily",
+      "coverageFrom": "2025-10-29",
+      "coverageTo": "2026-11-11",
+      "attribution": "NASA EOSDIS GIBS",
+      "source": "NASA GIBS · NISAR_L2_Geocoded_Polarimetric_Covariance (verificado en WMTSCapabilities 2026-11-14)"
+    },
+    {
+      "id": "gibs-modis-ndvi",
+      "kind": "gibs-wmts",
+      "group": "event",
+      "name": {
+        "es": "Vegetación NDVI (16 días)",
+        "en": "Vegetation NDVI (16-day)"
+      },
+      "description": {
+        "es": "Índice de vegetación: verde intenso = vegetación densa.",
+        "en": "Vegetation index: deep green = dense vegetation."
+      },
+      "engines": [
+        "map"
+      ],
+      "gibsLayer": "MODIS_Terra_L3_NDVI_16Day",
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_L3_NDVI_16Day/default/{Time}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png",
+      "tileMatrixSet": "GoogleMapsCompatible_Level9",
+      "format": "png",
+      "maxZoom": 9,
+      "temporal": "composite",
+      "legendUrl": "https://gibs.earthdata.nasa.gov/legends/MODIS_L3_NDVI_H.svg",
+      "attribution": "NASA EOSDIS GIBS",
+      "source": "NASA GIBS · MODIS_Terra_L3_NDVI_16Day (verificado en WMTSCapabilities 2026-11-14)"
+    }
+  ]
+}

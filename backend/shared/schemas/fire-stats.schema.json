@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dancing-with-the-sars/schemas/fire-stats.schema.json",
+  "title": "Fire stats (NASA FIRMS)",
+  "description": "Respuestas de GET /api/events/fires/stats y GET /api/events/fires (OpenSpec 09). Errores: HTTP 503/502/400 con detail {code, message}; code ∈ firms_not_configured, firms_rate_limited (429), firms_error, unknown_place, bad_range.",
+  "definitions": {
+    "stats": {
+      "type": "object",
+      "required": ["place", "start", "end", "total", "monthly", "peak_day", "source", "retrieved_at"],
+      "properties": {
+        "place": { "type": "string" },
+        "start": { "type": "string", "format": "date" },
+        "end": { "type": "string", "format": "date" },
+        "total": { "type": "integer", "minimum": 0 },
+        "monthly": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["month", "count"],
+            "properties": { "month": { "type": "string", "pattern": "^\\d{4}-\\d{2}$" }, "count": { "type": "integer" } }
+          }
+        },
+        "peak_day": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "object", "required": ["date", "count"], "properties": { "date": { "type": "string" }, "count": { "type": "integer" } } }
+          ]
+        },
+        "source": { "type": "string" },
+        "retrieved_at": { "type": "string" }
+      }
+    },
+    "day": {
+      "type": "object",
+      "required": ["place", "date", "count", "source", "retrieved_at", "geojson"],
+      "properties": {
+        "place": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "count": { "type": "integer" },
+        "source": { "type": "string" },
+        "retrieved_at": { "type": "string" },
+        "geojson": {
+          "type": "object",
+          "description": "FeatureCollection de puntos; properties: frp (MW), confidence, acq_time. Sin otros atributos.",
+          "required": ["type", "features"]
+        }
+      }
+    }
+  }
+}

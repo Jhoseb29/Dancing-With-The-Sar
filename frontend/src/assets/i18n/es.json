@@ -1,0 +1,175 @@
+{
+  "app": {
+    "name": "Dancing with the SARs",
+    "tagline": "Alerta temprana en cuencas · Cochabamba"
+  },
+  "nav": {
+    "orbit": "Órbita",
+    "basin": "Cuenca",
+    "temporal": "Lab temporal",
+    "risk": "Riesgo",
+    "insights": "Explicaciones",
+    "provenance": "Procedencia",
+    "language": "Idioma",
+    "menu": "Menú",
+    "events": "Eventos"
+  },
+  "countdown": {
+    "label": "Próximo paso · Cochabamba",
+    "loading": "Calculando órbita…",
+    "none": "Sin pasos en 48 h",
+    "error": "Órbita no disponible"
+  },
+  "orbit": {
+    "kicker": "NISAR · NASA–ISRO · Banda L",
+    "title": "El radar que baila sobre Cochabamba",
+    "intro": "NISAR rodea la Tierra cada ~100 minutos y repite la misma órbita cada 12 días. Su radar ve a través de nubes y de noche: por eso puede seguir el agua, el suelo y el terreno de nuestras cuencas en cualquier época del año.",
+    "readout": "Telemetría calculada",
+    "latitude": "Latitud",
+    "longitude": "Longitud",
+    "altitude": "Altitud",
+    "speed": "Velocidad",
+    "nextPass": "Próximo paso",
+    "closest": "Distancia mínima",
+    "ascending": "Ascendente",
+    "descending": "Descendente",
+    "upcoming": "Próximos pasos (48 h)",
+    "speedControl": "Velocidad del tiempo",
+    "now": "Ahora",
+    "follow": "Seguir a NISAR",
+    "home": "Vista global",
+    "toBasin": "Ver Cochabamba",
+    "legendOrbit": "Órbita",
+    "legendFuture": "Traza próxima",
+    "legendPast": "Traza anterior",
+    "legendSwath": "Franja ilustrativa ~{{km}} km",
+    "disclaimerPosition": "Posición calculada con elementos orbitales públicos (TLE) y el modelo SGP4. No es telemetría en vivo.",
+    "disclaimerPass": "Un paso orbital previsto no garantiza que NISAR tome una imagen: eso depende de su plan de observación.",
+    "disclaimerSwath": "La franja es ilustrativa: el radar real mira de lado, no hacia abajo.",
+    "tleEpoch": "Época del TLE",
+    "tleSource": "Fuente",
+    "tleStale": "Los elementos orbitales tienen más de {{days}} días: la posición puede ser imprecisa.",
+    "loading": "Cargando órbita de NISAR…",
+    "error": "No se pudo obtener la órbita de NISAR",
+    "lastAcquisition": "Última adquisición real de Cochabamba",
+    "pendingCatalog": "Se mostrará cuando el catálogo del backend esté disponible."
+  },
+  "pending": {
+    "kicker": "En preparación",
+    "body": "Esta vista usa datos reales que todavía está preparando el backend. Sin datos inventados: aparecerá en cuanto el pipeline los publique.",
+    "needs": "Necesita",
+    "back": "Volver a la órbita",
+    "temporal": "Comparación época seca vs lluvias con NISAR y lluvia GPM IMERG.",
+    "risk": "Riesgo por cuenca: laderas del Tunari vs valle del Rocha.",
+    "insights": "Explicaciones para ciudadanía, defensa civil y técnicos (Harness 2).",
+    "provenance": "Manifiestos, madurez de datos y juicio del Harness 1."
+  },
+  "basin": {
+    "kicker": "Cuenca · Cochabamba",
+    "title": "Del Tunari al Rocha",
+    "intro": "Cuencas, drenaje, emergencias y distritos reales del municipio. Activa capas, haz clic en el mapa para ver sus datos o busca un lugar arriba.",
+    "toOrbit": "Volver a la órbita",
+    "gamcLayers": "Capas municipales (GAMC)",
+    "gamcSource": "Datos reales del Gobierno Autónomo Municipal de Cochabamba · Proyecto 02",
+    "status": {
+      "loading": "cargando…",
+      "error": "no disponible"
+    },
+    "legendOf": "Leyenda de {{name}}",
+    "pointInfo": "Datos en este punto",
+    "close": "Cerrar",
+    "querying": "Consultando al GAMC…",
+    "noData": "Sin datos en este punto."
+  },
+  "common": {
+    "km": "km",
+    "kms": "km/s"
+  },
+  "search": {
+    "label": "Buscar lugar",
+    "placeholder": "Buscar lugar…",
+    "kind": {
+      "country": "País",
+      "department": "Departamento",
+      "city": "Ciudad",
+      "basin": "Cuenca",
+      "zone": "Zona"
+    }
+  },
+  "agent": {
+    "title": "Agente · Control de misión",
+    "name": "Guía",
+    "you": "Tú",
+    "open": "Hablar con el agente",
+    "close": "Cerrar",
+    "send": "Enviar",
+    "placeholder": "Escribe tu pregunta… (Enter para enviar)",
+    "online": "En línea",
+    "connecting": "Conectando…",
+    "offline": "Desconectado",
+    "thinking": "Pensando…",
+    "acting": "Moviendo la vista…",
+    "retry": "Reintentar",
+    "errors": {
+      "llm_not_configured": "El agente no está configurado: falta GEMINI_API_KEY en el backend.",
+      "llm_error": "El agente no pudo responder. Intenta de nuevo.",
+      "rate_limited": "Demasiados mensajes seguidos; espera unos segundos.",
+      "too_long": "El mensaje es demasiado largo (máx. 500 caracteres).",
+      "bad_message": "Mensaje no válido.",
+      "disconnected": "Agente no disponible: el servicio no responde.",
+      "no_speech": "No se entendió lo que dijiste. Intenta de nuevo, un poco más cerca del micrófono.",
+      "stt_error": "No se pudo transcribir el audio. Intenta de nuevo.",
+      "audio_too_large": "El audio es demasiado largo; habla en frases más cortas."
+    },
+    "voice": {
+      "settings": "Ajustes de voz",
+      "readReplies": "Leer respuestas",
+      "handsFree": "Manos libres",
+      "stop": "Callar",
+      "talk": "Hablar",
+      "stopListening": "Detener",
+      "listening": "Escuchando…",
+      "speaking": "Hablando…",
+      "speakNow": "Habla ahora…",
+      "privacy": "Tu voz se graba solo mientras el micrófono está activo y se envía al servidor del proyecto, que la transcribe con Gemini (Google). No se guarda. El micrófono solo se activa cuando lo pulsas.",
+      "privacyOk": "Entendido, hablar",
+      "errors": {
+        "not-supported": "Tu navegador no reconoce voz (prueba Chrome o Edge). Puedes seguir escribiendo.",
+        "not-allowed": "No hay permiso para usar el micrófono. Actívalo en el navegador.",
+        "service-not-allowed": "El navegador no permite el reconocimiento de voz aquí.",
+        "audio-capture": "No se encontró un micrófono.",
+        "network": "El reconocimiento de voz necesita conexión a internet.",
+        "language-not-supported": "El navegador no reconoce voz en este idioma.",
+        "start-failed": "No se pudo iniciar el micrófono. Intenta de nuevo."
+      },
+      "transcribing": "Transcribiendo…"
+    }
+  },
+  "events": {
+    "kicker": "Eventos · Imágenes NASA por día",
+    "title": "Explorador de eventos",
+    "type": "Tipo de evento",
+    "place": "Lugar",
+    "day": "Día mostrado",
+    "prev": "Día anterior",
+    "next": "Día siguiente",
+    "range": "Rango del evento: {{start}} → {{end}}",
+    "howToRead": "Cómo leer esta imagen",
+    "fireStats": "Focos de calor (NASA FIRMS)",
+    "statsLoading": "Consultando NASA FIRMS… la primera vez puede tardar.",
+    "firmsUnavailable": "Las estadísticas de FIRMS no están disponibles: falta FIRMS_MAP_KEY en el backend. Las imágenes MODIS sí se muestran.",
+    "statsError": "No se pudieron obtener las estadísticas de FIRMS ahora.",
+    "hotspots": "focos detectados en el rango",
+    "peak": "Día pico: {{date}} ({{count}} focos) · ver",
+    "monthly": "Focos por mes",
+    "dayHotspots": "{{count}} focos el {{date}}",
+    "layers": "Capas de este evento",
+    "noCoverage": "sin cobertura este día",
+    "source": "Imágenes: NASA EOSDIS GIBS. Focos: NASA FIRMS (VIIRS).",
+    "verifiedDays": "Días con imagen sobre este lugar (verificados):",
+    "rateLimited": "NASA FIRMS alcanzó el límite de consultas de esta key (5000 cada 10 minutos). Lo ya descargado quedó guardado; reintenta en unos minutos."
+  },
+  "panel": {
+    "hide": "Ocultar"
+  }
+}

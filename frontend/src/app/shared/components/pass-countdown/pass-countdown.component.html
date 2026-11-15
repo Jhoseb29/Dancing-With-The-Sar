@@ -1,0 +1,18 @@
+<div class="countdown" role="timer" aria-live="off">
+  <span class="caption">{{ 'countdown.label' | transloco }}</span>
+  @switch (status()) {
+    @case ('ready') {
+      @if (remaining(); as value) {
+        <span class="value tabular">{{ value }}</span>
+      } @else {
+        <span class="value muted">{{ 'countdown.none' | transloco }}</span>
+      }
+    }
+    @case ('error') {
+      <span class="value muted">{{ 'countdown.error' | transloco }}</span>
+    }
+    @default {
+      <span class="value muted">{{ 'countdown.loading' | transloco }}</span>
+    }
+  }
+</div>

@@ -1,0 +1,12 @@
+{
+  "apiBaseUrl": "/api",
+  "orbit": {
+    "satellite": "NISAR",
+    "targetPlaceId": "cochabamba-city",
+    "tleCacheHours": 2,
+    "staleTleDays": 3,
+    "passSearchHours": 48,
+    "passMaxGroundDistanceKm": 400,
+    "illustrativeSwathKm": 240
+  }
+}

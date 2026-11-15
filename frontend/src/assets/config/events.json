@@ -1,0 +1,378 @@
+{
+  "events": [
+    {
+      "id": "wildfire",
+      "name": {
+        "es": "Incendios",
+        "en": "Wildfires"
+      },
+      "keywords": {
+        "es": [
+          "incendio",
+          "incendios",
+          "fuego",
+          "quema",
+          "quemas",
+          "chaqueo",
+          "focos de calor",
+          "humo",
+          "área quemada"
+        ],
+        "en": [
+          "fire",
+          "fires",
+          "wildfire",
+          "burn",
+          "burning",
+          "hotspots",
+          "smoke",
+          "burned area"
+        ]
+      },
+      "available": true,
+      "layers": [
+        "gibs-viirs-falsecolor"
+      ],
+      "points": "firms",
+      "stats": "firms",
+      "howToRead": {
+        "es": "En el falso color de VIIRS (como el 7-2-1) las áreas quemadas se ven rojizas o marrones y la vegetación sana verde. Los puntos son focos de calor detectados por VIIRS (NASA FIRMS) ese día.",
+        "en": "In VIIRS false color (like 7-2-1), burned areas look reddish or brown and healthy vegetation green. Points are heat hotspots detected by VIIRS (NASA FIRMS) that day."
+      },
+      "defaultPlaceId": "bolivia"
+    },
+    {
+      "id": "flood",
+      "name": {
+        "es": "Inundaciones y agua",
+        "en": "Floods and water"
+      },
+      "keywords": {
+        "es": [
+          "inundación",
+          "inundaciones",
+          "riada",
+          "desborde",
+          "crecida",
+          "agua",
+          "anegamiento",
+          "lluvias",
+          "mazamorra"
+        ],
+        "en": [
+          "flood",
+          "floods",
+          "flooding",
+          "overflow",
+          "water",
+          "inundation",
+          "rain"
+        ]
+      },
+      "available": true,
+      "layers": [
+        "gibs-viirs-falsecolor",
+        "gibs-modis-flood"
+      ],
+      "howToRead": {
+        "es": "Capa MODIS de 2 días: celeste es agua superficial, rojo es inundación, amarillo es inundación recurrente y gris es sin datos (nubes). Debajo, el falso color de VIIRS: el agua se ve azul oscuro, la vegetación verde y las nubes celestes.",
+        "en": "2-day MODIS layer: light blue is surface water, red is flood, yellow is recurring flood and grey is no data (clouds). Underneath, the VIIRS false color: water looks dark blue, vegetation green and clouds light blue."
+      },
+      "defaultPlaceId": "cochabamba-basin"
+    },
+    {
+      "id": "radar",
+      "name": {
+        "es": "Imagen de radar NISAR",
+        "en": "NISAR radar image"
+      },
+      "keywords": {
+        "es": [
+          "radar",
+          "nisar",
+          "sar",
+          "imagen de radar",
+          "satélite nisar",
+          "banda l",
+          "retrodispersión"
+        ],
+        "en": [
+          "radar",
+          "nisar",
+          "sar",
+          "radar image",
+          "nisar satellite",
+          "l-band",
+          "backscatter"
+        ]
+      },
+      "available": true,
+      "layers": [
+        "gibs-nisar-gcov"
+      ],
+      "howToRead": {
+        "es": "Imagen real del radar banda L de NISAR en falso color: cada color combina polarizaciones. Zonas urbanas y relieve devuelven mucha señal (brillantes); el agua tranquila casi nada (oscura).",
+        "en": "Real NISAR L-band radar image in false color: each color combines polarizations. Urban areas and relief return strong signal (bright); calm water almost none (dark)."
+      },
+      "defaultPlaceId": "cochabamba-basin",
+      "verifiedDates": [
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-10-25",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-10-13",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-10-11",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-10-01",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-09-29",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-09-19",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-09-07",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-09-05",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-08-26",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-08-24",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-08-14",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-08-12",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-07-21",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-07-19",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-07-09",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-07-07",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-06-27",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-city",
+          "date": "2026-06-25",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-10-25",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-10-13",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-10-11",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-10-01",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-09-29",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-09-19",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-09-07",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-09-05",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-08-26",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-08-24",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-08-14",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-08-12",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-07-21",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-07-19",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-07-09",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-07-07",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-06-27",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        },
+        {
+          "placeId": "cochabamba-basin",
+          "date": "2026-06-25",
+          "note": "Tesela NISAR sobre el centro de Cochabamba verificada el 2026-11-14"
+        }
+      ]
+    },
+    {
+      "id": "vegetation",
+      "name": {
+        "es": "Vegetación y sequía",
+        "en": "Vegetation and drought"
+      },
+      "keywords": {
+        "es": [
+          "vegetación",
+          "sequía",
+          "seco",
+          "deforestación",
+          "bosque",
+          "cultivos",
+          "verdor",
+          "ndvi"
+        ],
+        "en": [
+          "vegetation",
+          "drought",
+          "dry",
+          "deforestation",
+          "forest",
+          "crops",
+          "greenness",
+          "ndvi"
+        ]
+      },
+      "available": true,
+      "layers": [
+        "gibs-modis-ndvi"
+      ],
+      "howToRead": {
+        "es": "Índice de vegetación NDVI de 16 días: verde intenso es vegetación densa y sana; amarillo y marrón, vegetación escasa o suelo seco.",
+        "en": "16-day NDVI vegetation index: deep green is dense, healthy vegetation; yellow and brown, sparse vegetation or dry soil."
+      },
+      "defaultPlaceId": "bolivia"
+    },
+    {
+      "id": "deformation",
+      "name": {
+        "es": "Deformación del suelo",
+        "en": "Ground deformation"
+      },
+      "keywords": {
+        "es": [
+          "deslizamiento",
+          "deslizamientos",
+          "hundimiento",
+          "subsidencia",
+          "deformación",
+          "terremoto",
+          "sismo",
+          "ladera"
+        ],
+        "en": [
+          "landslide",
+          "landslides",
+          "subsidence",
+          "deformation",
+          "earthquake",
+          "slope"
+        ]
+      },
+      "available": false,
+      "layers": [],
+      "howToRead": {
+        "es": "Se mostrará el desplazamiento del suelo en milímetros medido por interferometría NISAR (GUNW).",
+        "en": "Will show ground displacement in millimeters measured by NISAR interferometry (GUNW)."
+      },
+      "unavailableReason": {
+        "es": "Los interferogramas NISAR (GUNW) todavía no están procesados en el backend del proyecto.",
+        "en": "NISAR interferograms (GUNW) are not processed yet in the project backend."
+      },
+      "defaultPlaceId": "north-zone-2750"
+    }
+  ]
+}

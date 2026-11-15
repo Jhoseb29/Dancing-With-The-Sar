@@ -1,0 +1,81 @@
+{
+  "routes": [
+    {
+      "id": "orbit",
+      "path": "orbita",
+      "titleKey": "nav.orbit",
+      "engine": "globe",
+      "status": "ready",
+      "agentDescription": {
+        "es": "Globo 3D con el satélite NISAR en órbita en tiempo real, su trayectoria y los próximos pasos sobre Cochabamba.",
+        "en": "3D globe with the NISAR satellite orbiting in real time, its track and upcoming passes over Cochabamba."
+      }
+    },
+    {
+      "id": "basin",
+      "path": "cuenca",
+      "titleKey": "nav.basin",
+      "engine": "map",
+      "status": "ready",
+      "agentDescription": {
+        "es": "Mapa de la cuenca de Cochabamba con capas municipales reales del GAMC: cuencas, drenaje, emergencias, distritos y Cota 2750.",
+        "en": "Map of the Cochabamba basin with real municipal GAMC layers: basins, drainage, emergencies, districts and the 2750 m contour."
+      }
+    },
+    {
+      "id": "events",
+      "path": "eventos",
+      "titleKey": "nav.events",
+      "engine": "map",
+      "status": "ready",
+      "agentDescription": {
+        "es": "Explorador de eventos: incendios, inundaciones, vegetación y radar NISAR con imágenes reales de NASA por día, en Bolivia y Cochabamba.",
+        "en": "Event explorer: fires, floods, vegetation and NISAR radar with real NASA imagery by day, in Bolivia and Cochabamba."
+      }
+    },
+    {
+      "id": "temporal",
+      "path": "laboratorio",
+      "titleKey": "nav.temporal",
+      "engine": "none",
+      "status": "pending-backend",
+      "agentDescription": {
+        "es": "Comparación temporal época seca vs lluvias con radar NISAR y lluvia GPM IMERG (pendiente del backend).",
+        "en": "Dry vs rainy season comparison with NISAR radar and GPM IMERG rainfall (pending backend)."
+      }
+    },
+    {
+      "id": "risk",
+      "path": "riesgo",
+      "titleKey": "nav.risk",
+      "engine": "none",
+      "status": "pending-backend",
+      "agentDescription": {
+        "es": "Riesgo por cuenca: laderas del Tunari vs valle del Rocha (pendiente del backend).",
+        "en": "Risk by basin: Tunari slopes vs Rocha valley (pending backend)."
+      }
+    },
+    {
+      "id": "insights",
+      "path": "explicaciones",
+      "titleKey": "nav.insights",
+      "engine": "none",
+      "status": "pending-backend",
+      "agentDescription": {
+        "es": "Explicaciones didácticas generadas desde datos reales (pendiente del backend).",
+        "en": "Teaching explanations generated from real data (pending backend)."
+      }
+    },
+    {
+      "id": "provenance",
+      "path": "procedencia",
+      "titleKey": "nav.provenance",
+      "engine": "none",
+      "status": "pending-backend",
+      "agentDescription": {
+        "es": "Procedencia y madurez de los datos (pendiente del backend).",
+        "en": "Data provenance and maturity (pending backend)."
+      }
+    }
+  ]
+}

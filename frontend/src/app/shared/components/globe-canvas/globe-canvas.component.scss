@@ -1,0 +1,20 @@
+:host {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+.globe {
+  width: 100%;
+  height: 100%;
+  background: var(--color-void-black);
+}
+
+// Créditos de Cesium y de la imagen base: discretos, pero visibles.
+:host ::ng-deep .cesium-widget-credits {
+  font-family: var(--font-primary);
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-caption);
+  color: var(--color-muted-text);
+  opacity: 0.8;
+}

@@ -1,0 +1,246 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dancing-with-the-sars/schemas/scene-state.schema.json",
+  "title": "SceneState",
+  "description": "Shadow del estado modificable de la UI (OpenSpec 07). Lo modifican el usuario, la URL y el agente mediante ScenePatch.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "route",
+    "lang",
+    "camera",
+    "time",
+    "event",
+    "layers",
+    "search",
+    "panels"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Se incrementa con cada parche aplicado. No es parcheable."
+    },
+    "route": {
+      "type": "string",
+      "description": "Id de una vista declarada en routes.json.",
+      "enum": [
+        "orbit",
+        "basin",
+        "events",
+        "temporal",
+        "risk",
+        "insights",
+        "provenance"
+      ]
+    },
+    "lang": {
+      "type": "string",
+      "enum": [
+        "es",
+        "en"
+      ]
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "placeId",
+        "tourId",
+        "follow"
+      ],
+      "properties": {
+        "placeId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id de places.json al que debe encuadrar la cámara."
+        },
+        "tourId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Id de camera-tours.json en ejecución."
+        },
+        "follow": {
+          "type": "boolean",
+          "description": "Vista 3D: la cámara sigue al satélite."
+        }
+      }
+    },
+    "time": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "start",
+        "end",
+        "date",
+        "speed"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "live",
+            "range"
+          ]
+        },
+        "start": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "end": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "speed": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 3600,
+          "description": "Multiplicador del reloj de la vista 3D."
+        },
+        "date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Día mostrado por las capas temporales (GIBS) y los focos FIRMS."
+        }
+      }
+    },
+    "event": {
+      "description": "Evento activo (OpenSpec 09) o null.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "placeId",
+            "start",
+            "end"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Id de events.json."
+            },
+            "placeId": {
+              "type": "string",
+              "description": "Id de places.json."
+            },
+            "start": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "end": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          }
+        }
+      ]
+    },
+    "layers": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "presetId",
+          "visible",
+          "opacity"
+        ],
+        "properties": {
+          "presetId": {
+            "type": "string",
+            "description": "Id de layers.json."
+          },
+          "visible": {
+            "type": "boolean"
+          },
+          "opacity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "search": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query",
+        "selectedPlaceId"
+      ],
+      "properties": {
+        "query": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "selectedPlaceId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "panels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "layerPanel",
+        "agentDock",
+        "voice"
+      ],
+      "properties": {
+        "layerPanel": {
+          "type": "boolean"
+        },
+        "agentDock": {
+          "type": "string",
+          "enum": [
+            "open",
+            "closed"
+          ]
+        },
+        "voice": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "output",
+            "handsFree"
+          ],
+          "description": "Voz del agente (OpenSpec 10). El micrófono solo lo activa el usuario.",
+          "properties": {
+            "output": {
+              "type": "boolean",
+              "description": "Leer en voz alta las respuestas del agente."
+            },
+            "handsFree": {
+              "type": "boolean",
+              "description": "Volver a escuchar al terminar cada respuesta."
+            }
+          }
+        }
+      }
+    }
+  }
+}

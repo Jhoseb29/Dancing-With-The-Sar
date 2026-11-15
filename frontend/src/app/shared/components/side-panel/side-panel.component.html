@@ -1,0 +1,12 @@
+@if (open()) {
+  <aside class="panel overlay" [attr.aria-label]="label()" (keydown)="onKeydown($event)">
+    <button #hide class="btn-ghost small hide" type="button" [attr.aria-expanded]="true" (click)="setOpen(false)">
+      {{ hideLabel() }} ✕
+    </button>
+    <ng-content />
+  </aside>
+} @else {
+  <button #reopen class="btn-ghost reopen" type="button" [attr.aria-expanded]="false" (click)="setOpen(true)">
+    ☰ {{ label() }}
+  </button>
+}

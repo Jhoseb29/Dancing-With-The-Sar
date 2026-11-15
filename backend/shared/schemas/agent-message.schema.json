@@ -1,0 +1,273 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dancing-with-the-sars/schemas/agent-message.schema.json",
+  "title": "AgentMessage",
+  "description": "Mensajes del WebSocket /api/agent/session (OpenSpec 08). Cada mensaje es un objeto JSON con `type`.",
+  "oneOf": [
+    {
+      "title": "session.start (cliente → servidor)",
+      "type": "object",
+      "required": [
+        "type",
+        "lang",
+        "scene",
+        "reported"
+      ],
+      "properties": {
+        "type": {
+          "const": "session.start"
+        },
+        "lang": {
+          "enum": [
+            "es",
+            "en"
+          ]
+        },
+        "scene": {
+          "$ref": "scene-state.schema.json"
+        },
+        "reported": {
+          "type": "object"
+        }
+      }
+    },
+    {
+      "title": "user.text (cliente → servidor)",
+      "type": "object",
+      "required": [
+        "type",
+        "text",
+        "scene",
+        "reported"
+      ],
+      "properties": {
+        "type": {
+          "const": "user.text"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "scene": {
+          "$ref": "scene-state.schema.json"
+        },
+        "reported": {
+          "type": "object"
+        }
+      }
+    },
+    {
+      "title": "user.audio (cliente → servidor)",
+      "description": "Voz grabada en el navegador; el servidor la transcribe con Gemini (OpenSpec 10). Máx. 2 MB.",
+      "type": "object",
+      "required": [
+        "type",
+        "mime",
+        "data",
+        "scene",
+        "reported"
+      ],
+      "properties": {
+        "type": {
+          "const": "user.audio"
+        },
+        "mime": {
+          "enum": [
+            "audio/webm",
+            "audio/ogg",
+            "audio/mp4",
+            "audio/mpeg",
+            "audio/wav",
+            "audio/x-wav",
+            "audio/aac"
+          ]
+        },
+        "data": {
+          "type": "string",
+          "description": "Audio en base64"
+        },
+        "scene": {
+          "$ref": "scene-state.schema.json"
+        },
+        "reported": {
+          "type": "object"
+        }
+      }
+    },
+    {
+      "title": "scene.patch.result (cliente → servidor)",
+      "type": "object",
+      "required": [
+        "type",
+        "patchId",
+        "ok"
+      ],
+      "properties": {
+        "type": {
+          "const": "scene.patch.result"
+        },
+        "patchId": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer"
+        },
+        "scene": {
+          "$ref": "scene-state.schema.json"
+        },
+        "reported": {
+          "type": "object"
+        }
+      }
+    },
+    {
+      "title": "user.interrupt (cliente → servidor)",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "user.interrupt"
+        }
+      }
+    },
+    {
+      "title": "agent.status (servidor → cliente)",
+      "type": "object",
+      "required": [
+        "type",
+        "status"
+      ],
+      "properties": {
+        "type": {
+          "const": "agent.status"
+        },
+        "status": {
+          "enum": [
+            "ready",
+            "transcribing",
+            "thinking",
+            "acting",
+            "idle"
+          ]
+        },
+        "tool": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "title": "agent.text (servidor → cliente)",
+      "type": "object",
+      "required": [
+        "type",
+        "turnId",
+        "text"
+      ],
+      "properties": {
+        "type": {
+          "const": "agent.text"
+        },
+        "turnId": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "title": "user.transcript (servidor → cliente)",
+      "type": "object",
+      "required": [
+        "type",
+        "text"
+      ],
+      "properties": {
+        "type": {
+          "const": "user.transcript"
+        },
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "title": "scene.patch (servidor → cliente)",
+      "type": "object",
+      "required": [
+        "type",
+        "patchId",
+        "baseVersion",
+        "ops"
+      ],
+      "properties": {
+        "type": {
+          "const": "scene.patch"
+        },
+        "patchId": {
+          "type": "string"
+        },
+        "baseVersion": {
+          "type": "integer"
+        },
+        "ops": {
+          "$ref": "scene-patch.schema.json#/properties/ops"
+        }
+      }
+    },
+    {
+      "title": "agent.turn.end (servidor → cliente)",
+      "type": "object",
+      "required": [
+        "type",
+        "turnId"
+      ],
+      "properties": {
+        "type": {
+          "const": "agent.turn.end"
+        },
+        "turnId": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "title": "error (servidor → cliente)",
+      "type": "object",
+      "required": [
+        "type",
+        "code",
+        "message"
+      ],
+      "properties": {
+        "type": {
+          "const": "error"
+        },
+        "code": {
+          "enum": [
+            "llm_not_configured",
+            "llm_error",
+            "rate_limited",
+            "too_long",
+            "bad_message",
+            "no_speech",
+            "stt_error",
+            "audio_too_large"
+          ]
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  ]
+}

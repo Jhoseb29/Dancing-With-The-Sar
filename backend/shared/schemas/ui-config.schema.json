@@ -1,0 +1,447 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dancing-with-the-sars/schemas/ui-config.schema.json",
+  "title": "UI config (routes, places, layers, camera tours)",
+  "description": "Schemas de frontend/src/assets/config/*.json (OpenSpec 07). Cada archivo valida contra su definición.",
+  "definitions": {
+    "bbox": {
+      "type": "array",
+      "description": "[minLon, minLat, maxLon, maxLat] en WGS84.",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "i18nText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "es",
+        "en"
+      ],
+      "properties": {
+        "es": {
+          "type": "string"
+        },
+        "en": {
+          "type": "string"
+        }
+      }
+    },
+    "routesFile": {
+      "type": "object",
+      "required": [
+        "routes"
+      ],
+      "properties": {
+        "routes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "path",
+              "titleKey",
+              "engine",
+              "agentDescription"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "titleKey": {
+                "type": "string"
+              },
+              "engine": {
+                "type": "string",
+                "enum": [
+                  "globe",
+                  "map",
+                  "none"
+                ]
+              },
+              "agentDescription": {
+                "$ref": "#/definitions/i18nText"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ready",
+                  "pending-backend"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "placesFile": {
+      "type": "object",
+      "required": [
+        "places"
+      ],
+      "properties": {
+        "places": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "kind",
+              "bbox",
+              "source"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "$ref": "#/definitions/i18nText"
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "country",
+                  "department",
+                  "city",
+                  "basin",
+                  "zone"
+                ]
+              },
+              "bbox": {
+                "$ref": "#/definitions/bbox"
+              },
+              "approximate": {
+                "type": "boolean"
+              },
+              "source": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "layersFile": {
+      "type": "object",
+      "required": [
+        "layers"
+      ],
+      "properties": {
+        "layers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "name",
+              "engines",
+              "source"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "gibs-xyz",
+                  "gibs-wmts",
+                  "gamc-wms"
+                ]
+              },
+              "name": {
+                "$ref": "#/definitions/i18nText"
+              },
+              "description": {
+                "$ref": "#/definitions/i18nText"
+              },
+              "engines": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "globe",
+                    "map"
+                  ]
+                }
+              },
+              "group": {
+                "type": "string",
+                "enum": [
+                  "basemap",
+                  "gamc",
+                  "event"
+                ]
+              },
+              "url": {
+                "type": "string"
+              },
+              "maxZoom": {
+                "type": "number"
+              },
+              "serviceId": {
+                "type": "string",
+                "pattern": "^[0-9a-f-]{36}$"
+              },
+              "representation": {
+                "type": "string",
+                "enum": [
+                  "simple",
+                  "categorized"
+                ]
+              },
+              "bbox": {
+                "$ref": "#/definitions/bbox"
+              },
+              "defaultOpacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "legend": {
+                "type": "boolean"
+              },
+              "featureInfo": {
+                "type": "boolean"
+              },
+              "attribution": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "featureInfoFields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Lista blanca de atributos de GetFeatureInfo que se pueden mostrar (y entregar al agente). Si falta, se muestran todos salvo datos personales."
+              },
+              "gibsLayer": {
+                "type": "string",
+                "description": "Identificador de la capa en el WMTSCapabilities de GIBS."
+              },
+              "tileMatrixSet": {
+                "type": "string"
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "png",
+                  "jpg"
+                ]
+              },
+              "temporal": {
+                "type": "string",
+                "enum": [
+                  "daily",
+                  "composite"
+                ],
+                "description": "composite: GIBS ajusta la fecha al periodo."
+              },
+              "legendUrl": {
+                "type": "string"
+              },
+              "coverageFrom": {
+                "type": "string"
+              },
+              "coverageTo": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "cameraToursFile": {
+      "type": "object",
+      "required": [
+        "tours"
+      ],
+      "properties": {
+        "tours": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "engine",
+              "steps"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "$ref": "#/definitions/i18nText"
+              },
+              "engine": {
+                "type": "string",
+                "enum": [
+                  "globe",
+                  "map"
+                ]
+              },
+              "steps": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "durationMs"
+                  ],
+                  "properties": {
+                    "placeId": {
+                      "type": "string"
+                    },
+                    "lon": {
+                      "type": "number"
+                    },
+                    "lat": {
+                      "type": "number"
+                    },
+                    "altKm": {
+                      "type": "number",
+                      "minimum": 1
+                    },
+                    "durationMs": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "pauseMs": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "eventsFile": {
+      "type": "object",
+      "required": [
+        "events"
+      ],
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "keywords",
+              "available",
+              "layers",
+              "howToRead",
+              "defaultPlaceId"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "$ref": "#/definitions/i18nText"
+              },
+              "keywords": {
+                "type": "object",
+                "required": [
+                  "es",
+                  "en"
+                ],
+                "properties": {
+                  "es": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "en": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "available": {
+                "type": "boolean"
+              },
+              "layers": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "presetIds de layers.json en orden de dibujo."
+              },
+              "points": {
+                "type": "string",
+                "enum": [
+                  "firms"
+                ]
+              },
+              "stats": {
+                "type": "string",
+                "enum": [
+                  "firms"
+                ]
+              },
+              "howToRead": {
+                "$ref": "#/definitions/i18nText"
+              },
+              "defaultPlaceId": {
+                "type": "string"
+              },
+              "verifiedDates": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "placeId",
+                    "date"
+                  ],
+                  "properties": {
+                    "placeId": {
+                      "type": "string"
+                    },
+                    "date": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "unavailableReason": {
+                "$ref": "#/definitions/i18nText"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

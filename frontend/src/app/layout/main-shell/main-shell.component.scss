@@ -1,0 +1,107 @@
+:host {
+  display: block;
+  position: relative;
+  min-height: 100vh;
+}
+
+.topbar {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-24);
+  min-height: var(--topbar-height);
+  padding: var(--spacing-12) var(--spacing-40);
+  pointer-events: none;
+  // Legible sobre imágenes claras (nubes, nieve): velo negro plano, sin degradado ni blur
+  // (mismo token que los paneles flotantes; ver docs/06-design-system.md, barra superior).
+  background: var(--color-overlay);
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.brand {
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--element-gap);
+  margin-left: auto;
+}
+
+.nav-link {
+  padding: var(--spacing-4) 0;
+  border-bottom: var(--border-hairline) solid transparent;
+  color: var(--color-muted-text);
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover,
+  &.active {
+    color: var(--color-star-white);
+  }
+
+  &.active {
+    border-bottom-color: var(--color-star-white);
+  }
+}
+
+.langs {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+.menu-toggle {
+  display: none;
+  margin-left: auto;
+}
+
+.stage {
+  position: relative;
+  min-height: 100vh;
+}
+
+@media (max-width: 1099px) {
+  .topbar {
+    flex-wrap: wrap;
+    padding: var(--spacing-12) var(--spacing-20);
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .nav {
+    display: none;
+    order: 3;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 0;
+    padding: var(--panel-padding);
+    border: var(--border-hairline) solid var(--color-dark-gunmetal);
+    border-radius: var(--radius-md);
+    background: var(--color-overlay);
+
+    &.open {
+      display: flex;
+    }
+  }
+
+  .countdown {
+    order: 2;
+  }
+}
+
+@media (max-width: 559px) {
+  .countdown {
+    order: 4;
+    flex-basis: 100%;
+  }
+}
