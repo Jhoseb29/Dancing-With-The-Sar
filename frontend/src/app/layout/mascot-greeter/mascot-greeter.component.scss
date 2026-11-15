@@ -1,0 +1,264 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+}
+
+.mascot-stage {
+  position: fixed;
+  right: var(--spacing-40);
+  bottom: calc(var(--spacing-40) + 54px);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-24);
+  transform: translate(0, 0);
+  transition:
+    right 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+
+  &[data-phase='greeting'] {
+    right: 50%;
+    bottom: 50%;
+    transform: translate(50%, 50%);
+  }
+}
+
+.speech-card {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-15);
+  width: min(440px, calc(100vw - var(--spacing-40) * 2));
+  border-color: var(--color-star-white);
+}
+
+.speech-head,
+.speech-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-10);
+}
+
+.speech-actions {
+  justify-content: flex-end;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-10);
+  color: var(--color-star-white);
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-muted-text);
+
+  &.active {
+    background: var(--color-star-white);
+    animation: blink 0.8s infinite alternate;
+  }
+}
+
+.eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 12px;
+
+  span {
+    width: 2px;
+    height: 4px;
+    background: var(--color-dim-steel);
+  }
+
+  &.active span {
+    background: var(--color-star-white);
+    animation: eq 0.45s infinite alternate;
+
+    &:nth-child(even) {
+      animation-delay: 0.2s;
+    }
+  }
+}
+
+.greeting-line {
+  margin: 0;
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.caret {
+  animation: blink 0.45s steps(2, start) infinite;
+}
+
+.subtitle {
+  margin: 0;
+}
+
+.small {
+  padding: var(--spacing-4) var(--spacing-12);
+}
+
+.dock-tooltip {
+  max-width: 240px;
+  padding: var(--spacing-10) var(--spacing-12);
+  border: var(--border-hairline) solid var(--color-star-white);
+  border-radius: var(--radius-md);
+  background: var(--color-overlay);
+  color: var(--color-star-white);
+}
+
+.mascot-figure {
+  pointer-events: auto;
+  position: relative;
+  width: clamp(250px, 23vw, 330px);
+  height: clamp(350px, 32.2vw, 462px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    width 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.25s ease;
+
+  &.dancing {
+    animation: dance 1.1s ease-in-out infinite;
+  }
+
+  &.gliding,
+  &.docked {
+    width: 96px;
+    height: 134px;
+  }
+
+  &.docked {
+    animation: idle 3s ease-in-out infinite;
+
+    &:hover,
+    &:focus-visible {
+      transform: scale(1.08) translateY(-4px);
+    }
+  }
+}
+
+.sprite {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+
+  &.visible {
+    opacity: 1;
+  }
+}
+
+.radar-waves {
+  position: absolute;
+  top: 4%;
+  left: -4%;
+  width: 44%;
+  aspect-ratio: 1;
+  overflow: visible;
+
+  .wave {
+    fill: none;
+    stroke: var(--color-star-white);
+    stroke-width: 1.5;
+    opacity: 0;
+    transform-origin: 60px 60px;
+    animation: wave 2.1s ease-out infinite;
+  }
+
+  .w2 {
+    animation-delay: 0.65s;
+  }
+
+  .w3 {
+    animation-delay: 1.3s;
+  }
+}
+
+@keyframes dance {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(2.5deg);
+  }
+}
+
+@keyframes idle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px) rotate(1.5deg);
+  }
+}
+
+@keyframes wave {
+  0% {
+    opacity: 0.75;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+@keyframes blink {
+  from {
+    opacity: 0.2;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes eq {
+  from {
+    height: 3px;
+  }
+  to {
+    height: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  .mascot-stage {
+    flex-direction: column;
+    right: var(--spacing-12);
+    bottom: calc(var(--spacing-12) + 52px);
+
+    &[data-phase='greeting'] {
+      right: 50%;
+      bottom: 50%;
+      transform: translate(50%, 50%);
+    }
+  }
+
+  .mascot-figure {
+    width: 210px;
+    height: 294px;
+
+    &.gliding,
+    &.docked {
+      width: 72px;
+      height: 101px;
+    }
+  }
+}

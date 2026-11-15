@@ -407,5 +407,15 @@
     "none": "Aún sin datos de lluvia para esta zona.",
     "radarDone": "{{m}} ya pasó el {{d}}: se puede revisar con radar si dejó barro o agua.",
     "radarNext": "El radar todavía no pasó después de la lluvia. {{m}} vuelve ~{{d}}: ahí veremos si dejó barro o agua."
+  },
+  "mascot": {
+    "name": "Jucu",
+    "role": "Jucumari · Guardián radar del Tunari",
+    "greeting": "¡Bienvenido a Dancing with the SARs!",
+    "subtitle": "Vigilamos juntos el agua, el suelo y las cuencas de Cochabamba con el radar satelital NISAR.",
+    "skip": "Ir a la esquina →",
+    "replay": "Repetir bienvenida",
+    "speak": "Escuchar voz",
+    "dockHint": "¡Bienvenido a Dancing with the SARs! · Toca a Jucu para saludar"
   }
 }

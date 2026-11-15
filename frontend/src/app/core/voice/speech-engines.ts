@@ -20,6 +20,7 @@ export interface SpeechInputEngine {
 export interface SpeechOutputHandlers {
   onStart: () => void;
   onEnd: () => void;
+  onBlocked?: () => void;
 }
 
 export interface SpeechOutputEngine {
@@ -258,6 +259,23 @@ export function pickVoice(
   return [...candidates].sort((a, b) => score(b) - score(a))[0];
 }
 
+/** Espera a que el navegador cargue la lista de voces tras un refresh (en Chromium es asíncrono). */
+function waitForVoices(synth: SpeechSynthesis): Promise<SpeechSynthesisVoice[]> {
+  const existing = synth.getVoices();
+  if (existing.length > 0) return Promise.resolve(existing);
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      synth.removeEventListener?.('voiceschanged', done);
+      resolve(synth.getVoices());
+    };
+    synth.addEventListener?.('voiceschanged', done);
+    setTimeout(done, 350);
+  });
+}
+
 export class BrowserSpeechOutput implements SpeechOutputEngine {
   private token = 0;
 
@@ -269,29 +287,52 @@ export class BrowserSpeechOutput implements SpeechOutputEngine {
     if (!this.supported) return;
     const synth = window.speechSynthesis;
     const token = ++this.token;
-    synth.cancel();
-    const voice = pickVoice(synth.getVoices(), lang);
-    const sentences = splitSentences(text);
-    // `onstart` no se dispara en todos los navegadores (p. ej. pestañas en segundo plano):
-    // se considera "hablando" desde que la lectura queda en cola.
-    handlers.onStart();
-    sentences.forEach((sentence, index) => {
-      const utterance = new SpeechSynthesisUtterance(sentence);
-      utterance.lang = voice?.lang ?? (lang === 'es' ? 'es-419' : 'en-US');
-      if (voice) utterance.voice = voice;
-      utterance.rate = 1.02;
-      const finish = () => {
-        if (index === sentences.length - 1 && token === this.token) handlers.onEnd();
-      };
-      utterance.onend = finish;
-      utterance.onerror = finish;
-      synth.speak(utterance);
+    const wasBusy = synth.speaking || synth.pending;
+    if (wasBusy) {
+      synth.cancel();
+    }
+
+    void waitForVoices(synth).then((voices) => {
+      if (token !== this.token) return;
+      // En Chromium, llamar a speak() en el mismo tick que cancel() puede descartar la locución.
+      setTimeout(
+        () => {
+          if (token !== this.token) return;
+          if (synth.paused) {
+            synth.resume();
+          }
+          const voice = pickVoice(voices.length ? voices : synth.getVoices(), lang);
+          const sentences = splitSentences(text);
+          handlers.onStart();
+          sentences.forEach((sentence, index) => {
+            const utterance = new SpeechSynthesisUtterance(sentence);
+            utterance.lang = voice?.lang ?? (lang === 'es' ? 'es-ES' : 'en-US');
+            if (voice) utterance.voice = voice;
+            utterance.rate = 1.02;
+            const finish = () => {
+              if (index === sentences.length - 1 && token === this.token) handlers.onEnd();
+            };
+            utterance.onend = finish;
+            utterance.onerror = (ev: Event) => {
+              const errCode = (ev as { error?: string }).error;
+              if (errCode === 'not-allowed' && token === this.token) {
+                handlers.onBlocked?.();
+              }
+              finish();
+            };
+            synth.speak(utterance);
+          });
+        },
+        wasBusy ? 50 : 0,
+      );
     });
   }
 
   cancel(): void {
     if (!this.supported) return;
     this.token++;
-    window.speechSynthesis.cancel();
+    if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+      window.speechSynthesis.cancel();
+    }
   }
 }
