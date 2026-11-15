@@ -1,0 +1,29 @@
+{
+  "id": "tiquipaya-2020-02",
+  "nombre": "Tiquipaya, pie del Tunari (Cochabamba)",
+  "bbox": [
+    -66.25,
+    -17.37,
+    -66.15,
+    -17.27
+  ],
+  "fecha": "2020-02-22",
+  "precision_fecha": "±1 día",
+  "peligro": "mazamorra",
+  "ocurrio": true,
+  "fuente": "https://www.lostiempos.com/actualidad/cochabamba/20200223/aluvion-peor-que-2018-arrasa-barrios-tiquipaya-indefensa",
+  "radar_run": null,
+  "notas": "Histórico: IMERG Final (calibrado con pluviómetros). Sin radar NISAR (no existía).",
+  "esperado": {
+    "nivel_min": "amarillo",
+    "nivel_max": "rojo",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": ">=",
+        "valor": 15,
+        "por_que": "Un desborde o mazamorra reportado debería venir de lluvia relevante en los días previos sobre la cuenca de aporte."
+      }
+    ]
+  }
+}

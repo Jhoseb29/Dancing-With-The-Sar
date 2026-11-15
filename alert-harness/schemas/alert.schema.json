@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dancing-with-the-sars/schemas/alert.schema.json",
+  "title": "Alerta de riesgo por área",
+  "type": "object",
+  "required": ["id", "created_at", "area", "fecha_referencia", "peligro", "nivel", "indice_riesgo",
+               "confianza", "componentes", "indicadores", "motivos", "acciones", "fuentes"],
+  "properties": {
+    "id": {"type": "string"},
+    "created_at": {"type": "string"},
+    "case_id": {"type": ["string", "null"]},
+    "area": {
+      "type": "object",
+      "required": ["nombre", "bbox"],
+      "properties": {
+        "nombre": {"type": "string"},
+        "bbox": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4}
+      }
+    },
+    "fecha_referencia": {"type": "string", "description": "Día evaluado (YYYY-MM-DD)"},
+    "peligro": {"enum": ["inundacion", "mazamorra", "deslizamiento"]},
+    "nivel": {"enum": ["verde", "amarillo", "naranja", "rojo"]},
+    "indice_riesgo": {"type": "number", "minimum": 0, "maximum": 100,
+                      "description": "Índice 0–100. NO es una probabilidad."},
+    "confianza": {
+      "type": "object",
+      "required": ["porcentaje", "etiqueta", "faltantes"],
+      "properties": {
+        "porcentaje": {"type": "number", "minimum": 0, "maximum": 100},
+        "etiqueta": {"enum": ["alta", "media", "baja"]},
+        "faltantes": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "componentes": {
+      "type": "object",
+      "required": ["disparo", "susceptibilidad", "evidencia_radar"],
+      "properties": {
+        "disparo": {"type": ["number", "null"]},
+        "susceptibilidad": {"type": ["number", "null"]},
+        "evidencia_radar": {"type": ["number", "null"]}
+      }
+    },
+    "indicadores": {"type": "array", "items": {"$ref": "indicator.schema.json"}},
+    "motivos": {"type": "array", "items": {"type": "string"}},
+    "acciones": {
+      "type": "object",
+      "required": ["tecnicos", "ciudadania"],
+      "properties": {
+        "tecnicos": {"type": "array", "items": {"type": "string"}},
+        "ciudadania": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "fuentes": {"type": "array", "items": {"type": "string"}},
+    "caveats": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

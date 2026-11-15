@@ -1,0 +1,29 @@
+{
+  "id": "yicani-tamborada-2025-03",
+  "nombre": "Torrentera Yicani, Tamborada (zona sur)",
+  "bbox": [
+    -66.18,
+    -17.47,
+    -66.1,
+    -17.42
+  ],
+  "fecha": "2025-03-06",
+  "precision_fecha": "±1 día",
+  "peligro": "inundacion",
+  "ocurrio": true,
+  "fuente": "https://larazon.bo/sociedad/2025/03/07/desborde-de-torrentera-inunda-calles-y-viviendas-en-la-zona-sur-de-cochabamba/",
+  "radar_run": null,
+  "notas": "",
+  "esperado": {
+    "nivel_min": "amarillo",
+    "nivel_max": "rojo",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": ">=",
+        "valor": 15,
+        "por_que": "Un desborde o mazamorra reportado debería venir de lluvia relevante en los días previos sobre la cuenca de aporte."
+      }
+    ]
+  }
+}

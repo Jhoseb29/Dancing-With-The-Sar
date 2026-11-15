@@ -9,6 +9,7 @@ import logging
 from fastapi import FastAPI
 
 from config.settings import get_settings
+from modules.alerts.adapters.http import router as alerts_router
 from modules.events.adapters.http import router as events_router
 from modules.harness.adapters.http import router as harness_router
 
@@ -19,6 +20,7 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 app = FastAPI(title="Dancing with the SARs · compute-py")
 app.include_router(harness_router)
+app.include_router(alerts_router)
 app.include_router(events_router)
 
 

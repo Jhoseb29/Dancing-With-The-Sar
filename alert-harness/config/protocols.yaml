@@ -1,0 +1,31 @@
+# Acciones por nivel y tipo de peligro. Deterministas: el modelo de lenguaje NUNCA decide acciones,
+# solo las redacta. Escala de colores alineada con la usada por SENAMHI (verde/amarillo/naranja/rojo);
+# referencia normativa a verificar: Ley N° 602 de Gestión de Riesgos (Bolivia).
+version: 1
+
+comunes:
+  verde:
+    tecnicos: ["Monitoreo rutinario de lluvia y cauces."]
+    ciudadania: ["Sin alerta. Mantente informado por canales oficiales."]
+  amarillo:
+    tecnicos: ["Revisar pronóstico y lluvia de las próximas horas.", "Verificar limpieza de cauces y torrenteras en el área."]
+    ciudadania: ["Mantente atento a avisos oficiales.", "No acumules basura ni escombros en torrenteras."]
+  naranja:
+    tecnicos: ["Activar monitoreo en terreno de los puntos críticos.", "Coordinar con la Unidad de Gestión de Riesgos y el COE municipal."]
+    ciudadania: ["Evita cruzar ríos y torrenteras.", "Ten lista una mochila de emergencia y conoce tu ruta de evacuación."]
+  rojo:
+    tecnicos: ["Activar el COE y los protocolos de evacuación preventiva.", "Restringir el paso en vías y puentes expuestos."]
+    ciudadania: ["Sigue las instrucciones de evacuación de las autoridades.", "Aléjate de cauces, laderas inestables y zonas bajas."]
+
+por_peligro:
+  mazamorra:
+    naranja:
+      tecnicos: ["Vigilar quebradas con pendiente fuerte aguas arriba del área."]
+    rojo:
+      tecnicos: ["Cerrar preventivamente los cruces de carretera sobre la quebrada."]
+  inundacion:
+    naranja:
+      tecnicos: ["Verificar capacidad de colectores y pasos a desnivel."]
+  deslizamiento:
+    naranja:
+      tecnicos: ["Inspeccionar taludes y grietas en laderas habitadas."]

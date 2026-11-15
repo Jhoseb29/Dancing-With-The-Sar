@@ -1,0 +1,29 @@
+{
+  "id": "viloma-seco-2026-08",
+  "nombre": "Río Viloma, Sipe Sipe (Cochabamba)",
+  "bbox": [
+    -66.45,
+    -17.55,
+    -66.25,
+    -17.4
+  ],
+  "fecha": "2026-08-15",
+  "precision_fecha": "día",
+  "peligro": "mazamorra",
+  "ocurrio": false,
+  "fuente": "Sin evento reportado (temporada seca); negativo supuesto para medir falsas alarmas",
+  "radar_run": null,
+  "notas": "Mismo lugar que el evento, en estiaje.",
+  "esperado": {
+    "nivel_min": "verde",
+    "nivel_max": "verde",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": "<=",
+        "valor": 5,
+        "por_que": "Día de temporada seca sin evento reportado: casi sin lluvia."
+      }
+    ]
+  }
+}

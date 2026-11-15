@@ -1,0 +1,35 @@
+{
+  "id": "pampahasi-2026-02",
+  "nombre": "Pampahasi, La Paz",
+  "bbox": [
+    -68.15,
+    -16.55,
+    -68.05,
+    -16.45
+  ],
+  "fecha": "2026-02-21",
+  "precision_fecha": "día",
+  "peligro": "deslizamiento",
+  "ocurrio": true,
+  "fuente": "https://eldeber.com.bo/pais/deslizamiento-paz-activa-alerta-preventiva-evacuan-seis-viviendas_1771698677",
+  "radar_run": null,
+  "notas": "",
+  "esperado": {
+    "nivel_min": "amarillo",
+    "nivel_max": "rojo",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": ">=",
+        "valor": 15,
+        "por_que": "Un desborde o mazamorra reportado debería venir de lluvia relevante en los días previos sobre la cuenca de aporte."
+      },
+      {
+        "indicador": "fraccion_pendiente_fuerte_pct",
+        "op": ">=",
+        "valor": 15,
+        "por_que": "Ladera urbana de La Paz: debe haber pendiente fuerte."
+      }
+    ]
+  }
+}

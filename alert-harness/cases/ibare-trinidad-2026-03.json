@@ -1,0 +1,29 @@
+{
+  "id": "ibare-trinidad-2026-03",
+  "nombre": "Río Ibare, Trinidad (Beni)",
+  "bbox": [
+    -64.98,
+    -14.9,
+    -64.78,
+    -14.7
+  ],
+  "fecha": "2026-03-25",
+  "precision_fecha": "fin de marzo",
+  "peligro": "inundacion",
+  "ocurrio": true,
+  "fuente": "https://eju.tv/2026/03/beni-evacuan-a-43-familias-afectadas-por-desborde-del-rio-ibare/",
+  "radar_run": null,
+  "notas": "Llanura del Beni: el desborde puede venir de lluvia muy aguas arriba (días/semanas).",
+  "esperado": {
+    "nivel_min": "amarillo",
+    "nivel_max": "rojo",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": ">=",
+        "valor": 15,
+        "por_que": "Un desborde o mazamorra reportado debería venir de lluvia relevante en los días previos sobre la cuenca de aporte."
+      }
+    ]
+  }
+}

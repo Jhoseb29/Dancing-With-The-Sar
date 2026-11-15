@@ -1,0 +1,29 @@
+{
+  "id": "tiquipaya-seco-2021-08",
+  "nombre": "Tiquipaya, pie del Tunari (Cochabamba)",
+  "bbox": [
+    -66.25,
+    -17.37,
+    -66.15,
+    -17.27
+  ],
+  "fecha": "2021-08-20",
+  "precision_fecha": "día",
+  "peligro": "mazamorra",
+  "ocurrio": false,
+  "fuente": "Sin evento reportado (temporada seca); negativo supuesto para medir falsas alarmas",
+  "radar_run": null,
+  "notas": "Estiaje.",
+  "esperado": {
+    "nivel_min": "verde",
+    "nivel_max": "verde",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": "<=",
+        "valor": 5,
+        "por_que": "Día de temporada seca sin evento reportado: casi sin lluvia."
+      }
+    ]
+  }
+}

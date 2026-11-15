@@ -1,0 +1,29 @@
+{
+  "id": "pampahasi-seco-2026-06",
+  "nombre": "Pampahasi, La Paz",
+  "bbox": [
+    -68.15,
+    -16.55,
+    -68.05,
+    -16.45
+  ],
+  "fecha": "2026-06-15",
+  "precision_fecha": "día",
+  "peligro": "deslizamiento",
+  "ocurrio": false,
+  "fuente": "Sin evento reportado (temporada seca); negativo supuesto para medir falsas alarmas",
+  "radar_run": null,
+  "notas": "Invierno seco altiplánico.",
+  "esperado": {
+    "nivel_min": "verde",
+    "nivel_max": "verde",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": "<=",
+        "valor": 5,
+        "por_que": "Día de temporada seca sin evento reportado: casi sin lluvia."
+      }
+    ]
+  }
+}

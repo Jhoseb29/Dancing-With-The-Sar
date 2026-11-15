@@ -1,0 +1,29 @@
+{
+  "id": "villa-tunari-2025-11",
+  "nombre": "Villa Tunari, Trópico de Cochabamba",
+  "bbox": [
+    -65.52,
+    -17.07,
+    -65.32,
+    -16.87
+  ],
+  "fecha": "2025-11-18",
+  "precision_fecha": "±3 días",
+  "peligro": "inundacion",
+  "ocurrio": true,
+  "fuente": "https://www.infobae.com/america/america-latina/2025/11/20/lluvias-riadas-y-deslizamientos-golpean-a-tres-regiones-de-bolivia-y-dejan-miles-de-damnificados/",
+  "radar_run": null,
+  "notas": "",
+  "esperado": {
+    "nivel_min": "amarillo",
+    "nivel_max": "rojo",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": ">=",
+        "valor": 15,
+        "por_que": "Un desborde o mazamorra reportado debería venir de lluvia relevante en los días previos sobre la cuenca de aporte."
+      }
+    ]
+  }
+}

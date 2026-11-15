@@ -1,0 +1,29 @@
+{
+  "id": "abapo-seco-2026-07",
+  "nombre": "Abapó, Cabezas (Santa Cruz)",
+  "bbox": [
+    -63.5,
+    -18.97,
+    -63.32,
+    -18.79
+  ],
+  "fecha": "2026-07-20",
+  "precision_fecha": "día",
+  "peligro": "inundacion",
+  "ocurrio": false,
+  "fuente": "Sin evento reportado (temporada seca); negativo supuesto para medir falsas alarmas",
+  "radar_run": null,
+  "notas": "Estiaje en el Chaco.",
+  "esperado": {
+    "nivel_min": "verde",
+    "nivel_max": "verde",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": "<=",
+        "valor": 5,
+        "por_que": "Día de temporada seca sin evento reportado: casi sin lluvia."
+      }
+    ]
+  }
+}

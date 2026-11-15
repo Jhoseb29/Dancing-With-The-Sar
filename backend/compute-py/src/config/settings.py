@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     harness_timeout_s: int = 1200
     harness_max_text_chars: int = 500
 
+    # Alertas (alert-harness/): el harness escribe JSON en output/alerts; el WebSocket los empuja a la UI.
+    alerts_dir: Path = REPO_ROOT / "alert-harness" / "output" / "alerts"
+    alerts_schema_dir: Path = REPO_ROOT / "alert-harness" / "schemas"
+    alerts_poll_s: float = 3.0
+    alerts_initial: int = 20
+
     @property
     def harness_output_dir(self) -> Path:
         return self.harness_dir / "output"

@@ -1,0 +1,35 @@
+{
+  "id": "viloma-2026-01",
+  "nombre": "Río Viloma, Sipe Sipe (Cochabamba)",
+  "bbox": [
+    -66.45,
+    -17.55,
+    -66.25,
+    -17.4
+  ],
+  "fecha": "2026-01-23",
+  "precision_fecha": "día",
+  "peligro": "mazamorra",
+  "ocurrio": true,
+  "fuente": "https://rtvu.uto.edu.bo/2026/01/23/mazamorra-corta-el-trafico-entre-cochabamba-y-el-occidente-tras-desborde-del-rio-viloma/",
+  "radar_run": "20261115_070859",
+  "notas": "Sentinel-1 4-ene→3-feb: poco agua libre; sedimento en corredor de cauces 1.4 km² (compatible, no confirmatorio).",
+  "esperado": {
+    "nivel_min": "amarillo",
+    "nivel_max": "rojo",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": ">=",
+        "valor": 15,
+        "por_que": "Un desborde o mazamorra reportado debería venir de lluvia relevante en los días previos sobre la cuenca de aporte."
+      },
+      {
+        "indicador": "radar_sedimento_corredor_km2",
+        "op": "existe",
+        "valor": null,
+        "por_que": "Hay pasada Sentinel-1 antes y después: el radar debe aportar evidencia (aunque sea débil)."
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "abapo-2026-03",
+  "nombre": "Abapó, Cabezas (Santa Cruz)",
+  "bbox": [
+    -63.5,
+    -18.97,
+    -63.32,
+    -18.79
+  ],
+  "fecha": "2026-03-12",
+  "precision_fecha": "día",
+  "peligro": "inundacion",
+  "ocurrio": true,
+  "fuente": "https://www.reduno.com.bo/noticias/intensas-lluvias-dejan-a-abapo-bajo-el-agua-y-aislado-por-inundaciones-y-mazamorra-2026312122049",
+  "radar_run": null,
+  "notas": "",
+  "esperado": {
+    "nivel_min": "amarillo",
+    "nivel_max": "rojo",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": ">=",
+        "valor": 15,
+        "por_que": "Un desborde o mazamorra reportado debería venir de lluvia relevante en los días previos sobre la cuenca de aporte."
+      }
+    ]
+  }
+}

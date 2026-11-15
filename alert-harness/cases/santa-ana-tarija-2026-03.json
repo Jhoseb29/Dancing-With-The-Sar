@@ -1,0 +1,29 @@
+{
+  "id": "santa-ana-tarija-2026-03",
+  "nombre": "Puente Santa Ana, ruta Entre Ríos–Tarija",
+  "bbox": [
+    -64.72,
+    -21.65,
+    -64.52,
+    -21.45
+  ],
+  "fecha": "2026-03-10",
+  "precision_fecha": "±2 días",
+  "peligro": "mazamorra",
+  "ocurrio": true,
+  "fuente": "https://www.lostiempos.com/actualidad/seguridad/20260311/encuentran-cuerpo-dos-personas-arrastradas-mazamorra-tarija",
+  "radar_run": null,
+  "notas": "",
+  "esperado": {
+    "nivel_min": "amarillo",
+    "nivel_max": "rojo",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": ">=",
+        "valor": 15,
+        "por_que": "Un desborde o mazamorra reportado debería venir de lluvia relevante en los días previos sobre la cuenca de aporte."
+      }
+    ]
+  }
+}

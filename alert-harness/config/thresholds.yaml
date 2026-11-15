@@ -1,0 +1,44 @@
+# Parámetros del motor de alertas. CADA valor declara su fuente o que es un supuesto inicial.
+# Se ajustan solo con el ciclo de evaluación (run_eval.py) y cada cambio debe mejorar el score.
+version: 1
+
+area:
+  # La lluvia que causa una mazamorra cae en la cuenca de aporte, no solo en el punto afectado.
+  # Supuesto inicial: ampliar el área ±0.15° (~15 km). Mejora futura: cuenca real con el DEM.
+  margen_cuenca_aporte_grados: 0.15
+  fuente: "supuesto inicial (por calibrar con casos)"
+
+lluvia:
+  # Lluvia diaria areal (máximo de celdas IMERG ~10 km) y acumulados previos al día evaluado.
+  max_24h_mm:      {moderada: 15, fuerte: 30, extrema: 50}
+  acumulada_72h_mm: {moderada: 25, fuerte: 50, extrema: 80}
+  api_mm:          {moderada: 30, fuerte: 60, extrema: 90}
+  api_k: 0.9          # índice de precipitación antecedente: API_t = k·API_{t-1} + P_t
+  dias_api: 30
+  fuente: >-
+    Rangos operativos de intensidad diaria usados en alertas hidrometeorológicas andinas
+    (orden de magnitud); supuesto inicial por calibrar con los casos. Ojo: IMERG suaviza
+    tormentas convectivas de 30–60 min en celdas de ~10 km (subestima picos locales).
+
+terreno:
+  pendiente_fuerte_grados: 25      # laderas donde el lodo/derrumbe se moviliza
+  fraccion_fuerte_alta_pct: 30
+  fuente: "Copernicus DEM GLO-30; umbral de pendiente de literatura de movimientos en masa (supuesto inicial)"
+
+radar:
+  sedimento_alto_km2: 1.0
+  agua_nueva_alta_km2: 0.5
+  fuente: "nisar-harness (NISAR o Sentinel-1): hotspots relativos al corrimiento de escena; sedimento solo en corredor de cauces"
+
+# Índice de riesgo (0–100) = 100 · Σ peso·componente (cada componente 0–1). NO es probabilidad.
+pesos:
+  disparo: 0.55          # lluvia (lo que dispara el evento)
+  susceptibilidad: 0.25  # relieve (dónde el agua/lodo se moviliza)
+  evidencia_radar: 0.20  # confirmación posterior (radar ve el efecto días después)
+fuente_pesos: "supuesto inicial; analizar sensibilidad con run_eval.py --sensibilidad"
+
+niveles:   # límite inferior del índice para cada nivel
+  verde: 0
+  amarillo: 30
+  naranja: 50
+  rojo: 70

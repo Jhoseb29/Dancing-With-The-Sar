@@ -1,0 +1,29 @@
+{
+  "id": "samaipata-2025-11",
+  "nombre": "Samaipata (Santa Cruz)",
+  "bbox": [
+    -63.98,
+    -18.28,
+    -63.78,
+    -18.08
+  ],
+  "fecha": "2025-11-18",
+  "precision_fecha": "±3 días",
+  "peligro": "mazamorra",
+  "ocurrio": true,
+  "fuente": "https://www.vision360.bo/noticias/2025/11/19/35583-tras-las-lluvias-intensas-riadas-desbordes-y-mazamorras-golpean-a-tres-departamentos-de-bolivia-y-dejan-miles-de-damnificados",
+  "radar_run": null,
+  "notas": "",
+  "esperado": {
+    "nivel_min": "amarillo",
+    "nivel_max": "rojo",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": ">=",
+        "valor": 15,
+        "por_que": "Un desborde o mazamorra reportado debería venir de lluvia relevante en los días previos sobre la cuenca de aporte."
+      }
+    ]
+  }
+}

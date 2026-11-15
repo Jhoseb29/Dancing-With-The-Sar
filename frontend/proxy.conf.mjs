@@ -61,6 +61,12 @@ export default {
     timeout: 1_300_000,
     proxyTimeout: 1_300_000,
   },
+  // Alertas tempranas (alert-harness): REST + WebSocket en compute-py.
+  '/api/alerts': {
+    target: 'http://localhost:8000',
+    ws: true,
+    changeOrigin: true,
+  },
   // Eventos (OpenSpec 09): estadísticas FIRMS en compute-py.
   '/api/events': {
     target: 'http://localhost:8000',

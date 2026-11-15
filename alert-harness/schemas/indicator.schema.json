@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dancing-with-the-sars/schemas/indicator.schema.json",
+  "title": "Indicador diagnóstico",
+  "description": "Un número calculado de forma determinista, con su método, evidencia y confianza. Toda alerta se arma solo con indicadores que pasan este schema.",
+  "type": "object",
+  "required": ["id", "valor", "unidad", "metodo", "evidencia", "confianza"],
+  "properties": {
+    "id": {"type": "string"},
+    "valor": {"type": "number"},
+    "unidad": {"type": "string"},
+    "metodo": {"type": "string"},
+    "evidencia": {"type": "string"},
+    "confianza": {"enum": ["alta", "media", "baja"]},
+    "caveat": {"type": "string"}
+  },
+  "additionalProperties": false
+}
