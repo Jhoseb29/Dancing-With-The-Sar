@@ -64,12 +64,3 @@ La solución busca responder tres preguntas críticas para tomadores de decision
 ```
 
 ---
-
-## 4. Guía de Lectura para el Equipo
-
-* **Arquitectura general, 12-Factor, SOLID y trade-offs:** [`docs/01-architecture-overview.md`](./docs/01-architecture-overview.md)
-* **Diseño de módulos del Backend y Harnesses:** [`docs/02-backend-modules.md`](./docs/02-backend-modules.md)
-* **Estándares y estructura del Frontend Angular 22:** [`docs/03-frontend-architecture.md`](./docs/03-frontend-architecture.md)
-* **Pipeline real COG + Zarr + PMTiles y flujo Harness 1 -> Harness 2:** [`docs/04-data-pipeline-and-harnesses.md`](./docs/04-data-pipeline-and-harnesses.md)
-* **Cómo trabajaremos con OpenSpec (SDD):** [`docs/05-openspec-workflow.md`](./docs/05-openspec-workflow.md)
-* **Sistema de diseño "Control de Misión" (tokens, tipografía, componentes):** [`docs/06-design-system.md`](./docs/06-design-system.md)
