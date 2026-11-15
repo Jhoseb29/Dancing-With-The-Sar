@@ -1,0 +1,57 @@
+<section class="possible-events">
+  <header class="head">
+    <div>
+      <h2 class="label">{{ 'risk.predictions.title' | transloco }}</h2>
+      <p class="caption">{{ 'risk.predictions.subtitle' | transloco }}</p>
+    </div>
+    <span class="badge">{{ pending().length }}</span>
+  </header>
+
+  @if (pending().length === 0) {
+    <p class="empty">{{ 'risk.predictions.empty' | transloco }}</p>
+  } @else {
+    <ul class="cards">
+      @for (prediction of pending(); track prediction.id) {
+        <li class="prediction" [attr.data-level]="prediction.nivel">
+          <div class="row">
+            <strong>{{ prediction.area.nombre }}</strong>
+            <span class="tag">{{ 'risk.levels.' + prediction.nivel | transloco }}</span>
+          </div>
+          <p class="sub">{{ 'basin.type.' + prediction.peligro | transloco }} · {{ prediction.indice_riesgo }}/100</p>
+          <p class="why">{{ 'risk.predictions.driver' | transloco: { driver: ('risk.predictions.' + signal(prediction) | transloco) } }}</p>
+          <div class="evidence">
+            <span>{{ 'risk.predictions.confidence' | transloco }}: {{ prediction.confianza.porcentaje }}%</span>
+            <span>{{ 'risk.predictions.until' | transloco }}: {{ date(prediction.valida_hasta) }}</span>
+          </div>
+          <details>
+            <summary>{{ 'risk.predictions.evidence' | transloco }}</summary>
+            @for (reason of prediction.motivos; track reason) {
+              <p class="caption">{{ reason }}</p>
+            }
+            <p class="caption">{{ prediction.modelo }} · {{ prediction.fuentes.join(', ') }}</p>
+          </details>
+          <div class="actions">
+            <button type="button" class="btn-ghost small" (click)="confirm(prediction, true)">
+              {{ 'risk.predictions.confirm' | transloco }}
+            </button>
+            <button type="button" class="btn-secondary small" (click)="confirm(prediction, false)">
+              {{ 'risk.predictions.dismiss' | transloco }}
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (closed().length) {
+    <details class="history">
+      <summary>{{ 'risk.predictions.history' | transloco }}</summary>
+      @for (prediction of closed(); track prediction.id) {
+        <div class="history-row" [attr.data-status]="prediction.estado">
+          <span>{{ prediction.area.nombre }} · {{ 'basin.type.' + prediction.peligro | transloco }}</span>
+          <strong>{{ 'risk.predictions.status.' + prediction.estado | transloco }}</strong>
+        </div>
+      }
+    </details>
+  }
+</section>

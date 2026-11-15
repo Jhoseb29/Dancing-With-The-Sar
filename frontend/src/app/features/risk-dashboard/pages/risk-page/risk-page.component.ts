@@ -13,9 +13,10 @@ import { SidePanelComponent } from '../../../../shared/components/side-panel/sid
 import { EvalViewComponent } from '../../components/eval-view/eval-view.component';
 import { HowItWorksComponent } from '../../components/how-it-works/how-it-works.component';
 import { StationsPanelComponent } from '../../components/stations-panel/stations-panel.component';
+import { PossibleEventsComponent } from '../../components/possible-events/possible-events.component';
 import { TanksPanelComponent } from '../../components/tanks-panel/tanks-panel.component';
 
-type Tab = 'now' | 'tanks' | 'how' | 'eval';
+type Tab = 'now' | 'possible' | 'tanks' | 'how' | 'eval';
 
 /** Alertas por distrito: mapa 3D (color = nivel, altura = riesgo) + panel corto. Smart. */
 @Component({
@@ -27,6 +28,7 @@ type Tab = 'now' | 'tanks' | 'how' | 'eval';
     HowItWorksComponent,
     EvalViewComponent,
     StationsPanelComponent,
+    PossibleEventsComponent,
     TanksPanelComponent,
   ],
   templateUrl: './risk-page.component.html',
@@ -39,7 +41,7 @@ export class RiskPageComponent {
   protected readonly alerts = inject(AlertsService);
   protected readonly tanksSvc = inject(TanksService);
   private readonly stations = inject(StationsService);
-  protected readonly tabs: Tab[] = ['now', 'tanks', 'how', 'eval'];
+  protected readonly tabs: Tab[] = ['now', 'possible', 'tanks', 'how', 'eval'];
   protected readonly tab = signal<Tab>('now');
   protected readonly districts = computed(() => (this.alerts.districts()?.features ?? []).map((f) => f.properties));
   private readonly basinsSvc = inject(BasinsService);

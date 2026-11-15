@@ -59,5 +59,7 @@ niveles:   # límite inferior del índice para cada nivel
 monitor:
   intervalo_min: 30          # IMERG Early publica cada 30 min (con ~4 h de retraso)
   horas_para_bajar: 12       # un nivel sube al instante, pero baja solo si se mantiene más bajo este tiempo
+  horizonte_prediccion_horas: 6  # ventana operativa para confirmar o descartar un posible suceso
+  prediccion_desde: amarillo
   utc_offset_horas: -4       # Bolivia (BOT): el "día" de lluvia se evalúa en hora local
   fuente: "supuesto operativo inicial: evita alertas que parpadean (rojo-verde-rojo)"

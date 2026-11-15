@@ -1,5 +1,5 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
-import { AlertsMessage, DistrictsFC, EvalPayload, RadarSchedule, RainPayload, RiskAlert } from '../alerts/alerts.model';
+import { AlertsMessage, DistrictsFC, EvalPayload, PredictionsPayload, RadarSchedule, RainPayload, RiskAlert } from '../alerts/alerts.model';
 import { RuntimeConfigService } from '../config/runtime-config.service';
 
 const MAX_ALERTS = 100;
@@ -20,6 +20,7 @@ export class AlertsService {
   readonly alerts = signal<RiskAlert[]>([]);
   readonly districts = signal<DistrictsFC | null>(null);
   readonly evaluation = signal<EvalPayload | null>(null);
+  readonly predictions = signal<PredictionsPayload['predictions']>([]);
   readonly rain = signal<RainPayload | null>(null);
   readonly radar = signal<RadarSchedule | null>(null);
   /** Media hora que se ve en el mapa (índice en rain.slots); null = acumulado de 24 h. */
@@ -111,11 +112,12 @@ export class AlertsService {
       const r = await fetch(`${this.apiBaseUrl}/alerts/${path}`).catch(() => null);
       return r?.ok ? ((await r.json()) as T) : null;
     };
-    const [districts, evaluation, rain, radar] = await Promise.all([
+    const [districts, evaluation, rain, radar, predictions] = await Promise.all([
       get<DistrictsFC>('districts'),
       get<EvalPayload>('eval'),
       get<RainPayload>('rain'),
       get<RadarSchedule>('radar'),
+      get<PredictionsPayload>('predictions'),
     ]);
     if (districts) this.districts.set(districts);
     if (evaluation) this.evaluation.set(evaluation);
@@ -123,6 +125,16 @@ export class AlertsService {
     // sin grilla ni pico no hay lluvia que mostrar, y los paneles asumen el payload completo.
     this.rain.set(isCompleteRain(rain) ? rain : null);
     if (radar) this.radar.set(radar);
+    if (predictions) this.predictions.set(predictions.predictions);
+  }
+
+  async confirmPrediction(id: string, occurred: boolean): Promise<void> {
+    await fetch(`${this.apiBaseUrl}/alerts/predictions/${encodeURIComponent(id)}/confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ocurrio: occurred, fuente: 'UI', detalle: '' }),
+    }).catch(() => null);
+    await this.refresh();
   }
 
   private onMessage(msg: AlertsMessage): void {
