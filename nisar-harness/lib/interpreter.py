@@ -64,6 +64,22 @@ MEDIA_CATALOG: dict[str, dict[str, Any]] = {
 }
 
 
+# Layers the web globe draws from the data (the model only gets their titles).
+GLOBE_LAYERS: dict[str, dict[str, str]] = {
+    "objects": {"title": "Objetos del terreno",
+                "caption": "Cada mancha es un objeto: lagunas (azul), zonas urbanas en 3D (rojo), suelo desnudo o quemado "
+                           "(ocre) y bosque (verde). Haz clic en uno para ver sus datos."},
+    "classes": {"title": "Mapa de mecanismos de dispersión",
+                "caption": "Azul agua · beige suelo desnudo · verde vegetación · rojo urbano/rebote doble."},
+    "co": {"title": "Brillo radar HH",
+           "caption": "Cuánta energía devuelve el terreno: oscuro = liso o agua, claro = rugoso o edificios."},
+    "cross": {"title": "Brillo radar HV (vegetación)",
+              "caption": "La polarización cruzada crece con la biomasa: claro = más vegetación."},
+    "hotspots": {"title": "Puntos de cambio",
+                 "caption": "Celdas donde el radar detectó un cambio entre la primera y la última toma."},
+}
+
+
 # ------------------------------------------------------------------ context
 def _granule_metrics(run: RunContext) -> list[dict[str, Any]]:
     items = []
@@ -119,11 +135,23 @@ def build_context(run: RunContext) -> dict[str, Any]:
                     "available_dates": sorted({g["time_start"][:10] for g in query.get("granules", [])}),
                     "temporal_widened": query.get("temporal_widened", False)},
         "dates": [_date_row(m) for m in metrics],
-        "change": change_summary(metrics),
-        "media_shown_to_user": [v["title"] for k, v in MEDIA_CATALOG.items() if v["kind"] == "image"],
+        "change": _with_hotspots(change_summary(metrics), run),
+        "media_shown_to_user": [v["title"] for v in GLOBE_LAYERS.values()],
     }
     write_json(run.context_json, context)
     return context
+
+
+def _hotspot_summary(run: RunContext) -> dict[str, Any] | None:
+    return read_json(run.hotspots_geojson).get("summary") if run.hotspots_geojson.exists() else None
+
+
+def _with_hotspots(change: dict[str, Any] | None, run: RunContext) -> dict[str, Any] | None:
+    """Spatial change (cells, km², % of area) next to the aggregate deltas."""
+    summary = _hotspot_summary(run)
+    if change is not None and summary:
+        change["hotspots"] = {"kinds": summary["kinds"], "cell_area_km2": summary["cell_area_km2"]}
+    return change
 
 
 # ------------------------------------------------------------------ model call
@@ -167,6 +195,35 @@ def build_media(run: RunContext) -> list[dict[str, Any]]:
     return sorted(media, key=lambda x: x["date"], reverse=True)  # stable: newest date first
 
 
+def build_globe(run: RunContext) -> dict[str, Any] | None:
+    """What the web globe needs: one data grid per take (oldest -> newest) + change hotspots."""
+    takes = []
+    for gdir in run.granule_dirs():
+        index, metrics = gdir / "formats.json", gdir / "curated_metrics.json"
+        if not index.exists() or not metrics.exists() or "globe" not in read_json(index):
+            continue
+        m = read_json(metrics)
+        takes.append({
+            "date": (m["acquisition"].get("start_time") or "")[:10],
+            "granule_id": gdir.name,
+            "orbit": m["acquisition"].get("orbit_pass_direction"),
+            "data": read_json(index)["globe"],
+            "objects": read_json(index).get("objects"),
+            "scattering_pct": m["physical_scattering_breakdown"],
+            "classification_method": m.get("classification", {}).get("method"),
+        })
+    if not takes:
+        return None
+    takes.sort(key=lambda t: t["date"])
+    return {
+        "bbox": run.manifest.get("request", {}).get("bbox"),
+        "takes": takes,
+        "hotspots": run.rel(run.hotspots_geojson) if run.hotspots_geojson.exists() else None,
+        "hotspots_summary": _hotspot_summary(run),
+        "layers": GLOBE_LAYERS,
+    }
+
+
 def assemble_ui_payload(run: RunContext, usage: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     context = read_json(run.context_json) if run.context_json.exists() else build_context(run)
     chat = read_json(run.narrative_json) if run.narrative_json.exists() else None
@@ -188,6 +245,7 @@ def assemble_ui_payload(run: RunContext, usage: list[dict[str, Any]] | None = No
         "time_series": context["dates"],
         "change": context["change"],
         "media": build_media(run),
+        "globe": build_globe(run),
         "map": {"aoi_bbox": run.manifest.get("request", {}).get("bbox"),
                 "regions": context["regions"]},
         "usage": usage or [],
@@ -206,6 +264,7 @@ def clarification_payload(run: RunContext, question: str) -> dict[str, Any]:
         "chat": {"message": question, "alert_level": "sin_datos", "alert_reason": "", "highlights": []},
         "lesson_markdown": None,
         "media": [],
+        "globe": None,
     }
     write_json(run.ui_payload_json, payload)
     return payload

@@ -1,0 +1,167 @@
+:host {
+  display: block;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+p {
+  margin: 0;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-10);
+  padding-top: var(--spacing-15);
+  border-top: var(--border-hairline) solid var(--color-dark-gunmetal);
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-10);
+
+  &.between {
+    justify-content: space-between;
+  }
+}
+
+.small {
+  align-self: flex-start;
+  padding: var(--spacing-4) var(--spacing-10);
+}
+
+button[disabled] {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.progress {
+  height: var(--spacing-4);
+  background: var(--color-dark-gunmetal);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    background: var(--color-star-white);
+    transition: width 0.4s ease;
+  }
+}
+
+// Colores de datos: nivel de alerta, clases y tipos de cambio.
+.alert {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-10);
+  padding: var(--spacing-4) var(--spacing-12);
+  border: var(--border-hairline) solid var(--color-dim-steel);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-label);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+
+  &::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-dim-steel);
+  }
+
+  @each $level, $color in (verde: #4caf7a, amarillo: #e3c341, naranja: #e8893a, rojo: #e0524a) {
+    &[data-level='#{$level}']::before {
+      background: $color;
+    }
+  }
+}
+
+.legend {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.swatch,
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.dot {
+  border-radius: 50%;
+  background: #ffd000;
+
+  @each $kind,
+    $color
+      in (
+        perdida_vegetacion: #ff5a00,
+        nueva_agua: #00c8ff,
+        perdida_agua: #8a6cff,
+        nuevo_urbano: #ff2ad4
+      )
+  {
+    &[data-kind='#{$kind}'] {
+      background: $color;
+    }
+  }
+}
+
+.ramp {
+  height: var(--spacing-10);
+  border-radius: var(--radius-md);
+}
+
+input[type='range'] {
+  width: 100%;
+  accent-color: var(--color-star-white);
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--spacing-10);
+  }
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 7rem 1fr 3.5rem;
+  align-items: center;
+  gap: var(--spacing-10);
+  font-size: var(--text-label);
+
+  .track {
+    height: 6px;
+    background: var(--color-dark-gunmetal);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+
+    span {
+      display: block;
+      height: 100%;
+    }
+  }
+
+  .tabular {
+    text-align: right;
+  }
+}

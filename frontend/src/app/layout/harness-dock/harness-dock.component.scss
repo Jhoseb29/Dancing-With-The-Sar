@@ -21,10 +21,22 @@
   border-radius: var(--radius-md);
 }
 
-.head {
+.head,
+.head-actions {
   display: flex;
   justify-content: space-between;
-  gap: var(--spacing-12);
+  align-items: flex-start;
+  gap: var(--spacing-10);
+}
+
+.interim {
+  color: var(--color-muted-text);
+  font-style: italic;
+}
+
+.mic.live {
+  background: var(--color-star-white);
+  color: var(--color-void-black);
 }
 
 p {

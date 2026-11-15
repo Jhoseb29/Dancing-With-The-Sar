@@ -12,6 +12,8 @@ import rasterio
 from PIL import Image
 
 from . import sar_physics as phys
+from .globe import export_globe_json
+from .objects import export_objects
 from .scene import SarScene
 
 os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "matplotlib"))
@@ -185,11 +187,16 @@ EXPORTERS: dict[str, Exporter] = {
     "histogram": export_histogram,
     "kml": export_kml,
     "geojson": export_geojson,
+    "globe": export_globe_json,  # data grid the web globe colours itself (no image)
+    "objects": export_objects,  # vector patches per class: drawn as objects on the globe
 }
+
+# Images are no longer produced by default: the frontend renders the globe grid.
+DEFAULT_FORMATS = ["tif", "geojson", "globe", "objects"]
 
 
 def export_all(scene: SarScene, out_dir: Path, formats: list[str] | None = None) -> dict[str, Path]:
-    selected = list(EXPORTERS) if not formats or "all" in formats else formats
+    selected = list(EXPORTERS) if formats and "all" in formats else (formats or DEFAULT_FORMATS)
     unknown = set(selected) - set(EXPORTERS)
     if unknown:
         raise ValueError(f"Formatos desconocidos: {sorted(unknown)}. Disponibles: {list(EXPORTERS)}")

@@ -25,7 +25,7 @@ def curate(scene: SarScene) -> dict[str, Any]:
     cross = scene.cross_pol
 
     classes, method = scene.scattering_classes()
-    per_pol = {term: phys.distribution(phys.to_db(arr)) for term, arr in scene.layers.items()}
+    per_pol = {term: phys.distribution(scene.clean_db(term)) for term in scene.layers}
     indices = (
         phys.polarimetric_indices(scene.layers[co], scene.layers[cross])
         if cross else {"rvi_mean": None, "rvi_median": None, "cross_pol_ratio_mean_db": None}

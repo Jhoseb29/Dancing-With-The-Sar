@@ -23,6 +23,9 @@ log = logging.getLogger("nisar.scene")
 
 STRIP_ROWS = 1024
 MIN_VALID_FRACTION = 0.5
+# Below -40 dB (1e-4 linear) gamma0 is not a measurement: it is fill / outside-swath padding
+# (seen as ~1e-14 at swath edges). It must not enter the multilook average.
+MIN_LINEAR_GAMMA0 = 1e-4
 
 
 @dataclass
@@ -146,7 +149,7 @@ def _read_multilooked(ds: h5py.Dataset, win: PixelWindow, looks: int) -> tuple[n
     for r in range(0, out_rows * looks, strip):
         r_end = min(r + strip, out_rows * looks)
         block = ds[win.row0 + r: win.row0 + r_end, win.col0: col_end].astype(np.float32)
-        valid = np.isfinite(block) & (block > 0)
+        valid = np.isfinite(block) & (block > MIN_LINEAR_GAMMA0)
         valid_total += int(valid.sum())
         h = (r_end - r) // looks
         sums = np.where(valid, block, 0).reshape(h, looks, out_cols, looks).sum(axis=(1, 3))

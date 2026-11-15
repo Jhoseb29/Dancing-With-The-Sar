@@ -2,6 +2,8 @@ import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core'
 import { HarnessHttpError, runFileUrl, streamAsk } from '../harness/harness-client';
 import { HarnessEvent, HarnessMedia, HarnessPayload } from '../harness/harness.model';
 import { RuntimeConfigService } from '../config/runtime-config.service';
+import { HarnessGlobeService } from './harness-globe.service';
+import { VoiceService } from './voice.service';
 
 export interface HarnessTurn {
   id: number;
@@ -24,6 +26,8 @@ export interface HarnessTurn {
 @Injectable({ providedIn: 'root' })
 export class HarnessService {
   private readonly apiBaseUrl = inject(RuntimeConfigService).value.apiBaseUrl;
+  private readonly globe = inject(HarnessGlobeService);
+  private readonly voice = inject(VoiceService);
   private abort: AbortController | null = null;
   private nextId = 1;
 
@@ -58,6 +62,7 @@ export class HarnessService {
     this.abort = new AbortController();
     try {
       await streamAsk(this.apiBaseUrl, text, (event) => this.onEvent(id, event), this.abort.signal);
+      this.present(id);
       this.update(id, (t) =>
         t.state === 'running' ? { ...t, state: 'error', errorCode: 'harness_failed' } : t,
       );
@@ -77,6 +82,13 @@ export class HarnessService {
 
   cancel(): void {
     this.abort?.abort();
+  }
+
+  /** Lleva un turno terminado al globo (vista de análisis): encuadra el área y muestra las tomas. */
+  showOnGlobe(turn: HarnessTurn): void {
+    if (turn.runId && turn.payload?.globe?.takes.length) {
+      void this.globe.show(turn.runId, turn.payload, turn.question);
+    }
   }
 
   fileUrl(turn: HarnessTurn, media: HarnessMedia): string {
@@ -112,6 +124,14 @@ export class HarnessService {
           return { ...next, steps: [...turn.steps, event.message].slice(-8) };
       }
     });
+  }
+
+  /** Al terminar: como hacía el agente, mostrar el resultado en el globo y (opcional) leerlo. */
+  private present(id: number): void {
+    const turn = this.turns().find((t) => t.id === id);
+    if (turn?.state !== 'done' || !turn.payload) return;
+    this.showOnGlobe(turn);
+    void this.voice.speak(turn.payload.chat?.message ?? '');
   }
 
   private update(id: number, fn: (turn: HarnessTurn) => HarnessTurn): void {

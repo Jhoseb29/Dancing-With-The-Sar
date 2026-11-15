@@ -16,10 +16,13 @@ from .access import GranuleSource, open_granule
 from .catalog import CatalogQuery, Granule, search_granules
 from .credentials import AwsCredentials, check_sts_identity
 from .curation import curate
-from .intent import Intent, parse_intent
+from .exporters import DEFAULT_FORMATS
+from .hotspots import write_hotspots
+from .intent import Intent, offline_intent, parse_intent
 from .jsonio import read_json, write_json
 from .run_context import RunContext
 from .scene import LoadOptions, SarScene, load_scene
+from .selection import choose
 from .settings import DEFAULT_COLLECTIONS, Settings
 from .themes import get_theme
 
@@ -36,10 +39,10 @@ class PipelineRequest:
     temporal: str | None = None  # "2026-01-01T00:00:00Z,2026-12-31T23:59:59Z"
     theme: str | None = None
     collections: tuple[str, ...] = DEFAULT_COLLECTIONS
-    limit: int = 20  # catalog page size
+    limit: int = 60  # catalog page size (all takes in the window, to pick coverage + baseline)
     max_granules: int | None = None  # default: decided by the theme
     granule_ids: list[str] = field(default_factory=list)
-    formats: list[str] = field(default_factory=lambda: ["all"])
+    formats: list[str] = field(default_factory=lambda: list(DEFAULT_FORMATS))
     frequency: str = "auto"
     access: str = "auto"  # auto | s3 | https
     target_mpix: float = 2.0
@@ -78,7 +81,13 @@ class PipelineRequest:
 def step_intent(run: RunContext, settings: Settings, req: PipelineRequest) -> Intent:
     started = time.monotonic()
     run.emit("intent", "Entendiendo tu pregunta…", 0.02)
-    intent = parse_intent(req.text, settings)
+    try:
+        intent = parse_intent(req.text, settings)
+    except Exception as exc:  # noqa: BLE001 - Claude down / limit reached: the data path must still work
+        log.warning("Parser de intención no disponible: %s", exc)
+        run.emit("intent", "El asistente no está disponible; uso una interpretación básica de tu pregunta.", 0.04,
+                 level="warning")
+        intent = offline_intent(req.text, reason=str(exc))
     req.apply_intent(intent)
     run.manifest["intent"] = intent.to_dict()
     run.manifest["request"] = req.to_dict()
@@ -117,24 +126,19 @@ def step_query(run: RunContext, settings: Settings, req: PipelineRequest) -> lis
     return result.granules
 
 
-def select_granules(granules: list[Granule], count: int, ids: list[str] | None = None) -> list[Granule]:
-    """Newest acquisition first, then older ones from the SAME track/direction (comparable geometry)."""
-    if ids:
-        return [g for g in granules if g.granule_id in ids]
-    if not granules:
-        return []
-    newest = granules[0]
-    same_geometry = [g for g in granules[1:]
-                     if (g.track, g.orbit_direction) == (newest.track, newest.orbit_direction)]
-    return [newest, *same_geometry][: max(count, 1)]
-
-
 def resolve_sources(run: RunContext, req: PipelineRequest) -> list[GranuleSource]:
     if not run.query_json.exists():
         raise FileNotFoundError("La corrida no tiene query.json: ejecuta primero la consulta")
     granules = [Granule.from_dict(g) for g in read_json(run.query_json)["granules"]]
-    return [GranuleSource.from_granule(g) for g in select_granules(granules, req.granules_to_process,
-                                                                    req.granule_ids)]
+    choice = choose(granules, req.granules_to_process, req.bbox, req.granule_ids)
+    run.manifest["selection"] = {"group": choice.group, "coverage": choice.coverage,
+                                 "dates": [g.time_start[:10] for g in choice.granules]}
+    run.save_manifest()
+    if choice.granules:
+        best = max(choice.coverage.values())
+        dates = " y ".join(sorted({g.time_start[:10] for g in choice.granules}))
+        run.emit("query", f"Elegí la órbita que mejor cubre el área ({best:.0%}): {dates}.", 0.15)
+    return [GranuleSource.from_granule(g) for g in choice.granules]
 
 
 def load(src: GranuleSource, settings: Settings, req: PipelineRequest) -> SarScene:
@@ -189,6 +193,29 @@ def step_process(run: RunContext, settings: Settings, req: PipelineRequest,
     return results
 
 
+# ------------------------------------------------------------------ step 3b
+def step_change(run: RunContext, req: PipelineRequest) -> dict[str, Any] | None:
+    """Cell-by-cell change hotspots between the oldest and newest take (needs the globe grid)."""
+    started = time.monotonic()
+    takes = []
+    for gdir in run.granule_dirs():
+        index, metrics = gdir / "formats.json", gdir / "curated_metrics.json"
+        if index.exists() and metrics.exists() and "globe" in read_json(index):
+            date = read_json(metrics)["acquisition"].get("start_time") or ""
+            takes.append((date, run.run_dir / read_json(index)["globe"]))
+    takes.sort()
+    try:
+        summary = write_hotspots([p for _, p in takes], req.theme or "general", run.hotspots_geojson)
+    except ValueError as exc:  # grids differ (should not happen: same AOI)
+        log.warning("Hotspots: %s", exc)
+        summary = None
+    run.record_step("change", "ok" if summary else "skipped", started, hotspots=summary)
+    if summary:
+        found = sum(k["cells"] for k in summary["kinds"].values())
+        run.emit("change", f"Comparé {summary['from_date']} y {summary['to_date']}: {found} celdas con cambios.", 0.83)
+    return summary
+
+
 # ------------------------------------------------------------------ step 4
 def step_interpret(run: RunContext, settings: Settings, req: PipelineRequest) -> dict[str, Any]:
     started = time.monotonic()
@@ -235,6 +262,7 @@ def run_pipeline(req: PipelineRequest, settings: Settings, echo_events: bool = F
             run.emit("done", "No se pudo leer ninguna imagen del satélite.", 1.0, status="error")
             run.finish("error")
             return run
+        step_change(run, req)
         payload = step_interpret(run, settings, req)
         all_ok = all(r["status"] == "ok" for r in results)
         interpreted_ok = not req.interpret or payload["status"] == "complete"

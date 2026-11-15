@@ -18,7 +18,12 @@ Usuario (chat UI): "¿Hubo incendios recientes en la Chiquitania?"
 [Paso 2 · lib/exporters.py]     [Paso 3 · lib/curation.py + sar_physics.py]
  granules/<id>/formats/ +        granules/<id>/curated_metrics.json
  formats.json                    (clases dual-pol, RVI, CPR, estación, región)
+ (tif, geojson, *_globe.json:
+  grilla lon/lat común, sin PNG)
        └──────────────┬───────────────┘
+                      ▼
+[Paso 3b · lib/hotspots.py]  cambio celda a celda (relativo al corrimiento de la escena) → hotspots.geojson
+                      │
                       ▼
 [Paso 4 · lib/change.py + lib/interpreter.py]
        │  interpreter_context.json  (~800 tokens: solo números + cambios ya calculados)
@@ -26,7 +31,8 @@ Usuario (chat UI): "¿Hubo incendios recientes en la Chiquitania?"
        ▼
 interpretation_narrative.json (chat corto)  +  interpretation.md (lección)
        ▼
-interpretacion_didactica_nisar.json → UI: burbuja de chat · "Aprende más" (md) · galería/mapa (media)
+interpretacion_didactica_nisar.json → UI: burbuja de chat · "Aprende más" (md)
+       → vista Análisis NISAR: el navegador colorea *_globe.json por toma + hotspots como mapa de calor
 
 Durante todo el proceso: events.jsonl / stdout --events  →  barra de progreso en la UI
 ```

@@ -22,7 +22,8 @@ events.jsonl                          # progreso para la UI
 query.json                            # catálogo CMR + estado STS/Earthdata
 granules/<id>/curated_metrics.json    # métricas físicas
 granules/<id>/formats.json            # índice de archivos exportados
-granules/<id>/formats/                # GeoTIFF, PNG dB, RGB, clases, histograma, KML, GeoJSON
+granules/<id>/formats/                # GeoTIFF, GeoJSON, *_globe.json (grilla) y *_objects.geojson (objetos por clase); PNG/KML solo bajo pedido
+hotspots.geojson                      # puntos de cambio entre tomas (relativos al corrimiento de la escena)
 interpreter_context.json              # ENTRADA del modelo (~800 tokens)
 interpretation_narrative.json         # SALIDA: mensaje corto de chat
 interpretation.md                     # SALIDA: lección "Aprende más"
@@ -35,6 +36,7 @@ interpretacion_didactica_nisar.json   # payload final para Angular
 - Nuevo tema → entrada en `THEMES` (`lib/themes.py`) y en el enum del prompt de intención.
 - Nueva región curada → `REGIONS` (`lib/regions.py`) con `aliases`.
 - Nuevo formato → función en `lib/exporters.py` + `EXPORTERS` + `MEDIA_CATALOG` (`lib/interpreter.py`).
+- El globo web no usa imágenes del harness: colorea `*_globe.json` en el navegador (`frontend/src/app/core/harness/globe-grid.ts`).
 - Llamadas a Claude solo por `lib/claude_cli.py` (1 turno, sin tools, JSON schema).
 - Configuración por variables de entorno (`lib/settings.py`).
 - No ejecutes el pipeline completo para probar: tarda varios minutos y consume datos remotos. Prueba funciones puras (`intent.normalise`, `change.compare`) o `scripts/interpret.py --no-interpret` sobre una corrida existente.

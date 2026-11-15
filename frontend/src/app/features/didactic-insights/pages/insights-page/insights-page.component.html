@@ -1,0 +1,224 @@
+<app-map-canvas (ready)="onCanvasReady($event)" />
+
+<app-side-panel
+  [open]="scene.panels().layerPanel"
+  [label]="analysis.active()?.place ?? ('insights.title' | transloco)"
+  [hideLabel]="'panel.hide' | transloco"
+  (openChange)="setPanelOpen($event)"
+>
+  <p class="caption">{{ 'insights.kicker' | transloco }}</p>
+  <h1 class="headline">{{ analysis.active()?.place ?? ('insights.title' | transloco) }}</h1>
+
+  @if (running(); as turn) {
+    <section class="block">
+      <h2 class="label">{{ 'harness.running' | transloco }}</h2>
+      <p class="muted">“{{ turn.question }}”</p>
+      <div
+        class="progress"
+        role="progressbar"
+        [attr.aria-valuenow]="turn.progress * 100"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <span [style.width.%]="turn.progress * 100"></span>
+      </div>
+      <p>{{ turn.steps.at(-1) ?? ('harness.starting' | transloco) }}</p>
+    </section>
+  }
+
+  @if (analysis.active(); as a) {
+    <section class="block">
+      <p class="muted">“{{ a.question }}”</p>
+      @if (chat(); as c) {
+        <span class="alert" [attr.data-level]="c.alert_level">{{
+          'harness.alert.' + c.alert_level | transloco
+        }}</span>
+        <p>{{ c.message }}</p>
+      }
+      <button class="btn-secondary small" type="button" (click)="focus()">
+        {{ 'insights.focus' | transloco }}
+      </button>
+    </section>
+
+    <section class="block">
+      <h2 class="label">{{ 'insights.takes' | transloco }}</h2>
+      <div class="row">
+        @for (t of a.globe.takes; track t.data; let i = $index) {
+          <button
+            class="btn-pill"
+            type="button"
+            [attr.aria-pressed]="analysis.takeIndex() === i"
+            (click)="analysis.selectTake(i)"
+          >
+            {{ t.date }}
+          </button>
+        }
+      </div>
+      @if (analysis.take(); as t) {
+        <p class="caption">{{ t.orbit }} · {{ t.classification_method }}</p>
+      }
+    </section>
+
+    <section class="block">
+      <h2 class="label">{{ 'insights.layer' | transloco }}</h2>
+      <div class="row">
+        @for (l of analysis.availableLayers(); track l) {
+          <button
+            class="btn-pill"
+            type="button"
+            [attr.aria-pressed]="analysis.layer() === l"
+            (click)="setLayer(l)"
+          >
+            {{ a.globe.layers[l]?.title ?? l }}
+          </button>
+        }
+      </div>
+      <p class="muted">{{ a.globe.layers[analysis.layer()]?.caption }}</p>
+
+      @if (analysis.layer() === 'classes' || analysis.layer() === 'objects') {
+        <div class="row">
+          @for (c of classLegend; track c.id) {
+            <button
+              class="btn-pill legend"
+              type="button"
+              [attr.aria-pressed]="!analysis.hiddenClasses().has(c.id)"
+              (click)="analysis.toggleClass(c.id)"
+            >
+              <span class="swatch" [style.background]="rgb(c.color)"></span>
+              {{ 'insights.classes.' + c.key | transloco }}
+            </button>
+          }
+        </div>
+      } @else if (dbRange(); as range) {
+        <div class="ramp" [style.background]="ramp"></div>
+        <div class="row between caption">
+          <span>{{ range[0] }} dB</span><span>{{ range[1] }} dB</span>
+        </div>
+      }
+
+      @if (analysis.layer() !== 'objects') {
+        <label class="caption" for="analysis-opacity">{{ 'insights.opacity' | transloco }}</label>
+        <input
+          id="analysis-opacity"
+          type="range"
+          min="20"
+          max="100"
+          [value]="analysis.opacity() * 100"
+          (input)="setOpacity($any($event.target).value)"
+        />
+      }
+    </section>
+
+    @if (a.globe.hotspots_summary; as h) {
+      <section class="block">
+        <div class="row between">
+          <h2 class="label">{{ 'insights.changes' | transloco }}</h2>
+          <button
+            class="btn-pill"
+            type="button"
+            [attr.aria-pressed]="analysis.showHotspots()"
+            (click)="analysis.showHotspots.set(!analysis.showHotspots())"
+          >
+            {{ 'insights.showOnGlobe' | transloco }}
+          </button>
+        </div>
+        <p class="caption">{{ h.from_date }} → {{ h.to_date }}</p>
+        <ul class="stats">
+          @for (k of hotspotKinds(); track k[0]) {
+            <li>
+              <span class="dot" [attr.data-kind]="k[0]"></span>
+              <span>{{ 'insights.kinds.' + k[0] | transloco }}</span>
+              <span class="tabular">{{ k[1].area_km2 }} km² · {{ k[1].pct_of_area }}%</span>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (analysis.take(); as t) {
+      <section class="block">
+        <h2 class="label">{{ 'insights.composition' | transloco }} · {{ t.date }}</h2>
+        @for (key of classKeys; track key; let i = $index) {
+          <div class="bar">
+            <span>{{ 'insights.classes.' + classLegend[i].key | transloco }}</span>
+            <span class="track"
+              ><span
+                [style.width.%]="t.scattering_pct[key]"
+                [style.background]="rgb(classLegend[i].color)"
+              ></span
+            ></span>
+            <span class="tabular">{{ t.scattering_pct[key] }}%</span>
+          </div>
+        }
+      </section>
+    }
+
+    <section class="block">
+      <h2 class="label">{{ 'insights.cell' | transloco }}</h2>
+      @if (analysis.inspected(); as cell) {
+        @if (cell.object; as o) {
+          <p>
+            <strong>{{ 'insights.classes.' + o.class | transloco }}</strong> ·
+            {{ 'insights.objectArea' | transloco: { km2: o.area_km2 } }}
+          </p>
+          <p class="muted">
+            {{ 'insights.objectMean' | transloco }}: HH {{ o.co_db ?? '—' }} dB
+            @if (o.cross_db !== null) {
+              · HV {{ o.cross_db }} dB
+            }
+          </p>
+        }
+        <p>
+          {{ 'insights.classes.' + classKey(cell.classId) | transloco }} · HH
+          {{ cell.coDb ?? '—' }} dB
+          @if (cell.crossDb !== null) {
+            · HV {{ cell.crossDb }} dB
+          }
+        </p>
+        <p class="caption tabular">{{ cell.lat.toFixed(4) }}, {{ cell.lon.toFixed(4) }}</p>
+      } @else {
+        <p class="muted">{{ 'insights.clickHint' | transloco }}</p>
+      }
+    </section>
+
+    @if (a.payload.lesson_markdown; as lesson) {
+      <section class="block">
+        <button
+          class="btn-ghost small"
+          type="button"
+          [attr.aria-expanded]="lessonOpen()"
+          (click)="lessonOpen.set(!lessonOpen())"
+        >
+          {{ (lessonOpen() ? 'harness.hideLesson' : 'harness.learnMore') | transloco }}
+        </button>
+        @if (lessonOpen()) {
+          <article class="prose" [innerHTML]="lesson | markdown"></article>
+        }
+      </section>
+    }
+
+    @if (downloads().length) {
+      <section class="block">
+        <h2 class="label">{{ 'harness.downloads' | transloco }}</h2>
+        <div class="row">
+          @for (m of downloads(); track m.path) {
+            <a class="btn-pill" [href]="analysis.fileUrl(m.path)" [title]="m.caption" download>{{
+              m.title
+            }}</a>
+          }
+        </div>
+      </section>
+    }
+  } @else if (!running()) {
+    <section class="block">
+      <p class="muted">{{ 'insights.empty' | transloco }}</p>
+      <div class="row">
+        @for (key of examples; track key) {
+          <button class="btn-pill" type="button" [disabled]="harness.busy()" (click)="ask(key)">
+            {{ key | transloco }}
+          </button>
+        }
+      </div>
+    </section>
+  }
+</app-side-panel>

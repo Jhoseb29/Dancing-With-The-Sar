@@ -8,7 +8,7 @@
     "basin": "Cuenca",
     "temporal": "Lab temporal",
     "risk": "Riesgo",
-    "insights": "Explicaciones",
+    "insights": "Análisis NISAR",
     "provenance": "Procedencia",
     "language": "Idioma",
     "menu": "Menú",
@@ -136,6 +136,24 @@
       "cancelled": "Cancelaste el análisis.",
       "network": "No hay conexión con el servidor.",
       "unknown": "Ocurrió un error inesperado."
+    },
+    "showOnGlobe": "Ver en el globo ({{n}} tomas)",
+    "voice": {
+      "talk": "Hablar",
+      "stop": "Detener",
+      "speakNow": "Habla ahora…",
+      "readReplies": "Leer respuestas",
+      "privacy": "El dictado usa el reconocimiento de voz de tu navegador (Chrome lo procesa en Google, Edge en Microsoft). El micrófono solo se activa cuando lo pulsas y nuestro servidor no guarda el audio.",
+      "privacyOk": "Entendido, hablar",
+      "errors": {
+        "not-supported": "Tu navegador no reconoce voz (prueba Chrome o Edge). Puedes seguir escribiendo.",
+        "not-allowed": "No hay permiso para usar el micrófono. Actívalo en el navegador.",
+        "service-not-allowed": "El navegador no permite el reconocimiento de voz aquí.",
+        "audio-capture": "No se encontró un micrófono.",
+        "network": "El reconocimiento de voz necesita conexión a internet.",
+        "language-not-supported": "El navegador no reconoce voz en este idioma.",
+        "start-failed": "No se pudo iniciar el micrófono. Intenta de nuevo."
+      }
     }
   },
   "events": {
@@ -164,5 +182,35 @@
   },
   "panel": {
     "hide": "Ocultar"
+  },
+  "insights": {
+    "kicker": "Radar NISAR · análisis en el globo",
+    "title": "Análisis NISAR",
+    "empty": "Haz una pregunta (en el chat o con un ejemplo) y el resultado aparecerá aquí sobre el globo: cada toma del satélite coloreada por mecanismo de dispersión y los puntos donde hubo cambios.",
+    "focus": "Centrar en el área",
+    "takes": "Tomas del satélite",
+    "layer": "Capa",
+    "opacity": "Opacidad",
+    "changes": "Cambios entre tomas",
+    "showOnGlobe": "En el globo",
+    "composition": "Composición",
+    "cell": "Punto seleccionado",
+    "clickHint": "Haz clic en un objeto o en cualquier punto del globo para ver qué midió el radar.",
+    "classes": {
+      "water": "Agua",
+      "soil": "Suelo desnudo",
+      "vegetation": "Vegetación",
+      "urban": "Urbano / rebote doble",
+      "nodata": "Sin datos"
+    },
+    "kinds": {
+      "perdida_vegetacion": "Pérdida de vegetación",
+      "nueva_agua": "Agua nueva",
+      "perdida_agua": "Agua que desapareció",
+      "nuevo_urbano": "Nuevo urbano / rebote doble",
+      "cambio": "Cambio de brillo"
+    },
+    "objectArea": "Objeto de {{km2}} km²",
+    "objectMean": "Promedio del objeto"
   }
 }

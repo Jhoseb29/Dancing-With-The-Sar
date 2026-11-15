@@ -11,6 +11,7 @@ import {
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { HarnessMedia } from '../../core/harness/harness.model';
 import { HarnessService, HarnessTurn } from '../../core/services/harness.service';
+import { VoiceService } from '../../core/services/voice.service';
 import { MarkdownPipe } from '../../shared/pipes/markdown.pipe';
 
 const EXAMPLES = [
@@ -29,7 +30,9 @@ const EXAMPLES = [
 })
 export class HarnessDockComponent {
   protected readonly harness = inject(HarnessService);
+  protected readonly voice = inject(VoiceService);
   private readonly i18n = inject(TranslocoService);
+  protected readonly askPrivacy = signal(false);
   protected readonly examples = EXAMPLES;
   protected readonly open = signal(false);
   protected readonly draft = signal('');
@@ -63,10 +66,26 @@ export class HarnessDockComponent {
     if (this.harness.busy() || !text.trim()) {
       return;
     }
+    this.voice.interrupt();
     void this.harness.ask(text);
     this.draft.set('');
     const el = this.input()?.nativeElement;
     if (el) el.value = '';
+  }
+
+  /** Dictar la pregunta: al terminar de hablar se envía sola. */
+  protected onMic(): void {
+    if (!this.voice.privacyAcknowledged() && !this.voice.listening()) {
+      this.askPrivacy.set(true);
+      return;
+    }
+    void this.voice.listen((text) => this.send(text));
+  }
+
+  protected acceptPrivacy(): void {
+    this.askPrivacy.set(false);
+    this.voice.acknowledgePrivacy();
+    this.onMic();
   }
 
   protected sendExample(key: string): void {

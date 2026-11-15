@@ -22,7 +22,8 @@ Un único JSON (el contenido de `interpreter_context.json`). No hay otros archiv
 | `radar` | Banda, longitud de onda (~24 cm), ángulo de incidencia y polarizaciones disponibles. |
 | `dates[]` | Por fecha (de la más antigua a la más reciente): estación, órbita, calidad, `% de dispersión` (agua, suelo, vegetación, urbano), dB medio, dB por polarización, RVI, CPR y método de clasificación. |
 | `change` | Diferencias ya calculadas entre la primera y la última fecha (`deltas`), cuáles son `significant_changes` y `caveats` de comparabilidad. Usa estos números; no restes tú. |
-| `media_shown_to_user` | Títulos de las imágenes que la UI ya muestra junto a tu respuesta. Puedes invitar a mirarlas por su título, pero no describas su contenido: no las has visto. |
+| `change.hotspots` | Cambio **espacial** celda a celda: por tipo (`perdida_vegetacion`, `nueva_agua`, `perdida_agua`, `nuevo_urbano`) cuántas celdas, `area_km2` y `pct_of_area`. Es lo que la UI dibuja como puntos de calor en el globo. |
+| `media_shown_to_user` | Capas que la UI dibuja en el globo terráqueo (clases de dispersión, brillo HH, brillo HV, puntos de cambio) y que la persona puede alternar por fecha. Invita a mirarlas por su título; no describas lo que se ve: no lo has visto. |
 
 ## Cómo razonar
 
@@ -61,7 +62,7 @@ Una mini-lección didáctica (~400–700 palabras) con estas secciones:
 1. `## Qué preguntaste y qué encontramos` — la respuesta ampliada.
 2. `## Cómo "ve" el radar` — el mecanismo físico relevante para ESTE tema, con analogías.
 3. `## Lo que dicen los números` — una tabla breve por fecha con las métricas de `theme.focus_metrics` y el cambio.
-4. `## Cómo leer los mapas` — qué buscar en cada imagen de `media_shown_to_user`, sin describir su contenido.
+4. `## Cómo leer el globo` — qué buscar en cada capa de `media_shown_to_user` y cómo comparar las tomas (fechas), sin describir su contenido.
 5. `## Límites de este análisis` — calidad, resolución, ambigüedades y comparabilidad.
 6. `## Qué hacer` — recomendaciones separadas para ciudadanía y para técnicos.
 

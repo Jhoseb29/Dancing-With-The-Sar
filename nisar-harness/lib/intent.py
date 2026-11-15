@@ -14,7 +14,7 @@ from typing import Any
 from .claude_cli import ask_structured
 from .regions import REGIONS, Region, bbox_overlap_fraction
 from .settings import Settings
-from .themes import THEMES, get_theme
+from .themes import THEMES, get_theme, theme_from_text
 
 log = logging.getLogger("nisar.intent")
 
@@ -74,6 +74,27 @@ def parse_intent(text: str, settings: Settings, today: date | None = None) -> In
     )
     intent = normalise(text, result.data, today)
     intent.usage = result.usage
+    return intent
+
+
+def offline_intent(text: str, today: date | None = None, reason: str = "") -> Intent:
+    """Deterministic fallback when Claude is unavailable (e.g. subscription limit reached):
+    theme from keywords, place only from curated regions. Never guesses a bbox."""
+    low = text.lower()
+    region = next((r for r in REGIONS if any(a in low for a in r.aliases)), None)
+    raw = {
+        "place_name": region.name if region else None,
+        "bbox": list(region.bbox) if region else None,
+        "theme": theme_from_text(text),
+        "language": "es",
+        "confidence": 0.5 if region else 0.0,
+        "needs_clarification": region is None,
+        "clarification_question": None if region else (
+            "El asistente que interpreta lugares no está disponible ahora mismo. Nombra una región conocida "
+            "(" + ", ".join(r.name for r in REGIONS) + ") o vuelve a intentarlo en un rato."),
+    }
+    intent = normalise(text, raw, today or date.today())
+    intent.notes.append(f"parser determinista (Claude no disponible{': ' + reason[:120] if reason else ''})")
     return intent
 
 

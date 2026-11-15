@@ -8,7 +8,7 @@
     "basin": "Basin",
     "temporal": "Time lab",
     "risk": "Risk",
-    "insights": "Insights",
+    "insights": "NISAR analysis",
     "provenance": "Provenance",
     "language": "Language",
     "menu": "Menu",
@@ -136,6 +136,24 @@
       "cancelled": "You cancelled the analysis.",
       "network": "No connection to the server.",
       "unknown": "An unexpected error occurred."
+    },
+    "showOnGlobe": "View on the globe ({{n}} takes)",
+    "voice": {
+      "talk": "Talk",
+      "stop": "Stop",
+      "speakNow": "Speak now…",
+      "readReplies": "Read replies",
+      "privacy": "Dictation uses your browser's speech recognition (Chrome processes it at Google, Edge at Microsoft). The microphone only turns on when you press it and our server does not store audio.",
+      "privacyOk": "Got it, talk",
+      "errors": {
+        "not-supported": "Your browser does not support speech recognition (try Chrome or Edge). You can keep typing.",
+        "not-allowed": "No permission to use the microphone. Enable it in the browser.",
+        "service-not-allowed": "The browser does not allow speech recognition here.",
+        "audio-capture": "No microphone was found.",
+        "network": "Speech recognition needs an internet connection.",
+        "language-not-supported": "The browser does not recognize speech in this language.",
+        "start-failed": "Could not start the microphone. Try again."
+      }
     }
   },
   "events": {
@@ -164,5 +182,35 @@
   },
   "panel": {
     "hide": "Hide"
+  },
+  "insights": {
+    "kicker": "NISAR radar · analysis on the globe",
+    "title": "NISAR analysis",
+    "empty": "Ask a question (in the chat or with an example) and the result will appear here on the globe: each satellite take coloured by scattering mechanism and the spots where things changed.",
+    "focus": "Center on the area",
+    "takes": "Satellite takes",
+    "layer": "Layer",
+    "opacity": "Opacity",
+    "changes": "Changes between takes",
+    "showOnGlobe": "On the globe",
+    "composition": "Composition",
+    "cell": "Selected point",
+    "clickHint": "Click an object or any spot on the globe to see what the radar measured.",
+    "classes": {
+      "water": "Water",
+      "soil": "Bare soil",
+      "vegetation": "Vegetation",
+      "urban": "Urban / double bounce",
+      "nodata": "No data"
+    },
+    "kinds": {
+      "perdida_vegetacion": "Vegetation loss",
+      "nueva_agua": "New water",
+      "perdida_agua": "Water that disappeared",
+      "nuevo_urbano": "New urban / double bounce",
+      "cambio": "Brightness change"
+    },
+    "objectArea": "Object of {{km2}} km²",
+    "objectMean": "Object average"
   }
 }

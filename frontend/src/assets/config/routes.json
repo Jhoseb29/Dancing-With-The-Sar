@@ -39,8 +39,8 @@
       "id": "insights",
       "path": "explicaciones",
       "titleKey": "nav.insights",
-      "engine": "none",
-      "status": "pending-backend"
+      "engine": "map",
+      "status": "ready"
     },
     {
       "id": "provenance",

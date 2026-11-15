@@ -7,9 +7,21 @@
           {{ (harness.busy() ? 'harness.running' : 'harness.subtitle') | transloco }}
         </p>
       </div>
-      <button class="btn-secondary small" type="button" (click)="toggle()">
-        {{ 'harness.close' | transloco }}
-      </button>
+      <div class="head-actions">
+        @if (voice.outputSupported) {
+          <button
+            class="btn-pill small"
+            type="button"
+            [attr.aria-pressed]="voice.readReplies()"
+            (click)="voice.setReadReplies(!voice.readReplies())"
+          >
+            {{ 'harness.voice.readReplies' | transloco }}
+          </button>
+        }
+        <button class="btn-secondary small" type="button" (click)="toggle()">
+          {{ 'harness.close' | transloco }}
+        </button>
+      </div>
     </header>
 
     <ol #log class="log" aria-live="polite">
@@ -102,6 +114,12 @@
                   </p>
                 }
 
+                @if (payload.globe?.takes?.length; as n) {
+                  <button class="btn-ghost small" type="button" (click)="harness.showOnGlobe(turn)">
+                    {{ 'harness.showOnGlobe' | transloco: { n } }}
+                  </button>
+                }
+
                 @if (images(turn).length) {
                   <div class="gallery">
                     @for (m of images(turn); track m.path) {
@@ -175,6 +193,23 @@
       }
     </ol>
 
+    @if (voice.listening() || voice.interim()) {
+      <p class="interim" aria-live="polite">
+        {{ voice.interim() || ('harness.voice.speakNow' | transloco) }}
+      </p>
+    }
+    @if (askPrivacy()) {
+      <div class="notice" role="alertdialog">
+        <p>{{ 'harness.voice.privacy' | transloco }}</p>
+        <button class="btn-ghost small" type="button" (click)="acceptPrivacy()">
+          {{ 'harness.voice.privacyOk' | transloco }}
+        </button>
+      </div>
+    }
+    @if (voice.error(); as verr) {
+      <p class="caption">{{ 'harness.voice.errors.' + verr | transloco }}</p>
+    }
+
     <form class="composer" (submit)="$event.preventDefault(); send()">
       <label class="sr-only" for="harness-input">{{ 'harness.placeholder' | transloco }}</label>
       <textarea
@@ -187,6 +222,17 @@
         (input)="draft.set($any($event.target).value)"
         (keydown)="onKeydown($event)"
       ></textarea>
+      <button
+        class="btn-ghost mic"
+        type="button"
+        [class.live]="voice.listening()"
+        [disabled]="!voice.inputSupported || harness.busy()"
+        [attr.aria-pressed]="voice.listening()"
+        [title]="voice.inputSupported ? '' : ('harness.voice.errors.not-supported' | transloco)"
+        (click)="onMic()"
+      >
+        {{ (voice.listening() ? 'harness.voice.stop' : 'harness.voice.talk') | transloco }}
+      </button>
       <button class="btn-ghost" type="submit" [disabled]="harness.busy() || !draft().trim()">
         {{ 'harness.send' | transloco }}
       </button>
