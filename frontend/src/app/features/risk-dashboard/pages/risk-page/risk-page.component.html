@@ -13,23 +13,36 @@
     </p>
   </div>
 
-  <div class="tabs" role="tablist">
-    @for (t of tabs; track t) {
-      <button type="button" role="tab" [attr.aria-selected]="tab() === t" (click)="tab.set(t)">
+  <div class="tabs" role="tablist" [attr.aria-label]="'risk.title' | transloco">
+    @for (t of tabs; track t; let idx = $index) {
+      <button
+        type="button"
+        role="tab"
+        [id]="'risk-tab-' + t"
+        [attr.aria-selected]="tab() === t"
+        [attr.tabindex]="tab() === t ? 0 : -1"
+        (click)="selectTab(t)"
+        (keydown)="onTabKeydown($event, idx)"
+      >
         {{ 'risk.tabs.' + t | transloco }}
       </button>
     }
   </div>
 
-  @switch (tab()) {
-    @case ('now') {
-      <app-stations-panel />
+  <div role="tabpanel" [attr.aria-labelledby]="'risk-tab-' + tab()">
+    @switch (tab()) {
+      @case ('now') {
+        <app-stations-panel />
+      }
+      @case ('tanks') {
+        <app-tanks-panel />
+      }
+      @case ('how') {
+        <app-how-it-works />
+      }
+      @case ('eval') {
+        <app-eval-view [evaluation]="alerts.evaluation()" />
+      }
     }
-    @case ('how') {
-      <app-how-it-works />
-    }
-    @case ('eval') {
-      <app-eval-view [evaluation]="alerts.evaluation()" />
-    }
-  }
+  </div>
 </app-side-panel>

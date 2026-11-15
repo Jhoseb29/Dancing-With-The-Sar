@@ -1,0 +1,165 @@
+<header class="head">
+  <div>
+    <h2 class="label">{{ 'risk.tanks.title' | transloco }}</h2>
+    <p class="sub">{{ 'risk.tanks.subtitle' | transloco }}</p>
+  </div>
+  @if (tanks.network(); as net) {
+    <span class="badge" [attr.data-mode]="net.analysis_source">
+      {{
+        net.analysis_source === 'gemini'
+          ? ('risk.tanks.modeGemini' | transloco)
+          : ('risk.tanks.modeHydro' | transloco)
+      }}
+    </span>
+  }
+</header>
+
+@if (tanks.loading() && !tanks.network()) {
+  <div class="status-box" role="status" aria-live="polite">
+    <p class="sub">{{ 'risk.tanks.loading' | transloco }}</p>
+  </div>
+} @else if (tanks.error() && !tanks.network()) {
+  <div class="status-box error" role="alert">
+    <p>{{ tanks.error() }}</p>
+    <button type="button" class="btn-action" (click)="tanks.load(true)">
+      {{ 'risk.tanks.retry' | transloco }}
+    </button>
+  </div>
+} @else if (tanks.network(); as net) {
+  <div class="kpis">
+    <div class="kpi">
+      <span class="kpi-val">{{ net.summary.tanks_count }}</span>
+      <span class="kpi-lbl">{{ 'risk.tanks.kpiTanks' | transloco }}</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-val">{{ net.summary.total_storage_m3 }} m³</span>
+      <span class="kpi-lbl">{{ 'risk.tanks.kpiStorage' | transloco }}</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-val" style="color: #eab308">{{ net.summary.drought_targets_covered }}/{{ net.summary.drought_targets_total }}</span>
+      <span class="kpi-lbl">{{ 'risk.tanks.kpiDrought' | transloco }}</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-val" style="color: #fb7185">{{ net.summary.fire_hotspots_covered }}/{{ net.summary.fire_hotspots_total }}</span>
+      <span class="kpi-lbl">{{ 'risk.tanks.kpiFires' | transloco }}</span>
+    </div>
+  </div>
+
+  <section class="ai-card">
+    <div class="row">
+      <strong>{{ net.analysis.headline }}</strong>
+    </div>
+    <p class="body-copy">{{ net.analysis.executive_summary }}</p>
+
+    <div class="dual-notes">
+      <div class="note" style="border-left-color: #eab308">
+        <span class="note-kicker">{{ 'risk.tanks.droughtFocus' | transloco }}</span>
+        <p>{{ net.analysis.drought_strategy }}</p>
+      </div>
+      <div class="note" style="border-left-color: #fb7185">
+        <span class="note-kicker">{{ 'risk.tanks.fireFocus' | transloco }}</span>
+        <p>{{ net.analysis.wildfire_strategy }}</p>
+      </div>
+    </div>
+
+    <form class="prompt-row" (submit)="runAnalysis($event)">
+      <input
+        type="text"
+        class="field"
+        [value]="focusQuery()"
+        (input)="onFocusInput($event)"
+        [placeholder]="'risk.tanks.promptPlaceholder' | transloco"
+        [attr.aria-label]="'risk.tanks.promptPlaceholder' | transloco"
+      />
+      <button type="submit" class="btn-action" [disabled]="tanks.analyzing()">
+        {{ tanks.analyzing() ? ('risk.tanks.analyzing' | transloco) : ('risk.tanks.analyzeBtn' | transloco) }}
+      </button>
+    </form>
+
+    <details class="actions-details">
+      <summary>{{ 'risk.tanks.actionsTitle' | transloco }}</summary>
+      <ul class="actions-list">
+        @for (a of net.analysis.priority_actions; track a.tank_id) {
+          <li>
+            <strong>{{ a.title }}</strong>
+            <span>{{ a.impact }}</span>
+          </li>
+        }
+      </ul>
+      <p class="caption">{{ net.analysis_note }}</p>
+    </details>
+  </section>
+
+  <div class="filters" role="group" [attr.aria-label]="'risk.tanks.filterLabel' | transloco">
+    @for (f of filters; track f) {
+      <button
+        type="button"
+        class="chip"
+        [attr.aria-pressed]="tanks.roleFilter() === f"
+        (click)="tanks.roleFilter.set(f)"
+      >
+        {{ 'risk.tanks.roles.' + f | transloco }}
+        @if (f !== 'all') {
+          <span class="chip-count">({{ trackRoleCount(f) }})</span>
+        }
+      </button>
+    }
+  </div>
+
+  <div class="legend-line">
+    <span><i class="dot" style="background: #38bdf8"></i> {{ 'risk.tanks.legendDroughtLink' | transloco }}</span>
+    <span><i class="dot" style="background: #fb7185"></i> {{ 'risk.tanks.legendFireLink' | transloco }}</span>
+  </div>
+
+  <ul class="cards">
+    @for (t of tanks.filteredTanks(); track t.id) {
+      <li>
+        <button
+          type="button"
+          class="card"
+          [class.active]="tanks.selectedTankId() === t.id"
+          (click)="tanks.selectTank(t.id)"
+        >
+          <span class="row">
+            <strong>{{ t.id }} · {{ isEn() ? t.name_en : t.name_es }}</strong>
+            <span class="tag" [style.border-color]="roleColors[t.role]" [style.color]="roleColors[t.role]">
+              {{ 'risk.tanks.roles.' + t.role | transloco }}
+            </span>
+          </span>
+          <span class="sub">
+            {{ t.elevation_m }} m s.n.m. · {{ t.slope_deg }}° · {{ 'risk.tanks.storageLabel' | transloco }}
+            <b>{{ t.recommended_capacity_m3 }} m³</b>
+          </span>
+          <span class="targets">
+            @if (t.nearby_drought_targets[0]; as dr) {
+              <span class="target-chip drought">
+                {{ 'risk.tanks.nearDrought' | transloco }}: <b>{{ isEn() ? dr.name_en : dr.name_es }}</b> ({{ dr.distance_km }} km ·
+                {{ dr.gravity_fed ? '+' + dr.elevation_diff_m + ' m' : ('risk.tanks.pumped' | transloco) }})
+              </span>
+            }
+            @if (t.nearby_fire_targets[0]; as fr) {
+              <span class="target-chip fire">
+                {{ 'risk.tanks.nearFire' | transloco }}: <b>{{ fr.zone_label }}</b> ({{ fr.distance_km }} km · {{ fr.hotspots_count }}
+                {{ 'risk.tanks.hotspots' | transloco }})
+              </span>
+            }
+          </span>
+        </button>
+
+        @if (tanks.selectedTankId() === t.id) {
+          <details class="tech-box" open>
+            <summary>{{ 'risk.tanks.techSummary' | transloco }}</summary>
+            <div class="tech-grid">
+              <span>{{ 'risk.tanks.rain30d' | transloco }}: <b>{{ t.rain_30d_mm }} mm</b></span>
+              <span>{{ 'risk.tanks.dryDays' | transloco }}: <b>{{ t.dry_days_60d }} / 60 d</b></span>
+              <span>{{ 'risk.tanks.harvest30d' | transloco }}: <b>{{ t.harvest_30d_m3 }} m³</b></span>
+              <span>{{ 'risk.tanks.captureHa' | transloco }}: <b>{{ t.effective_capture_ha }} ha (C={{ t.runoff_coeff }})</b></span>
+              <span>D8 Acc: <b>{{ t.flow_acc_cells }} celdas</b></span>
+              <span>TWI: <b>{{ t.twi }}</b></span>
+            </div>
+          </details>
+        }
+      </li>
+    }
+  </ul>
+}

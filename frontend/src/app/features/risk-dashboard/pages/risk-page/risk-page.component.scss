@@ -26,21 +26,37 @@ p {
 
 .tabs {
   display: flex;
+  flex: none;
+  flex-shrink: 0;
+  min-block-size: 42px;
+  overflow-x: auto;
+  scrollbar-width: none;
   border-bottom: var(--border-hairline) solid var(--color-dark-gunmetal);
 
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
   button {
-    flex: 1;
-    padding: var(--spacing-10) 0;
+    flex: 1 0 auto;
+    min-block-size: 40px;
+    padding: var(--spacing-10) var(--spacing-10);
     border: 0;
     border-bottom: 2px solid transparent;
     background: none;
     color: var(--color-muted-text);
     font: inherit;
+    white-space: nowrap;
     cursor: pointer;
 
     &[aria-selected='true'] {
       color: var(--color-star-white);
       border-bottom-color: var(--color-star-white);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-star-white);
+      outline-offset: -2px;
     }
   }
 }

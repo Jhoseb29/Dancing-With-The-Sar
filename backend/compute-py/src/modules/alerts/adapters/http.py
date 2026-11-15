@@ -17,10 +17,13 @@ import json
 import logging
 from functools import lru_cache
 
-from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel
 
 from config.settings import get_settings
 from modules.alerts.application.feed import AlertFeed
+from modules.basin_risk.adapters.http import basin_service
+from modules.basin_risk.application.tank_network import TankNetworkService
 
 router = APIRouter(prefix="/api/alerts")
 log = logging.getLogger(__name__)
@@ -79,6 +82,39 @@ def evaluation() -> dict:
         if history_file.exists() else []
     latest = _read_json(evals / history[-1]["eval_id"] / "scorecard.json") if history else None
     return {"latest": latest, "history": history}
+
+
+@lru_cache
+def tank_service() -> TankNetworkService:
+    s = get_settings()
+    bs = basin_service()
+    return TankNetworkService(
+        dem=bs._dem,
+        precip=bs._precip,
+        firms_client=bs._firms,
+        districts_path=s.alerts_harness_dir / "data" / "districts.geojson",
+    )
+
+
+class TankAnalyzeBody(BaseModel):
+    focus: str | None = None
+    lang: str = "es"
+
+
+@router.get("/tanks")
+async def strategic_tanks(refresh: bool = False) -> dict:
+    try:
+        return await tank_service().network(force_refresh=refresh)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail={"code": "tank_network_error", "message": str(exc)}) from exc
+
+
+@router.post("/tanks/analyze")
+async def analyze_strategic_tanks(body: TankAnalyzeBody) -> dict:
+    try:
+        return await tank_service().analyze(focus_question=body.focus, lang=body.lang)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail={"code": "tank_analyze_error", "message": str(exc)}) from exc
 
 
 @router.websocket("/ws")

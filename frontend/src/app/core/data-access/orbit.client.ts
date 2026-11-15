@@ -26,7 +26,7 @@ export async function fetchOrbitElements(apiBaseUrl: string, cacheHours: number)
   const contentType = response.headers.get('content-type') ?? '';
   const elements = contentType.includes('application/json')
     ? ((await response.json()) as OrbitElements)
-    : parseTle(await response.text(), 'CelesTrak (proxy de desarrollo)');
+    : parseTle(await response.text(), 'CelesTrak');
 
   writeCache(elements);
   return elements;

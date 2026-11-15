@@ -335,44 +335,6 @@
         "en": "16-day NDVI vegetation index: deep green is dense, healthy vegetation; yellow and brown, sparse vegetation or dry soil."
       },
       "defaultPlaceId": "bolivia"
-    },
-    {
-      "id": "deformation",
-      "name": {
-        "es": "Deformación del suelo",
-        "en": "Ground deformation"
-      },
-      "keywords": {
-        "es": [
-          "deslizamiento",
-          "deslizamientos",
-          "hundimiento",
-          "subsidencia",
-          "deformación",
-          "terremoto",
-          "sismo",
-          "ladera"
-        ],
-        "en": [
-          "landslide",
-          "landslides",
-          "subsidence",
-          "deformation",
-          "earthquake",
-          "slope"
-        ]
-      },
-      "available": false,
-      "layers": [],
-      "howToRead": {
-        "es": "Se mostrará el desplazamiento del suelo en milímetros medido por interferometría NISAR (GUNW).",
-        "en": "Will show ground displacement in millimeters measured by NISAR interferometry (GUNW)."
-      },
-      "unavailableReason": {
-        "es": "Los interferogramas NISAR (GUNW) todavía no están procesados en el backend del proyecto.",
-        "en": "NISAR interferograms (GUNW) are not processed yet in the project backend."
-      },
-      "defaultPlaceId": "north-zone-2750"
     }
   ]
 }

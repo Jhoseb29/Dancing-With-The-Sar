@@ -78,27 +78,6 @@
         -17.24657
       ],
       "source": "GAMC WMS · Cuencas de Influencia (extensión del servicio)"
-    },
-    {
-      "id": "north-zone-2750",
-      "name": {
-        "es": "Zona norte · Cota 2750",
-        "en": "North zone · 2750 m contour"
-      },
-      "aliases": [
-        "cota 2750",
-        "zona norte",
-        "pie del tunari",
-        "tunari"
-      ],
-      "kind": "zone",
-      "bbox": [
-        -66.193763,
-        -17.367136,
-        -66.103902,
-        -17.257306
-      ],
-      "source": "GAMC WMS · Cota 2750 (extensión del servicio)"
     }
   ]
 }

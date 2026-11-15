@@ -45,7 +45,7 @@ export class BasinMapPageComponent {
   private readonly ui = inject(UiConfigService);
   private readonly apiBaseUrl = inject(RuntimeConfigService).value.apiBaseUrl;
 
-  protected readonly quickPlaces = ['cochabamba-basin', 'cochabamba-city', 'north-zone-2750'];
+  protected readonly quickPlaces = ['cochabamba-basin', 'cochabamba-city'];
   protected readonly modes: readonly AnalysisMode[] = ['integrated', 'change', 'water', 'nisar', 'rain'];
   protected readonly activeMode = signal<AnalysisMode>('integrated');
   protected readonly overview = signal<BasinOverview | null>(null);

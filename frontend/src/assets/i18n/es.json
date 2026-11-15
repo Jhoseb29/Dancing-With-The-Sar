@@ -6,10 +6,8 @@
   "nav": {
     "orbit": "Órbita",
     "basin": "Cuenca",
-    "temporal": "Lab temporal",
     "risk": "Alertas",
     "insights": "Ecos del radar",
-    "provenance": "Procedencia",
     "language": "Idioma",
     "menu": "Menú",
     "events": "Eventos"
@@ -34,12 +32,14 @@
     "ascending": "Ascendente",
     "descending": "Descendente",
     "upcoming": "Próximos pasos (48 h)",
-    "speedControl": "Velocidad del tiempo",
+    "speedControl": "Controles de órbita y tiempo",
     "now": "Ahora",
     "follow": "Seguir a NISAR",
     "home": "Vista global",
     "toBasin": "Ver Cochabamba",
-    "legendOrbit": "Órbita",
+    "legendTitle": "Capas orbitales",
+    "legendNisar": "NISAR (banda L)",
+    "legendSentinel": "Sentinel-1 (banda C)",
     "legendFuture": "Traza próxima",
     "legendPast": "Traza anterior",
     "legendSwath": "Franja ilustrativa ~{{km}} km",
@@ -50,19 +50,7 @@
     "tleSource": "Fuente",
     "tleStale": "Los elementos orbitales tienen más de {{days}} días: la posición puede ser imprecisa.",
     "loading": "Cargando órbita de NISAR…",
-    "error": "No se pudo obtener la órbita de NISAR",
-    "lastAcquisition": "Última adquisición real de Cochabamba",
-    "pendingCatalog": "Se mostrará cuando el catálogo del backend esté disponible."
-  },
-  "pending": {
-    "kicker": "En preparación",
-    "body": "Esta vista usa datos reales que todavía está preparando el backend. Sin datos inventados: aparecerá en cuanto el pipeline los publique.",
-    "needs": "Necesita",
-    "back": "Volver a la órbita",
-    "temporal": "Comparación época seca vs lluvias con NISAR y lluvia GPM IMERG.",
-    "risk": "Riesgo por cuenca: laderas del Tunari vs valle del Rocha.",
-    "insights": "Explicaciones para ciudadanía, defensa civil y técnicos (Harness 2).",
-    "provenance": "Manifiestos, madurez de datos y juicio del Harness 1."
+    "error": "No se pudo obtener la órbita de NISAR"
   },
   "basin": {
     "kicker": "Cuenca · Cochabamba",
@@ -115,7 +103,7 @@
     "modesHint": "Elige la vista operativa derivada de Copernicus DEM (30 m), lluvia NASA y radar sobre Cochabamba.",
     "mode": {
       "integrated": {
-        "title": "Alerta integrada (recomendada)",
+        "title": "Alerta integrada",
         "desc": "Cruza torrenteras del Tunari, Cota 2750 m, lluvia diaria y agua superficial OPERA."
       },
       "change": {
@@ -275,9 +263,15 @@
     "type": "Tipo de evento",
     "place": "Lugar",
     "day": "Día mostrado",
+    "dayLabel": "Elegir día mostrado",
     "prev": "Día anterior",
     "next": "Día siguiente",
-    "range": "Rango del evento: {{start}} → {{end}}",
+    "rangeLabel": "Rango del evento",
+    "rangeStart": "Desde",
+    "rangeEnd": "Hasta",
+    "rangeAdjustedSpan": "El rango máximo para estadísticas de incendios es de 2 años; se ajustó el límite.",
+    "rangeAdjustedOrder": "Se ajustó el rango para mantener el inicio anterior al fin.",
+    "invalidDate": "Ingresa una fecha válida entre {{min}} y {{max}}.",
     "howToRead": "Cómo leer esta imagen",
     "fireStats": "Focos de calor (NASA FIRMS)",
     "statsLoading": "Consultando NASA FIRMS… la primera vez puede tardar.",
@@ -338,8 +332,46 @@
     },
     "tabs": {
       "now": "Ahora",
+      "tanks": "Tanques",
       "how": "¿Cómo sabemos?",
       "eval": "¿Funciona?"
+    },
+    "tanks": {
+      "title": "Red de tanques pluviales",
+      "subtitle": "Cosecha estratégica para sequía e incendios cercanos (DEM 30 m · POWER · FIRMS)",
+      "modeGemini": "Gemini IA",
+      "modeHydro": "Hidro + FIRMS",
+      "loading": "Calculando nodos de captación, déficit hídrico y focos FIRMS…",
+      "retry": "Reintentar",
+      "kpiTanks": "Tanques",
+      "kpiStorage": "Reserva",
+      "kpiDrought": "Sequía cub.",
+      "kpiFires": "Focos cub.",
+      "droughtFocus": "Cobertura sequía",
+      "fireFocus": "Cobertura incendios",
+      "promptPlaceholder": "Foco opcional (ej. Arrumani y Sacaba)…",
+      "analyzeBtn": "Analizar red",
+      "analyzing": "Analizando…",
+      "actionsTitle": "Ver acciones priorizadas",
+      "filterLabel": "Filtrar tanques por rol",
+      "roles": {
+        "all": "Todos",
+        "dual": "Dual",
+        "drought": "Sequía",
+        "fire": "Incendios"
+      },
+      "legendDroughtLink": "Enlace sequía",
+      "legendFireLink": "Enlace incendios FIRMS",
+      "storageLabel": "Tanque",
+      "nearDrought": "Sequía",
+      "nearFire": "Incendio",
+      "pumped": "bombeo",
+      "hotspots": "focos",
+      "techSummary": "Respaldo físico y captación",
+      "rain30d": "Lluvia 30 d",
+      "dryDays": "Días secos",
+      "harvest30d": "Cosecha est. 30 d",
+      "captureHa": "Área toma"
     },
     "hero": {
       "rojo": "Peligro alto en la ciudad",

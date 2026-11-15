@@ -1,8 +1,9 @@
 import { EffectRef, Injectable, Injector, effect, inject, signal, untracked } from '@angular/core';
 import { DETAIL_IMAGERY } from '../config/detail-imagery';
 import { ALERT_HEX, RED_DISTRICTS, Station } from '../alerts/stations.model';
-import type { Feature, FeatureCollection, Polygon } from 'geojson';
+import type { Feature, FeatureCollection, LineString, Point, Polygon } from 'geojson';
 import type { RainPayload } from '../alerts/alerts.model';
+import type { StrategicTankNode, TankNetworkResponse, TankRole } from '../data-access/tanks.client';
 import type { BBox } from '../config/runtime-config.model';
 import { RuntimeConfigService } from '../config/runtime-config.service';
 import { UiConfigService } from '../config/ui-config.service';
@@ -28,6 +29,7 @@ import { EventService } from './event.service';
 import { AlertsService } from './alerts.service';
 import { BasinsService } from './basins.service';
 import { StationsService } from './stations.service';
+import { TanksService } from './tanks.service';
 import { BASIN_TYPE_HEX, LEVEL_HEX, NO_DATA_HEX } from '../alerts/zone-colors';
 import { HarnessGlobeService, ObjectProps } from './harness-globe.service';
 
@@ -84,6 +86,7 @@ export class GeoEngineService {
   private readonly analysis = inject(HarnessGlobeService);
   private readonly alerts = inject(AlertsService);
   private readonly stations = inject(StationsService);
+  private readonly tanks = inject(TanksService);
   private attachedAt = 0;
   private readonly basins = inject(BasinsService);
   private engine: GeoEngine | null = null;
@@ -238,11 +241,11 @@ export class GeoEngineService {
           this.engine?.setOverlays(overlays);
         });
       }, options),
-      // Alertas: distritos en 3D (color = nivel, altura = riesgo); se encuadran al entrar y al elegir uno.
+      // Alertas: distritos en 3D (color = nivel, altura = riesgo); se ocultan en la pestaña Tanques.
       effect(() => {
-        const onRisk = this.scene.route() === 'risk';
-        const districts = onRisk ? this.alerts.districts() : null;
-        const selected = onRisk ? this.alerts.selectedDistrictId() : null;
+        const showDistricts = this.scene.route() === 'risk' && !this.tanks.mapActive();
+        const districts = showDistricts ? this.alerts.districts() : null;
+        const selected = showDistricts ? this.alerts.selectedDistrictId() : null;
         untracked(() => {
           this.engine?.setZones(
             'districts',
@@ -261,17 +264,17 @@ export class GeoEngineService {
             },
             selected,
           );
-          if (!onRisk) {
+          if (!showDistricts) {
             this.framed.delete('districts');
             return;
           }
           this.frameZones('districts', districts?.features.map((f) => f.properties) ?? [], selected);
         });
       }, options),
-      // Alertas (sistema HidroGlobe): estaciones con su recuadro, torrenteras y mancha del escenario.
+      // Alertas (sistema HidroGlobe): estaciones con su recuadro, torrenteras y mancha (ocultas en Tanques).
       effect(() => {
-        const onRisk = this.scene.route() === 'risk';
-        const stations = onRisk ? this.stations.filtered() : [];
+        const showStations = this.scene.route() === 'risk' && !this.tanks.mapActive();
+        const stations = showStations ? this.stations.filtered() : [];
         untracked(() =>
           this.engine?.setStations(
             stations.length
@@ -288,14 +291,14 @@ export class GeoEngineService {
         );
       }, options),
       effect(() => {
-        const onRisk = this.scene.route() === 'risk';
-        const flood = onRisk ? this.stations.scenario() : null;
-        const channels = onRisk ? this.stations.torrenteras() : null;
+        const showHazard = this.scene.route() === 'risk' && !this.tanks.mapActive();
+        const flood = showHazard ? this.stations.scenario() : null;
+        const channels = showHazard ? this.stations.torrenteras() : null;
         const view = this.stations.scenarioView();
         this.stations.scenarioRequest();
         untracked(() => {
           this.engine?.setHazard(flood, channels);
-          if (onRisk && flood && view) {
+          if (showHazard && flood && view) {
             const wait = Math.max(0, 2500 - (performance.now() - this.attachedAt));
             setTimeout(() => this.engine?.flyToPoint(view.lon, view.lat, view.zoom), wait);
           }
@@ -317,6 +320,30 @@ export class GeoEngineService {
         const rain = onRisk ? this.alerts.rain() : null;
         const frame = this.alerts.rainFrame();
         untracked(() => this.engine?.setRain(rain ? rainCells(rain, frame) : null));
+      }, options),
+      // Red estratégica de tanques (sequía + incendios FIRMS) activa en la pestaña Tanques de Alertas.
+      effect(() => {
+        const active = this.scene.route() === 'risk' && this.tanks.mapActive();
+        const net = active ? this.tanks.network() : null;
+        const filtered = active ? this.tanks.filteredTanks() : [];
+        const selectedId = active ? this.tanks.selectedTankId() : null;
+        untracked(() => {
+          if (!active || !net) {
+            this.engine?.setTankNetwork(null, null, null);
+            return;
+          }
+          const built = buildTankMapLayers(net, filtered, selectedId);
+          this.engine?.setTankNetwork(built.tanks, built.links, built.targets, (id) => this.tanks.selectTank(id));
+        });
+      }, options),
+      effect(() => {
+        const req = this.tanks.focusRequest();
+        const id = this.tanks.selectedTankId();
+        const active = this.scene.route() === 'risk' && this.tanks.mapActive();
+        if (req && id && active) {
+          const wait = Math.max(0, 600 - (performance.now() - this.attachedAt));
+          untracked(() => setTimeout(() => this.engine?.openTank(id), wait));
+        }
       }, options),
       // Cuenca: cuencas torrenciales como polígonos coloreados por tipo (Melton), con etiqueta.
       effect(() => {
@@ -654,4 +681,105 @@ function stationPopup(st: Station): string {
 /** Resuelve URL relativa contra baseURI preservando marcadores de tesela sin codificar. */
 function tileTemplateUrl(path: string): string {
   return new URL(path, document.baseURI).href.replace(/%7B(z|x|y|bbox-epsg-3857)%7D/gi, '{$1}');
+}
+
+const TANK_ROLE_COLOR: Record<TankRole, string> = {
+  dual: '#38bdf8',
+  drought: '#eab308',
+  fire: '#fb7185',
+};
+
+function escHtml(v: unknown): string {
+  return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+}
+
+function tankPopup(t: StrategicTankNode): string {
+  const dr = t.nearby_drought_targets[0];
+  const fr = t.nearby_fire_targets[0];
+  const color = TANK_ROLE_COLOR[t.role];
+  const drLine = dr
+    ? `<div>Sequía cercana: <b>${escHtml(dr.name_es)}</b> (${dr.distance_km} km · Δ${dr.elevation_diff_m} m)</div>`
+    : '';
+  const frLine = fr
+    ? `<div>Incendios FIRMS: <b>${escHtml(fr.zone_label)}</b> (${fr.distance_km} km · ${fr.hotspots_count} focos)</div>`
+    : '';
+  return `
+    <div class="dws-popup-head">
+      <strong>${escHtml(t.id)} · ${escHtml(t.name_es)}</strong>
+      <span class="dws-popup-tag" style="border-color:${color};color:${color}">${escHtml(t.role.toUpperCase())}</span>
+    </div>
+    <div class="muted">${escHtml(t.subbasin_name_es)} · ${t.elevation_m} m s.n.m. (${t.slope_deg}°)</div>
+    <div class="dws-popup-box">
+      <div>Reserva propuesta: <b>${t.recommended_capacity_m3} m³</b> · Cosecha 30 d: <b>${t.harvest_30d_m3} m³</b></div>
+      <div>Lluvia 30 d: <b>${t.rain_30d_mm} mm</b> · Días secos (60 d): <b>${t.dry_days_60d}</b></div>
+      ${drLine}
+      ${frLine}
+    </div>
+  `;
+}
+
+function buildTankMapLayers(
+  net: TankNetworkResponse,
+  filtered: StrategicTankNode[],
+  selectedId: string | null,
+): {
+  tanks: FeatureCollection<Point, { id: string; label: string; color: string; selected: boolean; popup: string }>;
+  links: FeatureCollection<LineString, { tankId: string; kind: 'drought' | 'fire'; selected: boolean }>;
+  targets: FeatureCollection<Point, { id: string; label: string; kind: 'drought' | 'fire'; radius: number }>;
+} {
+  const linkFeatures: Feature<LineString, { tankId: string; kind: 'drought' | 'fire'; selected: boolean }>[] = [];
+  const tankFeatures: Feature<Point, { id: string; label: string; color: string; selected: boolean; popup: string }>[] = [];
+
+  for (const t of filtered) {
+    const selected = t.id === selectedId;
+    tankFeatures.push({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [t.lon, t.lat] },
+      properties: {
+        id: t.id,
+        label: `${t.id} · ${t.recommended_capacity_m3} m³`,
+        color: TANK_ROLE_COLOR[t.role],
+        selected,
+        popup: tankPopup(t),
+      },
+    });
+    for (const dt of t.nearby_drought_targets) {
+      linkFeatures.push({
+        type: 'Feature',
+        geometry: { type: 'LineString', coordinates: [[t.lon, t.lat], [dt.lon, dt.lat]] },
+        properties: { tankId: t.id, kind: 'drought', selected },
+      });
+    }
+    for (const ft of t.nearby_fire_targets) {
+      linkFeatures.push({
+        type: 'Feature',
+        geometry: { type: 'LineString', coordinates: [[t.lon, t.lat], [ft.lon, ft.lat]] },
+        properties: { tankId: t.id, kind: 'fire', selected },
+      });
+    }
+  }
+
+  const targetFeatures: Feature<Point, { id: string; label: string; kind: 'drought' | 'fire'; radius: number }>[] = [
+    ...net.drought_targets.map((dt) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [dt.lon, dt.lat] as [number, number] },
+      properties: { id: dt.id, label: `Sequía · ${dt.id}`, kind: 'drought' as const, radius: 6 },
+    })),
+    ...net.fire_clusters.map((fc) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [fc.lon, fc.lat] as [number, number] },
+      properties: {
+        id: fc.id,
+        label: `${fc.hotspots_count} focos`,
+        kind: 'fire' as const,
+        radius: Math.min(11, 5 + Math.round(fc.hotspots_count / 6)),
+      },
+    })),
+  ];
+
+  return {
+    tanks: { type: 'FeatureCollection', features: tankFeatures },
+    links: { type: 'FeatureCollection', features: linkFeatures },
+    targets: { type: 'FeatureCollection', features: targetFeatures },
+  };
 }

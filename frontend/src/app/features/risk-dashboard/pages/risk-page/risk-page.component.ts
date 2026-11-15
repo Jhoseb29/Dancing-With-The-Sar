@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { SceneStore } from '../../../../core/scene/scene.store';
@@ -7,13 +7,15 @@ import { BasinsService } from '../../../../core/services/basins.service';
 import { HarnessService } from '../../../../core/services/harness.service';
 import { GeoEngineService } from '../../../../core/services/geo-engine.service';
 import { StationsService } from '../../../../core/services/stations.service';
+import { TanksService } from '../../../../core/services/tanks.service';
 import { MapCanvasComponent } from '../../../../shared/components/map-canvas/map-canvas.component';
 import { SidePanelComponent } from '../../../../shared/components/side-panel/side-panel.component';
 import { EvalViewComponent } from '../../components/eval-view/eval-view.component';
 import { HowItWorksComponent } from '../../components/how-it-works/how-it-works.component';
 import { StationsPanelComponent } from '../../components/stations-panel/stations-panel.component';
+import { TanksPanelComponent } from '../../components/tanks-panel/tanks-panel.component';
 
-type Tab = 'now' | 'how' | 'eval';
+type Tab = 'now' | 'tanks' | 'how' | 'eval';
 
 /** Alertas por distrito: mapa 3D (color = nivel, altura = riesgo) + panel corto. Smart. */
 @Component({
@@ -25,6 +27,7 @@ type Tab = 'now' | 'how' | 'eval';
     HowItWorksComponent,
     EvalViewComponent,
     StationsPanelComponent,
+    TanksPanelComponent,
   ],
   templateUrl: './risk-page.component.html',
   styleUrl: './risk-page.component.scss',
@@ -34,8 +37,9 @@ export class RiskPageComponent {
   protected readonly map = inject(GeoEngineService);
   protected readonly scene = inject(SceneStore);
   protected readonly alerts = inject(AlertsService);
+  protected readonly tanksSvc = inject(TanksService);
   private readonly stations = inject(StationsService);
-  protected readonly tabs: Tab[] = ['now', 'how', 'eval'];
+  protected readonly tabs: Tab[] = ['now', 'tanks', 'how', 'eval'];
   protected readonly tab = signal<Tab>('now');
   protected readonly districts = computed(() => (this.alerts.districts()?.features ?? []).map((f) => f.properties));
   private readonly basinsSvc = inject(BasinsService);
@@ -52,11 +56,35 @@ export class RiskPageComponent {
     this.alerts.connect();
     void this.basinsSvc.load();
     void this.stations.load();
+    effect(() => {
+      this.tanksSvc.mapActive.set(this.tab() === 'tanks');
+    });
     inject(DestroyRef).onDestroy(() => {
+      this.tanksSvc.mapActive.set(false);
       this.map.detach();
       this.alerts.disconnect();
       this.alerts.selectDistrict(null);
     });
+  }
+
+  protected selectTab(t: Tab): void {
+    this.tab.set(t);
+    if (t === 'tanks') void this.tanksSvc.load();
+  }
+
+  protected onTabKeydown(ev: KeyboardEvent, index: number): void {
+    let next = -1;
+    if (ev.key === 'ArrowRight') next = (index + 1) % this.tabs.length;
+    else if (ev.key === 'ArrowLeft') next = (index - 1 + this.tabs.length) % this.tabs.length;
+    else if (ev.key === 'Home') next = 0;
+    else if (ev.key === 'End') next = this.tabs.length - 1;
+    if (next < 0) return;
+    ev.preventDefault();
+    const targetTab = this.tabs[next];
+    this.selectTab(targetTab);
+    const btn = (ev.currentTarget as HTMLElement)?.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next];
+    btn?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    btn?.focus();
   }
 
   protected onCanvasReady(container: HTMLElement): void {

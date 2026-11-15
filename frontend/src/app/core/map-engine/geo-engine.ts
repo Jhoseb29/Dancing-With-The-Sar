@@ -11,7 +11,7 @@ import {
   type SourceSpecification,
   type StyleSpecification,
 } from 'maplibre-gl';
-import type { FeatureCollection, Point, Polygon } from 'geojson';
+import type { FeatureCollection, LineString, Point, Polygon } from 'geojson';
 import type { BBox } from '../config/runtime-config.model';
 import { FeatureInfoQuery, lonLatTo3857 } from '../data-access/gamc-wms.client';
 
@@ -167,6 +167,7 @@ export class GeoEngine {
   private readonly tileUrls = new Map<string, string>();
   private readonly zoneMarkers = new Map<ZoneGroup, Marker[]>();
   private stationMarkers: { id: string; marker: Marker; popup: Popup }[] = [];
+  private tankMarkers: { id: string; marker: Marker; popup: Popup }[] = [];
   /** id de capa MapLibre → grupo de zonas. */
   private readonly zoneLayers = new Map<string, ZoneGroup>();
 
@@ -671,6 +672,144 @@ export class GeoEngine {
     if (!hit.popup.isOpen()) hit.marker.togglePopup();
   }
 
+  /**
+   * Red estratégica de tanques de cosecha de lluvia: enlaces hacia zonas de sequía y
+   * focos de incendios FIRMS, nodos objetivo y marcadores interactivos por tanque.
+   */
+  setTankNetwork(
+    tanks: FeatureCollection<
+      Point,
+      { id: string; label: string; color: string; selected: boolean; popup: string }
+    > | null,
+    links: FeatureCollection<LineString, { tankId: string; kind: 'drought' | 'fire'; selected: boolean }> | null,
+    targets: FeatureCollection<Point, { id: string; label: string; kind: 'drought' | 'fire'; radius: number }> | null,
+    onSelect?: (id: string) => void,
+  ): void {
+    if (!this.styleReady) {
+      this.map.once('style.load', () => this.setTankNetwork(tanks, links, targets, onSelect));
+      return;
+    }
+    const syncSource = (id: string, data: FeatureCollection | null, layers: LayerSpecification[]) => {
+      const source = this.map.getSource(id) as GeoJSONSource | undefined;
+      if (!data) {
+        if (source) {
+          layers.forEach((l) => this.map.getLayer(l.id) && this.map.removeLayer(l.id));
+          this.map.removeSource(id);
+        }
+        return;
+      }
+      if (source) {
+        source.setData(data);
+        return;
+      }
+      this.map.addSource(id, { type: 'geojson', data });
+      layers.forEach((l) => this.map.addLayer(l));
+    };
+
+    syncSource('tank-links', links, [
+      {
+        id: 'tank-links-drought',
+        type: 'line',
+        source: 'tank-links',
+        filter: ['==', ['get', 'kind'], 'drought'],
+        paint: {
+          'line-color': '#38bdf8',
+          'line-width': ['case', ['get', 'selected'], 3.2, 1.4],
+          'line-opacity': ['case', ['get', 'selected'], 0.95, 0.42],
+        },
+      },
+      {
+        id: 'tank-links-fire',
+        type: 'line',
+        source: 'tank-links',
+        filter: ['==', ['get', 'kind'], 'fire'],
+        paint: {
+          'line-color': '#fb7185',
+          'line-dasharray': [2, 1.5],
+          'line-width': ['case', ['get', 'selected'], 3.2, 1.4],
+          'line-opacity': ['case', ['get', 'selected'], 0.95, 0.42],
+        },
+      },
+    ]);
+
+    syncSource('tank-targets', targets, [
+      {
+        id: 'tank-targets-circle',
+        type: 'circle',
+        source: 'tank-targets',
+        paint: {
+          'circle-radius': ['get', 'radius'],
+          'circle-color': ['match', ['get', 'kind'], 'fire', '#fb7185', '#eab308'],
+          'circle-opacity': 0.85,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#0b0d12',
+        },
+      },
+      {
+        id: 'tank-targets-label',
+        type: 'symbol',
+        source: 'tank-targets',
+        layout: {
+          'text-field': ['get', 'label'],
+          'text-size': 10,
+          'text-offset': [0, 1.3],
+          'text-anchor': 'top',
+        },
+        paint: {
+          'text-color': '#f0f0fa',
+          'text-halo-color': '#000000',
+          'text-halo-width': 1.5,
+        },
+      },
+    ]);
+
+    const reopen = this.tankMarkers.find((w) => w.popup.isOpen())?.id ?? null;
+    this.tankMarkers.forEach((w) => w.marker.remove());
+    this.tankMarkers = [];
+    if (!tanks) return;
+
+    for (const f of tanks.features) {
+      const { id, label, color, selected, popup } = f.properties;
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.title = label;
+      el.style.cssText =
+        'display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;cursor:pointer;' +
+        `border:2px solid ${color};background:${selected ? color : 'rgba(6,10,16,.88)'};` +
+        `color:${selected ? '#05070a' : '#f0f0fa'};font:700 11px/1 Barlow,system-ui,sans-serif;` +
+        'box-shadow:0 2px 10px rgba(0,0,0,.6);white-space:nowrap;' +
+        (selected ? 'transform:scale(1.1);z-index:4;' : '');
+      const dot = document.createElement('span');
+      dot.style.cssText = `width:8px;height:8px;border-radius:2px;background:${selected ? '#05070a' : color};flex:none;`;
+      el.append(dot, label);
+      const card = new Popup({ offset: 16, maxWidth: '340px', className: 'dws-popup', closeButton: true }).setHTML(popup);
+      el.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        onSelect?.(id);
+      });
+      const marker = new Marker({ element: el, anchor: 'center' })
+        .setLngLat(f.geometry.coordinates as [number, number])
+        .setPopup(card)
+        .addTo(this.map);
+      this.tankMarkers.push({ id, marker, popup: card });
+    }
+    const again = reopen ? this.tankMarkers.find((w) => w.id === reopen) : null;
+    if (again && !again.popup.isOpen()) again.marker.togglePopup();
+  }
+
+  openTank(id: string): void {
+    const hit = this.tankMarkers.find((w) => w.id === id);
+    if (!hit) return;
+    this.tankMarkers.forEach((w) => w.popup.isOpen() && w.marker.togglePopup());
+    this.map.easeTo({
+      center: hit.marker.getLngLat(),
+      zoom: Math.max(this.map.getZoom(), 11.8),
+      padding: panelAwarePadding(this.map.getContainer(), this.panelOpen),
+      duration: 1200,
+    });
+    if (!hit.popup.isOpen()) hit.marker.togglePopup();
+  }
+
   flyToPoint(lon: number, lat: number, zoom: number): void {
     this.map.easeTo({
       center: [lon, lat],
@@ -1029,6 +1168,7 @@ export class GeoEngine {
   destroy(): void {
     this.zoneMarkers.forEach((list) => list.forEach((m) => m.remove()));
     this.stationMarkers.forEach((w) => w.marker.remove());
+    this.tankMarkers.forEach((w) => w.marker.remove());
     this.map.remove();
   }
 }

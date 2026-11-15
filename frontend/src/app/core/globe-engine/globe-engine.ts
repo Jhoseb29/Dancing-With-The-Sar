@@ -95,6 +95,11 @@ const SMALL_FONT = '700 11px Barlow, sans-serif';
 const TRACK_REFRESH_SIM_MS = 5 * 60_000;
 const SWATH_MINUTES = 25;
 const STAR_WHITE = '#f0f0fa';
+const NISAR_CYAN = '#38bdf8';
+const NISAR_SOFT = '#7dd3fc';
+const GLOBE_OCEAN = '#0a1526';
+const HOME_ALTITUDE_M = 19_500_000;
+const PANEL_LON_OFFSET = -8;
 /** Los puntos de alerta se ven desde el nivel de región; las etiquetas, al acercarse a la ciudad. */
 const POINT_RANGE = new DistanceDisplayCondition(0, 2_500_000);
 const BASIN_LABEL_RANGE = new DistanceDisplayCondition(0, 45_000);
@@ -143,7 +148,7 @@ export class GlobeEngine {
 
     const { scene, clock } = this.widget;
     scene.backgroundColor = Color.BLACK;
-    scene.globe.baseColor = Color.BLACK;
+    scene.globe.baseColor = Color.fromCssColorString(GLOBE_OCEAN);
     // Globo siempre iluminado (sin lado nocturno) y con atmósfera: continentes, relieve y puntos legibles.
     scene.globe.enableLighting = false;
     scene.globe.showGroundAtmosphere = true;
@@ -169,27 +174,27 @@ export class GlobeEngine {
     this.ringEntity = this.widget.entities.add({
       polyline: {
         positions: new CallbackProperty(() => this.ringInFixedFrame(), false),
-        width: 1.5,
+        width: 1.8,
         arcType: ArcType.NONE,
-        material: Color.fromCssColorString('#f0f0fa').withAlpha(0.55),
+        material: Color.fromCssColorString(NISAR_CYAN).withAlpha(0.7),
       },
     });
 
     this.pastTrackEntity = this.widget.entities.add({
       polyline: {
         positions: new CallbackProperty(() => this.pastTrack, false),
-        width: 1,
+        width: 1.5,
         arcType: ArcType.GEODESIC,
-        material: Color.fromCssColorString('#9a9aa3').withAlpha(0.45),
+        material: Color.fromCssColorString(NISAR_SOFT).withAlpha(0.45),
       },
     });
 
     this.futureTrackEntity = this.widget.entities.add({
       polyline: {
         positions: new CallbackProperty(() => this.futureTrack, false),
-        width: 1.5,
+        width: 2.2,
         arcType: ArcType.GEODESIC,
-        material: Color.fromCssColorString('#f0f0fa').withAlpha(0.8),
+        material: Color.fromCssColorString(NISAR_CYAN).withAlpha(0.95),
       },
     });
 
@@ -197,7 +202,7 @@ export class GlobeEngine {
       corridor: {
         positions: new CallbackProperty(() => this.swath, false),
         width: options.swathKm * 1000,
-        material: Color.fromCssColorString('#f0f0fa').withAlpha(0.08),
+        material: Color.fromCssColorString(NISAR_CYAN).withAlpha(0.14),
       },
     });
 
@@ -205,9 +210,9 @@ export class GlobeEngine {
     this.widget.entities.add({
       polyline: {
         positions: new CallbackProperty(() => this.beamPositions(), false),
-        width: 1.5,
+        width: 2,
         arcType: ArcType.NONE,
-        material: Color.fromCssColorString(STAR_WHITE).withAlpha(0.45),
+        material: Color.fromCssColorString(NISAR_CYAN).withAlpha(0.75),
       },
     });
     this.widget.entities.add({
@@ -215,9 +220,9 @@ export class GlobeEngine {
       ellipse: {
         semiMajorAxis: (options.swathKm * 1000) / 2,
         semiMinorAxis: (options.swathKm * 1000) / 3,
-        material: Color.fromCssColorString(STAR_WHITE).withAlpha(0.14),
+        material: Color.fromCssColorString(NISAR_CYAN).withAlpha(0.22),
         outline: true,
-        outlineColor: Color.fromCssColorString(STAR_WHITE).withAlpha(0.7),
+        outlineColor: Color.fromCssColorString(NISAR_CYAN).withAlpha(0.9),
         height: 0,
       },
     });
@@ -225,15 +230,15 @@ export class GlobeEngine {
     this.satelliteEntity = this.widget.entities.add({
       position: new CallbackPositionProperty((time, result) => this.satellitePosition(time, result), false),
       point: {
-        pixelSize: 9,
-        color: Color.fromCssColorString('#f0f0fa'),
-        outlineColor: Color.BLACK,
+        pixelSize: 11,
+        color: Color.fromCssColorString(NISAR_CYAN),
+        outlineColor: Color.fromCssColorString(STAR_WHITE),
         outlineWidth: 2,
       },
       label: {
         text: options.labels.satellite,
         font: FONT,
-        fillColor: Color.fromCssColorString('#f0f0fa'),
+        fillColor: Color.fromCssColorString(STAR_WHITE),
         outlineColor: Color.BLACK,
         outlineWidth: 3,
         style: LabelStyle.FILL_AND_OUTLINE,
@@ -257,7 +262,7 @@ export class GlobeEngine {
 
     const [minLon, minLat, maxLon, maxLat] = options.area;
     scene.camera.setView({
-      destination: Cartesian3.fromDegrees((minLon + maxLon) / 2, (minLat + maxLat) / 2, 22_000_000),
+      destination: Cartesian3.fromDegrees((minLon + maxLon) / 2 + PANEL_LON_OFFSET, (minLat + maxLat) / 2, HOME_ALTITUDE_M),
     });
   }
 
@@ -346,7 +351,7 @@ export class GlobeEngine {
     this.widget.trackedEntity = undefined;
     const [minLon, minLat, maxLon, maxLat] = this.options.area;
     this.widget.camera.flyTo({
-      destination: Cartesian3.fromDegrees((minLon + maxLon) / 2, (minLat + maxLat) / 2, 22_000_000),
+      destination: Cartesian3.fromDegrees((minLon + maxLon) / 2 + PANEL_LON_OFFSET, (minLat + maxLat) / 2, HOME_ALTITUDE_M),
       duration: 2,
     });
   }

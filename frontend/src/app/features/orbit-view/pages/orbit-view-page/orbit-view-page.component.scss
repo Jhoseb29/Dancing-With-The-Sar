@@ -1,20 +1,39 @@
 :host {
   display: block;
   position: relative;
-  height: 100vh;
-  overflow: hidden;
+  block-size: 100dvh;
+  overflow: clip;
 }
 
+.orbit-headline {
+  font-size: clamp(var(--text-headline-mobile), 3cqi, 36px);
+}
 
 .intro,
 p {
   margin: 0;
 }
 
+.card,
 .block {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-10);
+  min-inline-size: 0;
+}
+
+.card {
+  padding: var(--spacing-12);
+  border: var(--border-hairline) solid var(--color-dark-gunmetal);
+  border-radius: var(--radius-md);
+  background: var(--color-hover-fill);
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.block {
   padding-top: var(--spacing-15);
   border-top: var(--border-hairline) solid var(--color-dark-gunmetal);
 
@@ -23,10 +42,24 @@ p {
   }
 }
 
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-10);
+}
+
+.controls-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-10);
+}
+
 .readout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-12) var(--spacing-20);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-10) var(--spacing-15);
   margin: 0;
 
   dd {
@@ -52,13 +85,14 @@ p {
 .row {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--spacing-10);
 }
 
 .legend {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-10) var(--spacing-12);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -67,27 +101,41 @@ p {
     display: flex;
     align-items: center;
     gap: var(--spacing-10);
+    min-inline-size: 0;
   }
 }
 
+.legend-wide {
+  grid-column: 1 / -1;
+}
+
 .swatch {
+  flex: none;
   display: inline-block;
-  width: var(--spacing-24);
-  border-top: var(--border-hairline) solid var(--color-star-white);
+  inline-size: var(--spacing-20);
+  border-top: 2px solid var(--color-star-white);
+
+  &.nisar {
+    border-top-color: #38bdf8;
+  }
+
+  &.sentinel {
+    border-top-color: #ec4899;
+  }
+
+  &.future {
+    border-top-color: #38bdf8;
+  }
 
   &.past {
-    border-top-color: var(--color-muted-text);
+    border-top-color: #7dd3fc;
     border-top-style: dashed;
   }
 
-  &.ring {
-    border-top-width: 2px;
-  }
-
   &.swath {
-    height: var(--spacing-10);
-    border: var(--border-hairline) solid var(--color-dim-steel);
-    background: var(--color-hover-fill);
+    block-size: var(--spacing-10);
+    border: var(--border-hairline) solid #38bdf8;
+    background: rgba(56, 189, 248, 0.16);
   }
 }
 

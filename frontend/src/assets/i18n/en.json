@@ -6,10 +6,8 @@
   "nav": {
     "orbit": "Orbit",
     "basin": "Basin",
-    "temporal": "Time lab",
     "risk": "Alerts",
     "insights": "Radar Echoes",
-    "provenance": "Provenance",
     "language": "Language",
     "menu": "Menu",
     "events": "Events"
@@ -34,12 +32,14 @@
     "ascending": "Ascending",
     "descending": "Descending",
     "upcoming": "Upcoming passes (48 h)",
-    "speedControl": "Time speed",
+    "speedControl": "Orbit & time controls",
     "now": "Now",
     "follow": "Follow NISAR",
     "home": "Global view",
     "toBasin": "View Cochabamba",
-    "legendOrbit": "Orbit",
+    "legendTitle": "Orbital layers",
+    "legendNisar": "NISAR (L-band)",
+    "legendSentinel": "Sentinel-1 (C-band)",
     "legendFuture": "Upcoming track",
     "legendPast": "Previous track",
     "legendSwath": "Illustrative swath ~{{km}} km",
@@ -50,19 +50,7 @@
     "tleSource": "Source",
     "tleStale": "Orbital elements are more than {{days}} days old: the position may be inaccurate.",
     "loading": "Loading NISAR orbit…",
-    "error": "Could not get the NISAR orbit",
-    "lastAcquisition": "Latest real acquisition over Cochabamba",
-    "pendingCatalog": "Will appear once the backend catalog is available."
-  },
-  "pending": {
-    "kicker": "In preparation",
-    "body": "This view uses real data that the backend is still preparing. No made-up data: it will appear as soon as the pipeline publishes it.",
-    "needs": "Needs",
-    "back": "Back to orbit",
-    "temporal": "Dry vs rainy season comparison with NISAR and GPM IMERG rainfall.",
-    "risk": "Risk by basin: Tunari slopes vs Rocha valley.",
-    "insights": "Explanations for citizens, civil defense and technical staff (Harness 2).",
-    "provenance": "Manifests, data maturity and Harness 1 judgment."
+    "error": "Could not get the NISAR orbit"
   },
   "basin": {
     "kicker": "Basin · Cochabamba",
@@ -115,7 +103,7 @@
     "modesHint": "Choose the operational view derived from Copernicus DEM (30 m), NASA rainfall and radar over Cochabamba.",
     "mode": {
       "integrated": {
-        "title": "Integrated alert (recommended)",
+        "title": "Integrated alert",
         "desc": "Combines Tunari torrents, 2750 m contour, daily rainfall and OPERA surface water."
       },
       "change": {
@@ -275,9 +263,15 @@
     "type": "Event type",
     "place": "Place",
     "day": "Day shown",
+    "dayLabel": "Choose day shown",
     "prev": "Previous day",
     "next": "Next day",
-    "range": "Event range: {{start}} → {{end}}",
+    "rangeLabel": "Event range",
+    "rangeStart": "From",
+    "rangeEnd": "To",
+    "rangeAdjustedSpan": "Maximum range for fire statistics is 2 years; the bound was adjusted.",
+    "rangeAdjustedOrder": "Range adjusted so the start date is not after the end date.",
+    "invalidDate": "Enter a valid date between {{min}} and {{max}}.",
     "howToRead": "How to read this image",
     "fireStats": "Heat hotspots (NASA FIRMS)",
     "statsLoading": "Querying NASA FIRMS… the first time may take a while.",
@@ -338,8 +332,46 @@
     },
     "tabs": {
       "now": "Now",
+      "tanks": "Tanks",
       "how": "How we know",
       "eval": "Does it work?"
+    },
+    "tanks": {
+      "title": "Rainwater tank network",
+      "subtitle": "Strategic harvesting for nearby drought and wildfire zones (30 m DEM · POWER · FIRMS)",
+      "modeGemini": "Gemini AI",
+      "modeHydro": "Hydro + FIRMS",
+      "loading": "Computing capture nodes, drought deficit, and FIRMS hotspots…",
+      "retry": "Retry",
+      "kpiTanks": "Tanks",
+      "kpiStorage": "Storage",
+      "kpiDrought": "Drought cov.",
+      "kpiFires": "Fires cov.",
+      "droughtFocus": "Drought coverage",
+      "fireFocus": "Wildfire coverage",
+      "promptPlaceholder": "Optional focus (e.g. Arrumani & Sacaba)…",
+      "analyzeBtn": "Analyze network",
+      "analyzing": "Analyzing…",
+      "actionsTitle": "Show prioritized actions",
+      "filterLabel": "Filter tanks by role",
+      "roles": {
+        "all": "All",
+        "dual": "Dual",
+        "drought": "Drought",
+        "fire": "Wildfire"
+      },
+      "legendDroughtLink": "Drought link",
+      "legendFireLink": "FIRMS fire link",
+      "storageLabel": "Tank",
+      "nearDrought": "Drought",
+      "nearFire": "Wildfire",
+      "pumped": "pumped",
+      "hotspots": "hotspots",
+      "techSummary": "Physical hydrology & capture",
+      "rain30d": "30d rain",
+      "dryDays": "Dry days",
+      "harvest30d": "Est. 30d harvest",
+      "captureHa": "Intake area"
     },
     "hero": {
       "rojo": "High danger in the city",

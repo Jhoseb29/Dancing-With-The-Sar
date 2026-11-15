@@ -7,7 +7,7 @@
   (openChange)="setPanelOpen($event)"
 >
   <p class="caption">{{ 'events.kicker' | transloco }}</p>
-  <h1 class="headline">{{ active()?.config ? name(active()?.config?.name) : ('events.title' | transloco) }}</h1>
+  <h1 id="events-heading" class="headline">{{ active()?.config ? name(active()?.config?.name) : ('events.title' | transloco) }}</h1>
 
   <section class="block">
     <h2 class="label">{{ 'events.type' | transloco }}</h2>
@@ -28,43 +28,132 @@
   </section>
 
   @if (active(); as a) {
-    <section class="block">
-      <h2 class="label">{{ 'events.place' | transloco }}</h2>
-      <div class="row">
-        @for (placeId of placeIds; track placeId) {
-          <button class="btn-pill" type="button" [attr.aria-pressed]="a.state.placeId === placeId" (click)="selectPlace(placeId)">
-            {{ placeName(placeId) }}
-          </button>
-        }
-      </div>
-    </section>
-
-    <section class="block">
-      <h2 class="label">{{ 'events.day' | transloco }}</h2>
-      <div class="row center">
-        <button class="btn-secondary small" type="button" [disabled]="scene.time().date === a.state.start" (click)="step(-1)" [attr.aria-label]="'events.prev' | transloco">‹</button>
-        <input
-          class="date tabular"
-          type="date"
-          [min]="a.state.start"
-          [max]="a.state.end"
-          [value]="scene.time().date"
-          (change)="setDate($any($event.target).value)"
-        />
-        <button class="btn-secondary small" type="button" [disabled]="scene.time().date === a.state.end" (click)="step(1)" [attr.aria-label]="'events.next' | transloco">›</button>
-      </div>
-      <p class="caption tabular">{{ 'events.range' | transloco: { start: a.state.start, end: a.state.end } }}</p>
-      @if (verifiedDays().length) {
-        <p class="caption">{{ 'events.verifiedDays' | transloco }}</p>
+    <form class="filters" aria-labelledby="events-heading" (submit)="$event.preventDefault()">
+      <fieldset class="block fieldset">
+        <legend class="label">{{ 'events.place' | transloco }}</legend>
         <div class="row">
-          @for (day of verifiedDays(); track day) {
-            <button class="btn-pill small tabular" type="button" [attr.aria-pressed]="scene.time().date === day" (click)="setDate(day)">
-              {{ day }}
+          @for (placeId of placeIds; track placeId) {
+            <button class="btn-pill" type="button" [attr.aria-pressed]="a.state.placeId === placeId" (click)="selectPlace(placeId)">
+              {{ placeName(placeId) }}
             </button>
           }
         </div>
-      }
-    </section>
+      </fieldset>
+
+      <fieldset class="block fieldset">
+        <legend class="label">{{ 'events.day' | transloco }}</legend>
+        <div class="fieldset-body">
+          <div class="row center">
+            <button
+              class="btn-secondary small"
+              type="button"
+              [disabled]="(scene.time().date ?? '') <= dayBounds().min"
+              (click)="step(-1)"
+              [attr.aria-label]="'events.prev' | transloco"
+            >
+              ‹
+            </button>
+            <label class="sr-only" for="event-day-input">{{ 'events.dayLabel' | transloco }}</label>
+            <input
+              #dayInput
+              id="event-day-input"
+              name="day"
+              class="date tabular"
+              type="date"
+              [min]="dayBounds().min"
+              [max]="dayBounds().max"
+              [value]="scene.time().date ?? ''"
+              [attr.aria-invalid]="dateNotice() === 'invalid' ? 'true' : null"
+              [attr.aria-describedby]="dateNotice() ? 'event-date-notice' : null"
+              (input)="onDateTyping(dayInput)"
+              (change)="onDayChange(dayInput, false)"
+              (blur)="onDayChange(dayInput, true)"
+              (keydown.enter)="onDayChange(dayInput, true)"
+            />
+            <button
+              class="btn-secondary small"
+              type="button"
+              [disabled]="(scene.time().date ?? '') >= dayBounds().max"
+              (click)="step(1)"
+              [attr.aria-label]="'events.next' | transloco"
+            >
+              ›
+            </button>
+          </div>
+
+          <fieldset class="range-fieldset">
+            <legend class="caption">{{ 'events.rangeLabel' | transloco }}</legend>
+            <div class="range-grid">
+              <div class="range-field">
+                <label class="caption" for="event-range-start">{{ 'events.rangeStart' | transloco }}</label>
+                <input
+                  #rangeStartInput
+                  id="event-range-start"
+                  name="rangeStart"
+                  class="date tabular"
+                  type="date"
+                  [min]="dayBounds().min"
+                  [max]="dayBounds().max"
+                  [value]="a.state.start"
+                  [attr.aria-invalid]="dateNotice() ? 'true' : null"
+                  [attr.aria-describedby]="dateNotice() ? 'event-date-notice' : null"
+                  (input)="onDateTyping(rangeStartInput)"
+                  (change)="onRangeChange('start', rangeStartInput, rangeEndInput, false)"
+                  (blur)="onRangeChange('start', rangeStartInput, rangeEndInput, true)"
+                  (keydown.enter)="onRangeChange('start', rangeStartInput, rangeEndInput, true)"
+                />
+              </div>
+              <div class="range-field">
+                <label class="caption" for="event-range-end">{{ 'events.rangeEnd' | transloco }}</label>
+                <input
+                  #rangeEndInput
+                  id="event-range-end"
+                  name="rangeEnd"
+                  class="date tabular"
+                  type="date"
+                  [min]="dayBounds().min"
+                  [max]="dayBounds().max"
+                  [value]="a.state.end"
+                  [attr.aria-invalid]="dateNotice() ? 'true' : null"
+                  [attr.aria-describedby]="dateNotice() ? 'event-date-notice' : null"
+                  (input)="onDateTyping(rangeEndInput)"
+                  (change)="onRangeChange('end', rangeStartInput, rangeEndInput, false)"
+                  (blur)="onRangeChange('end', rangeStartInput, rangeEndInput, true)"
+                  (keydown.enter)="onRangeChange('end', rangeStartInput, rangeEndInput, true)"
+                />
+              </div>
+            </div>
+          </fieldset>
+
+          @if (dateNotice(); as notice) {
+            <p id="event-date-notice" class="caption notice" role="status" aria-live="polite">
+              @switch (notice) {
+                @case ('max_span') {
+                  {{ 'events.rangeAdjustedSpan' | transloco }}
+                }
+                @case ('order') {
+                  {{ 'events.rangeAdjustedOrder' | transloco }}
+                }
+                @case ('invalid') {
+                  {{ 'events.invalidDate' | transloco: { min: dayBounds().min, max: dayBounds().max } }}
+                }
+              }
+            </p>
+          }
+
+          @if (verifiedDays().length) {
+            <p class="caption">{{ 'events.verifiedDays' | transloco }}</p>
+            <div class="row">
+              @for (day of verifiedDays(); track day) {
+                <button class="btn-pill small tabular" type="button" [attr.aria-pressed]="scene.time().date === day" (click)="setDate(day)">
+                  {{ day }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </fieldset>
+    </form>
 
     <section class="block">
       <h2 class="label">{{ 'events.howToRead' | transloco }}</h2>

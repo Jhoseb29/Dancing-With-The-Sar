@@ -5,7 +5,7 @@ import { RuntimeConfigService } from '../../../../core/config/runtime-config.ser
 import { UiConfigService } from '../../../../core/config/ui-config.service';
 import { FireStats, fetchFireStats } from '../../../../core/data-access/fires.client';
 import { SceneStore } from '../../../../core/scene/scene.store';
-import { EventService } from '../../../../core/services/event.service';
+import { EventService, RangeAdjustment, isIsoDate } from '../../../../core/services/event.service';
 import { GeoEngineService } from '../../../../core/services/geo-engine.service';
 import { MapCanvasComponent } from '../../../../shared/components/map-canvas/map-canvas.component';
 
@@ -14,6 +14,8 @@ type StatsState =
   | { status: 'loading' }
   | { status: 'ready'; stats: FireStats }
   | { status: 'unavailable' | 'rate_limited' | 'error'; message: string };
+
+type DateNotice = RangeAdjustment | 'invalid';
 
 /** Explorador de eventos (OpenSpec 09): imágenes NASA por tipo de evento y día. Smart. */
 @Component({
@@ -31,13 +33,16 @@ export class EventExplorerPageComponent {
   private readonly apiBaseUrl = inject(RuntimeConfigService).value.apiBaseUrl;
 
   protected readonly eventTypes = this.ui.value.events;
-  protected readonly placeIds = ['bolivia', 'cochabamba-basin', 'cochabamba-city'];
+  protected readonly placeIds = ['bolivia', 'cochabamba-basin'];
   protected readonly stats = signal<StatsState>({ status: 'none' });
+  protected readonly dateNotice = signal<DateNotice>(null);
 
   protected readonly active = computed(() => {
     const event = this.scene.state().event;
     return event ? { state: event, config: this.ui.event(event.type) } : null;
   });
+
+  protected readonly dayBounds = computed(() => this.events.boundsFor(this.active()?.config));
 
   protected readonly eventLayers = computed(() =>
     (this.active()?.config?.layers ?? [])
@@ -66,8 +71,11 @@ export class EventExplorerPageComponent {
     inject(DestroyRef).onDestroy(() => this.map.detach());
 
     // Sin evento activo: mostrar inundaciones en la cuenca por defecto.
-    if (!this.scene.state().event) {
+    const currentEvent = this.scene.state().event;
+    if (!currentEvent) {
       void this.events.show('flood');
+    } else if (!this.placeIds.includes(currentEvent.placeId)) {
+      void this.events.changePlace('cochabamba-basin');
     }
 
     effect(() => {
@@ -81,6 +89,7 @@ export class EventExplorerPageComponent {
   }
 
   protected selectEvent(id: string): void {
+    this.dateNotice.set(null);
     void this.events.show(id);
   }
 
@@ -89,13 +98,87 @@ export class EventExplorerPageComponent {
   }
 
   protected step(delta: number): void {
+    this.dateNotice.set(null);
     void this.events.stepDate(delta);
   }
 
   protected setDate(value: string): void {
-    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    if (isIsoDate(value)) {
+      this.dateNotice.set(null);
       void this.events.setDate(value);
     }
+  }
+
+  protected onDateTyping(input: HTMLInputElement): void {
+    if (this.dateNotice() === 'invalid' && isIsoDate(input.value)) {
+      this.dateNotice.set(null);
+    }
+  }
+
+  protected async onDayChange(input: HTMLInputElement, finalize: boolean): Promise<void> {
+    const value = input.value;
+    const bounds = this.dayBounds();
+    const inBounds = isIsoDate(value) && value >= bounds.min && value <= bounds.max;
+    if (!inBounds && !finalize) {
+      return;
+    }
+    if (!isIsoDate(value)) {
+      this.dateNotice.set('invalid');
+      input.value = this.scene.time().date ?? '';
+      return;
+    }
+    if (value === this.scene.time().date) {
+      if (this.dateNotice() === 'invalid') {
+        this.dateNotice.set(null);
+      }
+      return;
+    }
+    this.dateNotice.set(null);
+    await this.events.setDate(value);
+    if (finalize || this.scene.time().date === value) {
+      input.value = this.scene.time().date ?? value;
+    }
+  }
+
+  protected async onRangeChange(
+    edited: 'start' | 'end',
+    startInput: HTMLInputElement,
+    endInput: HTMLInputElement,
+    finalize: boolean,
+  ): Promise<void> {
+    const rawStart = startInput.value;
+    const rawEnd = endInput.value;
+    const bounds = this.dayBounds();
+    const active = this.active()?.state;
+    const bothInBounds =
+      isIsoDate(rawStart) &&
+      isIsoDate(rawEnd) &&
+      rawStart >= bounds.min &&
+      rawStart <= bounds.max &&
+      rawEnd >= bounds.min &&
+      rawEnd <= bounds.max;
+
+    if (!bothInBounds && !finalize) {
+      return;
+    }
+    if (!isIsoDate(rawStart) || !isIsoDate(rawEnd)) {
+      this.dateNotice.set('invalid');
+      if (active) {
+        startInput.value = active.start;
+        endInput.value = active.end;
+      }
+      return;
+    }
+    if (active && rawStart === active.start && rawEnd === active.end) {
+      if (this.dateNotice() === 'invalid') {
+        this.dateNotice.set(null);
+      }
+      return;
+    }
+    const result = await this.events.setRange(rawStart, rawEnd, edited);
+    this.dateNotice.set(result.adjusted);
+    startInput.value = result.start;
+    endInput.value = result.end;
   }
 
   protected name(text: { es: string; en: string } | undefined): string {
