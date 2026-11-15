@@ -19,7 +19,7 @@ Un único JSON (el contenido de `interpreter_context.json`). No hay otros archiv
 | `period`, `catalog.available_dates`, `catalog.temporal_widened` | Ventana pedida y fechas con datos. Si `temporal_widened` es true, avisa que no hubo pasadas en el periodo pedido y se usaron fechas anteriores. |
 | `regions[]` | Contexto geográfico curado (landmarks). Si está vacío, no inventes geografía local. |
 | `aoi` | Si `intersects_granule` es false, el satélite no cubrió el lugar pedido: dilo y no interpretes como si lo hubiera hecho. |
-| `radar` | Banda, longitud de onda (~24 cm), ángulo de incidencia y polarizaciones disponibles. |
+| `radar` | Misión (`NISAR` banda L ~24 cm, o `Sentinel-1` banda C ~5.5 cm cuando NISAR no tenía tomas), longitud de onda, ángulo de incidencia y polarizaciones (HH/HV en NISAR, VV/VH en Sentinel-1). |
 | `dates[]` | Por fecha (de la más antigua a la más reciente): estación, órbita, calidad, `% de dispersión` (agua, suelo, vegetación, urbano), dB medio, dB por polarización, RVI, CPR y método de clasificación. |
 | `change` | Diferencias ya calculadas entre la primera y la última fecha (`deltas`), cuáles son `significant_changes` y `caveats` de comparabilidad. Usa estos números; no restes tú. |
 | `change.hotspots` | Cambio **espacial** celda a celda: por tipo (`perdida_vegetacion`, `nueva_agua`, `perdida_agua`, `nuevo_urbano`) cuántas celdas, `area_km2` y `pct_of_area`. Es lo que la UI dibuja como puntos de calor en el globo. |
@@ -34,10 +34,11 @@ Un único JSON (el contenido de `interpreter_context.json`). No hay otros archiv
   - Urbano: rebote doble pared-suelo, como un retrorreflector (HH muy alto respecto de HV).
   - Suelo desnudo: dispersión superficial moderada.
   - La humedad sube el brillo (γ0).
+- **Si el sensor es Sentinel-1 (banda C):** dilo y explica la diferencia en una frase. La onda corta (~5.5 cm) rebota en hojas y ramas finas y casi no atraviesa el dosel: ve la superficie de la vegetación, no el tronco ni el suelo debajo como la banda L de NISAR. Sus umbrales de clase son aproximados (no calibrados en Cochabamba) y el pipeline ya quitó las zonas de layover/sombra de laderas.
 - **Ambigüedades honestas:**
   - Las laderas orientadas al radar pueden parecer "urbano".
   - Sombras radar o asfalto pueden parecer "agua".
-  - Con `single_pol_threshold`, el bosque denso puede caer en "urbano".
+  - Si el método de clasificación empieza con `single_pol_threshold`, el bosque denso puede caer en "urbano".
   - Menciónalas solo si afectan la conclusión.
 - **Cambio entre fechas:** léelo de `change`. Si `comparable` es false o hay `caveats` (versiones de producto distintas, corrimiento uniforme), trata el cambio como "a confirmar".
 - **Estación:** `epoca_seca` o `epoca_de_lluvias` condiciona lo que es normal (por ejemplo, poca agua en estiaje). Si `season` es `null`, el lugar no tiene calendario curado: menciona la fecha y, si hablas de estación, aclara que es una referencia general y no un dato del sistema.

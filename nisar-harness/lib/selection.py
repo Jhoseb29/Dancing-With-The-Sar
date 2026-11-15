@@ -15,6 +15,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from shapely.geometry import Polygon, box
+from shapely.ops import unary_union
 
 from .catalog import Granule
 
@@ -29,11 +30,17 @@ class Choice:
 
 
 def coverage(granule: Granule, aoi: tuple[float, float, float, float] | None) -> float:
-    if not aoi or len(granule.footprint) < 3:
-        return 1.0 if not aoi else 0.0
+    if not aoi:
+        return 1.0
     area = box(*aoi)
     try:
-        footprint = Polygon(granule.footprint).buffer(0)
+        if granule.assets:  # Sentinel-1: union of the real burst footprints (no convex-hull overestimate)
+            footprint = unary_union([Polygon(a["footprint"]).buffer(0) for a in granule.assets
+                                     if len(a.get("footprint") or []) >= 3])
+        elif len(granule.footprint) >= 3:
+            footprint = Polygon(granule.footprint).buffer(0)
+        else:
+            return 0.0
     except ValueError:
         return 0.0
     return round(footprint.intersection(area).area / area.area, 3) if area.area else 0.0

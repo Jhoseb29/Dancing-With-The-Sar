@@ -72,6 +72,9 @@ export interface GlobeTake {
   date: string;
   granule_id: string;
   orbit: string | null;
+  /** Radar de la toma: "NISAR" (banda L) o "Sentinel-1" (banda C, respaldo cuando NISAR no tiene tomas). */
+  sensor?: string | null;
+  band?: string | null;
   /** Ruta (relativa a la corrida) del *_globe.json. */
   data: string;
   /** Ruta del *_objects.geojson (polígonos por clase), si se generó. */

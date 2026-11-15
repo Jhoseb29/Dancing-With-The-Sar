@@ -76,9 +76,14 @@ class SarScene:
         db[~phys.clean_mask(db)] = np.nan
         return db
 
+    @property
+    def thresholds(self) -> phys.ScatteringThresholds:
+        return phys.thresholds_for(self.identification.radar_band)
+
     def scattering_classes(self) -> tuple[np.ndarray, str]:
         cross = self.clean_db(self.cross_pol) if self.cross_pol else None
-        return phys.classify(self.clean_db(self.co_pol), cross)
+        classes, method = phys.classify(self.clean_db(self.co_pol), cross, self.thresholds)
+        return classes, f"{method}_{self.identification.radar_band}_band"
 
 
 def load_scene(h5: h5py.File, granule_id: str, access_mode: str, opts: LoadOptions) -> SarScene:

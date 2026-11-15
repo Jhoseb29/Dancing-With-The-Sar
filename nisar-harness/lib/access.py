@@ -1,4 +1,8 @@
-"""Open a NISAR HDF5 granule directly from the AWS archive - nothing is downloaded to disk.
+"""Open radar products directly from the AWS archive - nothing is downloaded to disk.
+
+* NISAR GCOV: one HDF5 per granule (open_granule).
+* Sentinel-1 OPERA RTC: Cloud-Optimized GeoTIFFs per burst (cog_candidates -> GDAL paths).
+
 
 Strategy chain (first that works wins):
     1. s3     - direct S3 with STS temporary keys (only works in-region, us-west-2)
@@ -30,10 +34,12 @@ class GranuleSource:
     granule_id: str
     s3_url: str | None = None
     https_url: str | None = None
+    sensor: str = "nisar"
+    granule: Granule | None = None  # full catalog record (Sentinel-1 needs its burst assets)
 
     @classmethod
     def from_granule(cls, granule: Granule) -> GranuleSource:
-        return cls(granule.granule_id, granule.s3_url, granule.https_url)
+        return cls(granule.granule_id, granule.s3_url, granule.https_url, granule.sensor, granule)
 
 
 # ---------- openers: each returns a file-like object or raises ----------
@@ -99,3 +105,33 @@ def open_granule(src: GranuleSource, settings: Settings, prefer: str = "auto") -
         finally:
             handle.close()
     raise ConnectionError(f"No se pudo abrir {src.granule_id}: {errors}")
+
+
+# ---------- Cloud-Optimized GeoTIFFs (Sentinel-1 OPERA RTC) ----------
+def _signed_https(url: str, settings: Settings) -> str:
+    """ASF answers with a redirect to a short-lived signed CloudFront URL (GDAL can range-read it)."""
+    resp = requests.get(url, headers={"Authorization": f"Bearer {settings.earthdata_token}"},
+                        allow_redirects=False, timeout=30)
+    if resp.status_code in (401, 403):
+        detail = resp.json().get("error_description", "") if "json" in resp.headers.get("content-type", "") else ""
+        hint = resp.json().get("resolution_url", "") if detail == "EULA Acceptance Failure" else ""
+        raise PermissionError(f"Earthdata rechazó el acceso (HTTP {resp.status_code}) {detail} {hint}".strip())
+    return resp.headers.get("Location", url) if resp.is_redirect else url
+
+
+def cog_candidates(urls: dict[str, str | None], settings: Settings,
+                   prefer: str = "auto") -> Iterator[tuple[str, str, dict[str, str]]]:
+    """Yield (access_mode, gdal_path, gdal_env) in preference order; the caller opens the first that works."""
+    order = ["s3", "https"] if prefer == "auto" else [prefer]
+    for mode in order:
+        if mode == "s3" and urls.get("s3"):
+            creds = AwsCredentials.load(settings.aws_credentials_file)
+            if creds and not creds.expired:
+                yield "s3", "/vsis3/" + urls["s3"].removeprefix("s3://"), {
+                    "AWS_ACCESS_KEY_ID": creds.access_key_id,
+                    "AWS_SECRET_ACCESS_KEY": creds.secret_access_key,
+                    "AWS_SESSION_TOKEN": creds.session_token or "",
+                    "AWS_REGION": AWS_REGION,
+                }
+        elif mode == "https" and urls.get("https") and settings.earthdata_token:
+            yield "https", "/vsicurl/" + _signed_https(urls["https"], settings), {}

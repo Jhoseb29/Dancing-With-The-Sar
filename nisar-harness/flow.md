@@ -8,6 +8,7 @@ Usuario (chat UI): "¿Hubo incendios recientes en la Chiquitania?"
        │  (sin lugar identificable → status needs_clarification + pregunta al usuario)
        ▼
 [Paso 1 · lib/catalog.py]  NASA CMR (V1 > PROVISIONAL > BETA)  → query.json
+       │  sin tomas NISAR suficientes / cobertura < 70 % → lib/catalog_sentinel1.py: Sentinel-1 OPERA RTC (bursts → pasadas)
        │  sin pasadas en la ventana → amplía a 12 meses (temporal_widened)
        │  selección: fecha más reciente + anteriores de la MISMA órbita (comparables)
        ▼

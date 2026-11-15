@@ -34,6 +34,19 @@ class ScatteringThresholds:
 SCATTERING_CLASSES = ("water_flood", "bare_soil", "vegetation_canopy", "urban_double_bounce")
 DEFAULT_THRESHOLDS = ScatteringThresholds()
 
+# C-band (Sentinel-1 VV/VH): shorter wavelength saturates on canopy and is more sensitive to
+# leaves and surface roughness. APPROXIMATE literature-range values, not calibrated on Cochabamba.
+C_BAND_THRESHOLDS = ScatteringThresholds(
+    water_max=-18.0, soil_max=-12.0, vegetation_max=-5.0,
+    water_co_max_dual=-17.0, water_cross_max=-23.0,
+    vegetation_cross_min=-17.0, urban_co_cross_min=10.0,
+)
+THRESHOLDS_BY_BAND = {"L": DEFAULT_THRESHOLDS, "C": C_BAND_THRESHOLDS}
+
+
+def thresholds_for(band: str | None) -> ScatteringThresholds:
+    return THRESHOLDS_BY_BAND.get((band or "L").upper(), DEFAULT_THRESHOLDS)
+
 
 def to_db(linear: np.ndarray) -> np.ndarray:
     out = np.full(linear.shape, np.nan, dtype=np.float32)

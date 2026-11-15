@@ -211,6 +211,7 @@
       "cambio": "Brightness change"
     },
     "objectArea": "Object of {{km2}} km²",
-    "objectMean": "Object average"
+    "objectMean": "Object average",
+    "band": "{{band}} band"
   }
 }

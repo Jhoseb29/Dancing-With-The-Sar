@@ -63,6 +63,7 @@ def curate(scene: SarScene) -> dict[str, Any]:
             "regions": regions,
         },
         "radar_physics": {
+            "mission": ident.mission or "NISAR",
             "band": ident.radar_band,
             "frequency_grid": scene.radar.frequency,
             "center_frequency_hz": scene.radar.center_frequency_hz,
@@ -90,7 +91,7 @@ def curate(scene: SarScene) -> dict[str, Any]:
         },
         "polarimetric_indices": indices,
         "physical_scattering_breakdown": phys.scattering_breakdown(classes),
-        "classification": {"method": method, "thresholds_db": phys.thresholds_dict()},
+        "classification": {"method": method, "thresholds_db": phys.thresholds_dict(scene.thresholds)},
         "statistical_distribution_db": phys.distribution(co_db[clean]),
         "per_polarization_db": per_pol,
     }

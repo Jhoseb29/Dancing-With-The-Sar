@@ -40,6 +40,10 @@ class Granule:
     frame: str | None = None
     orbit_direction: str | None = None
     polarization_mode: str | None = None
+    sensor: str = "nisar"  # "nisar" | "sentinel-1" (lib/sensors.py)
+    # Sentinel-1: one acquisition = several bursts; each asset is
+    # {"id", "footprint", "VV": {"https", "s3"}, "VH": {...}, "mask": {...}}
+    assets: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def filename(self) -> str:
@@ -50,7 +54,9 @@ class Granule:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Granule:
-        return cls(**{k: data.get(k) for k in cls.__dataclass_fields__})
+        values = {k: data[k] for k in cls.__dataclass_fields__ if k in data and data[k] is not None}
+        return cls(**{"collection": None, "time_end": "", "size_mb": None, "https_url": None, "s3_url": None,
+                      "browse_url": None, **values})
 
 
 @dataclass

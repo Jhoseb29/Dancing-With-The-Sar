@@ -28,6 +28,8 @@ def add_override_args(p: argparse.ArgumentParser) -> None:
     g.add_argument("--formats", nargs="+", choices=["all", *EXPORTERS])
     g.add_argument("--frequency", choices=["auto", "frequencyA", "frequencyB"])
     g.add_argument("--access", choices=["auto", "s3", "https"])
+    g.add_argument("--sensor", choices=["auto", "nisar", "sentinel-1"],
+                   help="Radar: auto = NISAR y, si no hay tomas útiles, Sentinel-1 (default)")
     g.add_argument("--target-mpix", type=float, help="Megapíxeles de análisis tras multilook (default 2)")
     g.add_argument("--max-read-mpix", type=float, help="Presupuesto de lectura remota por capa (default 8)")
 

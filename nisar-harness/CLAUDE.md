@@ -7,7 +7,7 @@ Pregunta en lenguaje natural → datos radar **NISAR L2 GCOV** leídos directame
 | Capa | Qué hace | Dónde |
 |------|----------|-------|
 | Intención (Claude Haiku, 1 turno) | Texto → lugar, bbox, tema y fechas; Python valida | `lib/intent.py`, `lib/prompts/intent_parser.md`, `lib/themes.py` |
-| Determinista (Python/uv) | CMR → streaming S3/HTTPS → recorte AOI + multilook → formatos → métricas → cambios | `lib/` |
+| Determinista (Python/uv) | CMR → streaming S3/HTTPS (NISAR; Sentinel-1 OPERA RTC como respaldo) → recorte AOI + multilook → formatos → métricas → cambios | `lib/` (`sensors.py`, `catalog_sentinel1.py`, `sentinel1.py`) |
 | Explicación (Claude Sonnet, 1 turno) | Contexto compacto → chat corto + lección | `lib/interpreter.py` + skill `nisar-didactic-interpreter` |
 
 Todo número sale de Python. El modelo **no calcula, no descarga y no ve imágenes**: las imágenes se muestran al usuario, no se interpretan. No hay datos locales: todo se lee por streaming desde AWS.

@@ -13,7 +13,8 @@ from typing import Any
 
 from . import exporters, interpreter
 from .access import GranuleSource, open_granule
-from .catalog import CatalogQuery, Granule, search_granules
+from .catalog import CatalogQuery, CatalogResult, Granule, search_granules
+from .catalog_sentinel1 import search_sentinel1
 from .credentials import AwsCredentials, check_sts_identity
 from .curation import curate
 from .exporters import DEFAULT_FORMATS
@@ -22,7 +23,9 @@ from .intent import Intent, offline_intent, parse_intent
 from .jsonio import read_json, write_json
 from .run_context import RunContext
 from .scene import LoadOptions, SarScene, load_scene
-from .selection import choose
+from .selection import Choice, choose
+from .sensors import NISAR, SENTINEL1
+from .sentinel1 import load_scene_sentinel1
 from .settings import DEFAULT_COLLECTIONS, Settings
 from .themes import get_theme
 
@@ -45,6 +48,7 @@ class PipelineRequest:
     formats: list[str] = field(default_factory=lambda: list(DEFAULT_FORMATS))
     frequency: str = "auto"
     access: str = "auto"  # auto | s3 | https
+    sensor: str = "auto"  # auto (NISAR, fallback Sentinel-1) | nisar | sentinel-1
     target_mpix: float = 2.0
     max_read_mpix: float = 8.0
     interpret: bool = True
@@ -101,28 +105,77 @@ def step_intent(run: RunContext, settings: Settings, req: PipelineRequest) -> In
 
 
 # ------------------------------------------------------------------ step 1
+MIN_COVERAGE = 0.7  # NISAR below this AOI coverage -> try Sentinel-1
+
+
+def _search(searcher, query: CatalogQuery, settings: Settings, req: PipelineRequest) -> tuple[CatalogResult, bool]:
+    """Catalog search; if the requested window is empty, widen it to WIDEN_DAYS (same end date)."""
+    result = searcher(query, settings)
+    if result.granules or not req.temporal:
+        return result, False
+    end = req.temporal.split(",")[1]
+    start = (date.fromisoformat(end[:10]) - timedelta(days=WIDEN_DAYS)).isoformat()
+    widened = CatalogQuery(bbox=query.bbox, temporal=f"{start}T00:00:00Z,{end}", collections=query.collections,
+                           limit=query.limit)
+    result = searcher(widened, settings)
+    return result, bool(result.granules)
+
+
+def _adequate(choice: Choice, needed: int) -> bool:
+    """Enough takes for the theme (2 for change detection) and good AOI coverage."""
+    if not choice.granules:
+        return False
+    enough = len(choice.granules) >= min(needed, 2)
+    return enough and max(choice.coverage.values()) >= MIN_COVERAGE
+
+
 def step_query(run: RunContext, settings: Settings, req: PipelineRequest) -> list[Granule]:
+    """NISAR first; Sentinel-1 (OPERA RTC) when NISAR has no usable takes or poor coverage."""
     started = time.monotonic()
-    run.emit("query", "Buscando pasadas del satélite NISAR en el catálogo de NASA…", 0.10)
+    needed = req.granules_to_process
     query = CatalogQuery(bbox=req.bbox, temporal=req.temporal, collections=req.collections, limit=req.limit)
-    result = search_granules(query, settings)
-    widened = False
-    if not result.granules and req.temporal:
-        end = req.temporal.split(",")[1][:10]
-        start = (date.fromisoformat(end) - timedelta(days=WIDEN_DAYS)).isoformat()
-        query.temporal = f"{start}T00:00:00Z,{req.temporal.split(',')[1]}"
-        result = search_granules(query, settings)
-        widened = bool(result.granules)
-        run.emit("query", "No hubo pasadas en ese periodo; amplié la búsqueda a 12 meses.", 0.12)
+
+    nisar = sentinel1 = None
+    nisar_choice = sentinel1_choice = Choice([], {}, "")
+    if req.sensor in ("auto", "nisar"):
+        run.emit("query", "Buscando pasadas del satélite NISAR en el catálogo de NASA…", 0.10)
+        nisar = _search(search_granules, query, settings, req)
+        nisar_choice = choose(nisar[0].granules, needed, req.bbox)
+    use_sentinel1 = req.sensor == SENTINEL1.key or (req.sensor == "auto" and not _adequate(nisar_choice, needed))
+    if use_sentinel1:
+        run.emit("query", "NISAR no tiene tomas suficientes aquí; busco también Sentinel-1 (ESA)…", 0.12)
+        sentinel1 = _search(search_sentinel1, CatalogQuery(bbox=req.bbox, temporal=req.temporal,
+                                             collections=SENTINEL1.collections, limit=req.limit), settings, req)
+        sentinel1_choice = choose(sentinel1[0].granules, needed, req.bbox)
+
+    # Keep NISAR unless Sentinel-1 is clearly better (adequate when NISAR is not, or more coverage/takes).
+    def score(c: Choice) -> tuple:
+        return (_adequate(c, needed), len(c.granules) >= min(needed, 2),
+                max(c.coverage.values(), default=0.0), len(c.granules))
+    pick_sentinel1 = sentinel1 is not None and (nisar is None or score(sentinel1_choice) > score(nisar_choice))
+    (result, widened), sensor = (sentinel1, SENTINEL1) if pick_sentinel1 else (nisar, NISAR)
+
     payload = result.to_dict()
+    payload["sensor"] = sensor.key
+    payload["sensor_label"] = sensor.label
+    payload["sensor_reason"] = (
+        "Sentinel-1 elegido: NISAR sin tomas suficientes o con cobertura baja en esta zona y fecha"
+        if pick_sentinel1 else "NISAR (sensor principal)")
+    payload["alternatives"] = {
+        k: {"takes": len(c.granules), "best_coverage": max(c.coverage.values(), default=0.0)}
+        for k, c, r in ((NISAR.key, nisar_choice, nisar), (SENTINEL1.key, sentinel1_choice, sentinel1)) if r is not None
+    }
     payload["temporal_widened"] = widened
     payload["aws_sts"] = check_sts_identity(AwsCredentials.load(settings.aws_credentials_file))
     payload["earthdata_token_present"] = bool(settings.earthdata_token)
     write_json(run.query_json, payload)
-    run.record_step("query", "ok", started, total_hits=result.total_hits, returned=len(result.granules),
-                    temporal_widened=widened, aws_sts=payload["aws_sts"]["status"])
-    run.emit("query", f"Encontré {len(result.granules)} pasadas del satélite sobre el área.", 0.15,
-             dates=[g.time_start[:10] for g in result.granules])
+    run.record_step("query", "ok", started, sensor=sensor.key, total_hits=result.total_hits,
+                    returned=len(result.granules), temporal_widened=widened,
+                    alternatives=payload["alternatives"], aws_sts=payload["aws_sts"]["status"])
+    if widened:
+        run.emit("query", "No hubo pasadas en ese periodo; amplié la búsqueda a 12 meses.", 0.13)
+    run.emit("query", f"Usaré {sensor.label}: {len(result.granules)} pasadas sobre el área.", 0.15,
+             sensor=sensor.key, dates=[g.time_start[:10] for g in result.granules])
     return result.granules
 
 
@@ -142,6 +195,8 @@ def resolve_sources(run: RunContext, req: PipelineRequest) -> list[GranuleSource
 
 
 def load(src: GranuleSource, settings: Settings, req: PipelineRequest) -> SarScene:
+    if src.sensor == SENTINEL1.key:
+        return load_scene_sentinel1(src, settings, req.load_options(), prefer=req.access)
     with open_granule(src, settings, prefer=req.access) as (h5, mode):
         return load_scene(h5, src.granule_id, mode, req.load_options())
 

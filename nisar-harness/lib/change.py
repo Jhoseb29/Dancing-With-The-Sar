@@ -19,6 +19,10 @@ def flat_metrics(m: dict[str, Any]) -> dict[str, float | None]:
     flat["cross_pol_ratio_mean_db"] = m.get("polarimetric_indices", {}).get("cross_pol_ratio_mean_db")
     for term, dist in (m.get("per_polarization_db") or {}).items():
         flat[f"{term}_mean_db"] = dist.get("mean_db")
+    radar = m.get("radar_physics", {})
+    for alias, term in (("co_mean_db", radar.get("primary_polarization")), ("cross_mean_db", radar.get("cross_polarization"))):
+        if term and f"{term}_mean_db" in flat:
+            flat[alias] = flat[f"{term}_mean_db"]
     return flat
 
 
@@ -51,7 +55,7 @@ def compare(oldest: dict[str, Any], newest: dict[str, Any]) -> dict[str, Any]:
     if not same_version:
         caveats.append(f"Versiones de producto distintas ({acq_a.get('product_version')} → "
                        f"{acq_b.get('product_version')}): parte del cambio puede ser calibración.")
-    co_shift = [deltas[k]["delta"] for k in deltas if k.endswith("_mean_db") and k[:4] in ("HHHH", "VVVV", "HVHV", "VHVH")]
+    co_shift = [deltas[k]["delta"] for k in ("co_mean_db", "cross_mean_db") if k in deltas]
     if len(co_shift) >= 2 and all(abs(x) >= 0.8 for x in co_shift) and max(co_shift) - min(co_shift) < 0.5:
         caveats.append("Desplazamiento casi uniforme en todas las polarizaciones: típico de calibración o "
                        "humedad generalizada, no de un cambio localizado.")

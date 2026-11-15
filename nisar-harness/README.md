@@ -40,6 +40,23 @@ Por defecto el harness genera `tif`, `geojson`, `globe` y `objects`. Ya no produ
 - `hotspots.geojson`: puntos de cambio entre la primera y la última toma, según el tema. El cambio es **relativo**: antes de aplicar umbrales se resta el corrimiento mediano de toda la escena (calibración o humedad general). El campo `summary` trae celdas, km² y % por tipo, y es lo único que recibe el modelo.
 - Payload: la sección `globe` incluye `takes[]`, `hotspots`, `hotspots_summary` y los títulos de las capas.
 
+## Sensores: NISAR primero, Sentinel-1 de respaldo
+
+`lib/sensors.py` define los dos radares. Ambos terminan en el mismo `SarScene`, así que la física, el globo, los objetos, los hotspots y el intérprete funcionan igual con cualquiera.
+
+| | NISAR (principal) | Sentinel-1 · OPERA RTC-S1 (respaldo) |
+|---|---|---|
+| Banda | L (~24 cm, atraviesa el dosel) | C (~5.5 cm, ve la superficie de la vegetación) |
+| Producto | GCOV, un HDF5 por gránulo | RTC por *burst*: COG VV, VH y máscara de layover/sombra |
+| Acceso | S3 (in-region) → HTTPS rango (Earthdata) | Igual: `/vsis3/` → `/vsicurl/` con URL firmada |
+| Lectura | Chunks HDF5 del área | Ventana del área de cada COG, a resolución de análisis (overviews), mosaico en UTM |
+
+Con `sensor=auto` (por defecto), el pipeline busca NISAR y **pasa a Sentinel-1 si NISAR no tiene las tomas que pide el tema o cubre menos del 70 % del área**. Pasa, por ejemplo, entre ene y jun de 2026, cuando NISAR no tiene tomas procesadas sobre la mayor parte de Bolivia. La decisión y la alternativa descartada quedan en `query.json` (`sensor`, `sensor_reason`, `alternatives`).
+
+Se puede forzar con `--sensor nisar|sentinel-1`. La clasificación usa umbrales por banda (`sar_physics.THRESHOLDS_BY_BAND`); los de banda C son aproximados.
+
+> Requisito para Sentinel-1: aceptar una vez el EULA de ASF para productos OPERA en Earthdata. Sin eso, ASF responde `403 EULA Acceptance Failure` con un enlace de aprobación.
+
 ## Elección de tomas
 
 `lib/selection.py` decide qué gránulos se analizan:

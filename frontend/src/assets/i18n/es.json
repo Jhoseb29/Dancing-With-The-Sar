@@ -211,6 +211,7 @@
       "cambio": "Cambio de brillo"
     },
     "objectArea": "Objeto de {{km2}} km²",
-    "objectMean": "Promedio del objeto"
+    "objectMean": "Promedio del objeto",
+    "band": "banda {{band}}"
   }
 }

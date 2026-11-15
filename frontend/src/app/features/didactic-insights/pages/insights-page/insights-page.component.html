@@ -55,7 +55,7 @@
         }
       </div>
       @if (analysis.take(); as t) {
-        <p class="caption">{{ t.orbit }} · {{ t.classification_method }}</p>
+        <p class="caption">{{ t.sensor ?? 'NISAR' }} · {{ 'insights.band' | transloco: { band: t.band ?? 'L' } }} · {{ t.orbit }}</p>
       }
     </section>
 

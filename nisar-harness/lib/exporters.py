@@ -54,7 +54,7 @@ def export_geotiff(scene: SarScene, out: Path, stem: str) -> Path:
         for band, (term, arr) in enumerate(scene.layers.items(), start=1):
             db = phys.to_db(arr)
             dst.write(np.where(np.isfinite(db), db, NODATA).astype(np.float32), band)
-            dst.set_band_description(band, f"NISAR {term} gamma0 (dB)")
+            dst.set_band_description(band, f"{scene.identification.mission or 'NISAR'} {term} gamma0 (dB)")
     return path
 
 
