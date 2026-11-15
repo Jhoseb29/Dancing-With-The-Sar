@@ -61,6 +61,10 @@
     <p>{{ 'risk.todo.' + level() | transloco }}</p>
   </div>
 
+  @if (basins().length) {
+    <app-feeding-basins [basins]="basins()" [rain]="rain()?.cuencas" (open)="openBasin.emit($event)" />
+  }
+
   <app-detection-sources [district]="district()" [rain]="rain()" [radar]="radar()" />
 
   <p class="caption">{{ 'risk.score' | transloco: { v: round(district().estado?.indice) } }} · {{ 'risk.bulletin.issuer' | transloco }}</p>

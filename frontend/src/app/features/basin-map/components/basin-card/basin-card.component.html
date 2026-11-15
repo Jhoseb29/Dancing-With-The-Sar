@@ -22,6 +22,8 @@
     <div><strong>{{ basin().area_km2 }} km²</strong><span class="caption">{{ 'basin.fact.area' | transloco }}</span></div>
   </div>
 
+  <app-satellite-saw [rain]="rain()" [radar]="radar()" />
+
   @if (basin().sedimento_radar; as s) {
     <a class="radar" routerLink="/explicaciones" [queryParams]="{ run: s.corrida }">
       <strong>{{ 'basin.radar.title' | transloco: { ha: sedimentHa() } }}</strong>

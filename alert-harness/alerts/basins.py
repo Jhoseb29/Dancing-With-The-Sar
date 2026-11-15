@@ -93,7 +93,19 @@ def _polygons() -> dict[str, Any]:
         if not name or name in SKIP_NAMES:
             continue
         by_name.setdefault(name, []).append(poly.buffer(1.5 * px_deg))
-    return {name: unary_union(polys).simplify(px_deg, preserve_topology=True) for name, polys in by_name.items()}
+    return {name: _main_body(unary_union(polys)).simplify(px_deg, preserve_topology=True)
+            for name, polys in by_name.items()}
+
+
+MAIN_BODY_GAP_DEG = 0.01  # pieces farther than ~1 km from the largest one were mis-named (label hit)
+
+
+def _main_body(geom):
+    """A basin is one connected area: drop distant pieces that GetFeatureInfo named by mistake."""
+    if geom.geom_type != "MultiPolygon":
+        return geom
+    parts = sorted(geom.geoms, key=lambda g: g.area, reverse=True)
+    return unary_union([g for g in parts if g.distance(parts[0]) <= MAIN_BODY_GAP_DEG])
 
 
 def _dem() -> tuple[np.ndarray, np.ndarray, Any]:
@@ -140,6 +152,16 @@ def _radar_sediment(polys: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return found
 
 
+FED_DISTANCE_DEG = 0.015  # ~1.5 km: the torrent's fan reaches districts just below the basin outlet
+
+
+def _districts_fed(geom) -> list[str]:
+    """Districts touched by the basin or right below it (where its water and mud arrive)."""
+    from . import districts as districts_mod
+    return [d["properties"]["id"] for d in districts_mod.load()
+            if shape(d["geometry"]).distance(geom) <= FED_DISTANCE_DEG]
+
+
 def build() -> dict[str, Any]:
     polys = _polygons()
     z, slope, transform = _dem()
@@ -164,6 +186,7 @@ def build() -> dict[str, Any]:
             "ladera_fuerte_pct": round(100 * float(np.mean(ss[ok] > STEEP_DEG)), 1),
             "melton": round(melton, 2), "tipo": _melton_class(melton),
             "sedimento_radar": sediment.get(name),
+            "distritos": _districts_fed(geom),
             "centro": [round(p.x, 5), round(p.y, 5)],
             "bbox": [round(v, 5) for v in geom.bounds],
         }})

@@ -1,0 +1,33 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-10);
+  padding: var(--spacing-12);
+  border: var(--border-hairline) solid var(--color-dark-gunmetal);
+  border-radius: var(--radius-md);
+}
+
+p,
+h3 {
+  margin: 0;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 40px;
+
+  span {
+    flex: 1;
+    min-height: 1px;
+    border-radius: 1px 1px 0 0;
+    background: #3a8dff; // dato: lluvia
+  }
+}
+
+.radar {
+  padding-top: var(--spacing-10);
+  border-top: var(--border-hairline) dashed var(--color-dim-steel);
+  font-size: var(--text-label);
+}

@@ -1,0 +1,21 @@
+<h3 class="label">{{ 'satSaw.title' | transloco }}</h3>
+@if (rain(); as r) {
+  @if (r.max_mm_h >= 1) {
+    <p>{{ 'satSaw.storm' | transloco: { mm: r.max_mm_h, t: when().t, d: when().d, total: r.acumulado_24h_mm } }}</p>
+  } @else {
+    <p>{{ 'satSaw.calm' | transloco: { total: r.acumulado_24h_mm } }}</p>
+  }
+  @if (bars().length) {
+    <div class="bars" aria-hidden="true">
+      @for (b of bars(); track b.i) {
+        <span [style.height.%]="b.pct" [title]="b.v + ' mm/h'"></span>
+      }
+    </div>
+    <p class="caption">{{ 'satSaw.axis' | transloco }}</p>
+  }
+} @else {
+  <p class="muted">{{ 'satSaw.none' | transloco }}</p>
+}
+@if (radarLine(); as l) {
+  <p class="radar">{{ l.key | transloco: l.params }}</p>
+}

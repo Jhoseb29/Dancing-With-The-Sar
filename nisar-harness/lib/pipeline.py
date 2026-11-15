@@ -283,18 +283,20 @@ def step_interpret(run: RunContext, settings: Settings, req: PipelineRequest) ->
     started = time.monotonic()
     context = interpreter.build_context(run)
     usage = [run.manifest.get("steps", {}).get("intent", {}).get("usage")]
+    interpret_usage = None
     status = "skipped"
     if req.interpret and context["dates"]:
         run.emit("interpret", "Preparando la explicación…", 0.85)
         try:
-            usage.append(interpreter.interpret(run, settings, req.model))
+            interpret_usage = interpreter.interpret(run, settings, req.model)
+            usage.append(interpret_usage)
             status = "ok"
         except Exception as exc:  # noqa: BLE001 - data is still delivered without narrative
             log.error("Intérprete: %s", exc)
             status = "error"
             run.emit("interpret", "No pude generar la explicación; te muestro los datos.", 0.95, level="warning")
     payload = interpreter.assemble_ui_payload(run, [u for u in usage if u])
-    run.record_step("interpret", status, started, payload_status=payload["status"])
+    run.record_step("interpret", status, started, payload_status=payload["status"], usage=interpret_usage)
     return payload
 
 

@@ -1,0 +1,18 @@
+<h3 class="label">{{ 'risk.basins.title' | transloco }}</h3>
+<ul>
+  @for (x of rows(); track x.b.id) {
+    <li>
+      <button type="button" (click)="open.emit(x.b.id)">
+        <i [style.background]="x.color"></i>
+        <span class="name">
+          <strong>{{ x.b.nombre }}</strong>
+          <span class="caption">{{ 'basin.type.' + x.b.tipo | transloco }}</span>
+        </span>
+        @if (x.r && x.r.max_mm_h >= 1) {
+          <span class="caption rain">{{ 'risk.basins.rain' | transloco: { mm: x.r.max_mm_h, t: time(x.r.cuando) } }}</span>
+        }
+        <span aria-hidden="true">→</span>
+      </button>
+    </li>
+  }
+</ul>

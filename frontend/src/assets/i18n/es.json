@@ -393,6 +393,19 @@
       "coverage": "Cobertura",
       "coverageValue": "Distrito {{id}} · {{comuna}}",
       "issuer": "Emitido por Centinela con datos de NASA, ESA y GAMC. No reemplaza los avisos oficiales de SENAMHI ni del COE."
+    },
+    "basins": {
+      "title": "Cuencas que bajan aquí",
+      "rain": "{{mm}} mm/h a las {{t}}"
     }
+  },
+  "satSaw": {
+    "title": "Lo que vio el satélite (últimas 24 h)",
+    "storm": "Tormenta de {{mm}} mm/h el {{d}} a las {{t}} · {{total}} mm en 24 h",
+    "calm": "Sin tormenta fuerte · {{total}} mm en 24 h",
+    "axis": "Lluvia cada 30 min (NASA GPM IMERG) · hace 24 h → ahora",
+    "none": "Aún sin datos de lluvia para esta zona.",
+    "radarDone": "{{m}} ya pasó el {{d}}: se puede revisar con radar si dejó barro o agua.",
+    "radarNext": "El radar todavía no pasó después de la lluvia. {{m}} vuelve ~{{d}}: ahí veremos si dejó barro o agua."
   }
 }

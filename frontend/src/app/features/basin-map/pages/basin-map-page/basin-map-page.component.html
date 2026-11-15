@@ -12,7 +12,12 @@
 
   <section class="block">
     @if (basins.selected(); as b) {
-      <app-basin-card [basin]="b" (back)="basins.select(null)" />
+      <app-basin-card
+        [basin]="b"
+        [rain]="alerts.rain()?.cuencas?.[b.id] ?? null"
+        [radar]="alerts.radar()"
+        (back)="basins.select(null)"
+      />
     } @else {
       <app-basin-list [basins]="basinList()" (pick)="basins.select($event)" />
     }

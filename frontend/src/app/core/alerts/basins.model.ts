@@ -15,6 +15,8 @@ export interface BasinProps {
   melton: number;
   tipo: BasinType;
   sedimento_radar: { area_km2: number; desde: string; hasta: string; corrida: string } | null;
+  /** Distritos que toca o a los que llega (≤ 1,5 km de la salida). */
+  distritos: string[];
   centro: [number, number];
   bbox: [number, number, number, number];
 }

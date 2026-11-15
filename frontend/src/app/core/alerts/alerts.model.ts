@@ -67,6 +67,15 @@ export interface RainPayload {
   acumulado_mm: number[][];
   pico: { max_30min_mm_h: number | null; max_1h_mm: number | null; cuando: string | null; medias_horas: number };
   esperadas: number;
+  /** Lo que vio el satélite sobre cada cuenca torrencial (id → ráfaga y serie de 24 h). */
+  cuencas?: Record<string, BasinRain>;
+}
+
+export interface BasinRain {
+  max_mm_h: number;
+  cuando: string;
+  acumulado_24h_mm: number;
+  serie_mm_h?: number[];
 }
 
 export interface RadarPass {

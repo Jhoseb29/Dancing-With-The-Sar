@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { SceneStore } from '../../../../core/scene/scene.store';
 import { AlertsService } from '../../../../core/services/alerts.service';
+import { BasinsService } from '../../../../core/services/basins.service';
 import { GeoEngineService } from '../../../../core/services/geo-engine.service';
 import { MapCanvasComponent } from '../../../../shared/components/map-canvas/map-canvas.component';
 import { SidePanelComponent } from '../../../../shared/components/side-panel/side-panel.component';
@@ -39,9 +41,17 @@ export class RiskPageComponent {
   protected readonly tabs: Tab[] = ['now', 'how', 'eval'];
   protected readonly tab = signal<Tab>('now');
   protected readonly districts = computed(() => (this.alerts.districts()?.features ?? []).map((f) => f.properties));
+  private readonly basinsSvc = inject(BasinsService);
+  private readonly router = inject(Router);
+  /** Cuencas que bajan al distrito elegido. */
+  protected readonly districtBasins = computed(() => {
+    const id = this.alerts.selectedDistrictId();
+    return id ? (this.basinsSvc.basins()?.features ?? []).map((f) => f.properties).filter((b) => b.distritos?.includes(id)) : [];
+  });
 
   constructor() {
     this.alerts.connect();
+    void this.basinsSvc.load();
     inject(DestroyRef).onDestroy(() => {
       this.map.detach();
       this.alerts.disconnect();
@@ -55,6 +65,12 @@ export class RiskPageComponent {
 
   protected setPanelOpen(open: boolean): void {
     void this.scene.set('/panels/layerPanel', open);
+  }
+
+  /** Abre la cuenca en la vista Cuenca, ya seleccionada. */
+  protected openBasin(id: string): void {
+    this.basinsSvc.selectedId.set(id);
+    void this.router.navigate(['/cuenca']);
   }
 
   protected pick(id: string | null): void {

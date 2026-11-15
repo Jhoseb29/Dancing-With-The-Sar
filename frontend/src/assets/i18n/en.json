@@ -393,6 +393,19 @@
       "coverage": "Coverage",
       "coverageValue": "District {{id}} · {{comuna}}",
       "issuer": "Issued by Centinela with NASA, ESA and GAMC data. Does not replace official SENAMHI or COE warnings."
+    },
+    "basins": {
+      "title": "Basins draining here",
+      "rain": "{{mm}} mm/h at {{t}}"
     }
+  },
+  "satSaw": {
+    "title": "What the satellite saw (last 24 h)",
+    "storm": "Storm of {{mm}} mm/h on {{d}} at {{t}} · {{total}} mm in 24 h",
+    "calm": "No strong storm · {{total}} mm in 24 h",
+    "axis": "Rain every 30 min (NASA GPM IMERG) · 24 h ago → now",
+    "none": "No rain data for this area yet.",
+    "radarDone": "{{m}} already passed on {{d}}: radar can check for mud or water left behind.",
+    "radarNext": "Radar hasn't passed since the rain. {{m}} returns ~{{d}}: then we'll see if it left mud or water."
   }
 }

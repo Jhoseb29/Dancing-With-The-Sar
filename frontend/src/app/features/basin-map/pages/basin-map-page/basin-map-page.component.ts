@@ -6,6 +6,7 @@ import { RuntimeConfigService } from '../../../../core/config/runtime-config.ser
 import { UiConfigService } from '../../../../core/config/ui-config.service';
 import { gamcLegendUrl } from '../../../../core/data-access/gamc-wms.client';
 import { SceneStore } from '../../../../core/scene/scene.store';
+import { AlertsService } from '../../../../core/services/alerts.service';
 import { BasinsService } from '../../../../core/services/basins.service';
 import { GeoEngineService } from '../../../../core/services/geo-engine.service';
 import { MapCanvasComponent } from '../../../../shared/components/map-canvas/map-canvas.component';
@@ -33,6 +34,7 @@ export class BasinMapPageComponent {
   protected readonly map = inject(GeoEngineService);
   protected readonly scene = inject(SceneStore);
   protected readonly basins = inject(BasinsService);
+  protected readonly alerts = inject(AlertsService);
   protected readonly basinList = computed(() => (this.basins.basins()?.features ?? []).map((f) => f.properties));
   private readonly ui = inject(UiConfigService);
   private readonly apiBaseUrl = inject(RuntimeConfigService).value.apiBaseUrl;
@@ -56,6 +58,7 @@ export class BasinMapPageComponent {
 
   constructor() {
     void this.basins.load();
+    void this.alerts.refresh(); // lluvia por cuenca y calendario del radar
     inject(DestroyRef).onDestroy(() => {
       this.map.detach();
       this.basins.select(null);

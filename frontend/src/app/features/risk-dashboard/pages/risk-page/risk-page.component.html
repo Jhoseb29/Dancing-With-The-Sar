@@ -29,7 +29,9 @@
           [alert]="alerts.districtAlert()"
           [rain]="alerts.rain()"
           [radar]="alerts.radar()"
+          [basins]="districtBasins()"
           (back)="pick(null)"
+          (openBasin)="openBasin($event)"
         />
       } @else {
         <app-city-summary [districts]="districts()" (pick)="pick($event)">
