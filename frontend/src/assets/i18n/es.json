@@ -332,9 +332,30 @@
     },
     "tabs": {
       "now": "Ahora",
+      "possible": "Posibles sucesos",
       "tanks": "Tanques",
       "how": "¿Cómo sabemos?",
       "eval": "¿Funciona?"
+    },
+    "predictions": {
+      "title": "Posibles sucesos",
+      "subtitle": "Condiciones encontradas por el arnés, pendientes de confirmación.",
+      "empty": "No hay posibles sucesos pendientes.",
+      "driver": "Señal principal: {{driver}}",
+      "lluvia": "lluvia",
+      "radar": "radar",
+      "terreno": "terreno",
+      "confidence": "Confianza",
+      "until": "Vigente hasta",
+      "evidence": "Ver datos encontrados",
+      "confirm": "Confirmar suceso",
+      "dismiss": "Marcar no ocurrió",
+      "history": "Historial de confirmaciones",
+      "status": {
+        "confirmada": "Confirmada",
+        "falsa_alarma": "No ocurrió",
+        "expirada": "Expirada"
+      }
     },
     "tanks": {
       "title": "Red de tanques pluviales",

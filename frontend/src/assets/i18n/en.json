@@ -332,9 +332,30 @@
     },
     "tabs": {
       "now": "Now",
+      "possible": "Possible events",
       "tanks": "Tanks",
       "how": "How we know",
       "eval": "Does it work?"
+    },
+    "predictions": {
+      "title": "Possible events",
+      "subtitle": "Conditions found by the harness, awaiting confirmation.",
+      "empty": "There are no pending possible events.",
+      "driver": "Main signal: {{driver}}",
+      "lluvia": "rain",
+      "radar": "radar",
+      "terreno": "terrain",
+      "confidence": "Confidence",
+      "until": "Valid until",
+      "evidence": "Show detected evidence",
+      "confirm": "Confirm event",
+      "dismiss": "Mark did not occur",
+      "history": "Confirmation history",
+      "status": {
+        "confirmada": "Confirmed",
+        "falsa_alarma": "Did not occur",
+        "expirada": "Expired"
+      }
     },
     "tanks": {
       "title": "Rainwater tank network",

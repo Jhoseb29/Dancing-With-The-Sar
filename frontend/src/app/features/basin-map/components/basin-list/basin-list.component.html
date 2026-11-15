@@ -1,0 +1,26 @@
+<ul class="types">
+  @for (x of types(); track x.t) {
+    <li>
+      <i class="dot" [style.background]="colors[x.t]"></i>
+      <span><strong>{{ x.n }}</strong> {{ 'basin.type.' + x.t | transloco }}</span>
+    </li>
+  }
+</ul>
+<p class="hint">{{ 'basin.tapHint' | transloco }}</p>
+
+<ul class="list">
+  @for (b of sorted(); track b.id) {
+    <li>
+      <button type="button" (click)="pick.emit(b.id)">
+        <i class="dot" [style.background]="colors[b.tipo]"></i>
+        <span class="name">{{ b.nombre }}</span>
+        @if (b.sedimento_radar) {
+          <span class="tag">{{ 'basin.radarTag' | transloco }}</span>
+        }
+        <span class="caption tabular">{{ b.cota_max_m - b.cota_min_m }} m</span>
+      </button>
+    </li>
+  } @empty {
+    <li class="muted">{{ 'basin.noBasins' | transloco }}</li>
+  }
+</ul>

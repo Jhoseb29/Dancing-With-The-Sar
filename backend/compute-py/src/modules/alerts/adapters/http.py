@@ -24,6 +24,12 @@ from config.settings import get_settings
 from modules.alerts.application.feed import AlertFeed
 from modules.basin_risk.adapters.http import basin_service
 from modules.basin_risk.application.tank_network import TankNetworkService
+import sys
+
+ALERT_HARNESS = get_settings().alerts_harness_dir
+if str(ALERT_HARNESS) not in sys.path:
+    sys.path.insert(0, str(ALERT_HARNESS))
+from alerts.predictions import PredictionStore  # noqa: E402
 
 router = APIRouter(prefix="/api/alerts")
 log = logging.getLogger(__name__)
@@ -82,6 +88,30 @@ def evaluation() -> dict:
         if history_file.exists() else []
     latest = _read_json(evals / history[-1]["eval_id"] / "scorecard.json") if history else None
     return {"latest": latest, "history": history}
+
+
+@router.get("/predictions")
+def predictions(limit: int = Query(50, ge=1, le=200)) -> dict:
+    return {"predictions": PredictionStore(get_settings().alerts_harness_dir / "output").list(limit)}
+
+
+class PredictionConfirmation(BaseModel):
+    ocurrio: bool
+    fuente: str = "confirmación manual"
+    detalle: str = ""
+    observado_en: str | None = None
+
+
+@router.post("/predictions/{prediction_id}/confirm")
+def confirm_prediction(prediction_id: str, body: PredictionConfirmation) -> dict:
+    result = PredictionStore(get_settings().alerts_harness_dir / "output").confirm(
+        prediction_id,
+        body.ocurrio,
+        {"fuente": body.fuente, "detalle": body.detalle, "observado_en": body.observado_en},
+    )
+    if result is None:
+        raise HTTPException(status_code=404, detail="prediction_not_found")
+    return {"prediction": result}
 
 
 @lru_cache

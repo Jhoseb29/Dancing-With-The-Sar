@@ -19,6 +19,7 @@ from typing import Any
 from . import districts as districts_mod
 from .engine import LEVELS, Request, evaluate
 from .publish import publish
+from .predictions import PredictionStore
 from .situation import publish as publish_situation
 from .summary import compact
 from .settings import Settings
@@ -53,6 +54,7 @@ def tick(st: Settings, now: datetime | None = None, only: list[str] | None = Non
     mon_dir.mkdir(parents=True, exist_ok=True)
     state_path = mon_dir / "state.json"
     state: dict[str, Any] = json.loads(state_path.read_text()) if state_path.exists() else {}
+    predictions = PredictionStore(st.output_dir)
 
     bursts = publish_situation(st, now)  # rain every 30 min + radar passes, for the web
     rows = []
@@ -69,6 +71,13 @@ def tick(st: Settings, now: datetime | None = None, only: list[str] | None = Non
             rows.append({"ts": now.isoformat(), "distrito": props["id"], "error": str(exc)})
             continue
         kept, decision, lowering = _decide(state.get(props["id"]), alert["nivel"], now, hold)
+        predictions.upsert(
+            alert,
+            now,
+            cfg["horizonte_prediccion_horas"],
+            st.thresholds["version"],
+            cfg["prediccion_desde"],
+        )
         published = None
         if decision in ("primera_observacion", "sube", "baja"):
             published = str(publish(alert, st.output_dir).name)

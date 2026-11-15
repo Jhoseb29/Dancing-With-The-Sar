@@ -144,6 +144,34 @@ export interface EvalPayload {
   history: EvalSummary[];
 }
 
+export type PredictionStatus = 'pendiente' | 'confirmada' | 'falsa_alarma' | 'expirada';
+
+export interface RiskPrediction {
+  id: string;
+  area: { nombre: string; bbox: [number, number, number, number] };
+  peligro: Hazard;
+  nivel: AlertLevel;
+  indice_riesgo: number;
+  confianza: { porcentaje: number; etiqueta: Confidence; faltantes: string[] };
+  componentes: { disparo: number | null; susceptibilidad: number | null; evidencia_radar: number | null };
+  indicadores: Indicator[];
+  motivos: string[];
+  fuentes: string[];
+  alerta_id: string;
+  fecha_referencia: string;
+  modelo: string;
+  estado: PredictionStatus;
+  emitida_en: string;
+  actualizada_en: string;
+  valida_hasta: string;
+  confirmada_en?: string;
+  observacion?: { fuente: string; detalle: string; observado_en: string | null };
+}
+
+export interface PredictionsPayload {
+  predictions: RiskPrediction[];
+}
+
 export type AlertsMessage = { type: 'snapshot'; alerts: RiskAlert[] } | { type: 'alert'; alert: RiskAlert };
 
 export type DistrictProps = DistrictsFC['features'][number]['properties'];

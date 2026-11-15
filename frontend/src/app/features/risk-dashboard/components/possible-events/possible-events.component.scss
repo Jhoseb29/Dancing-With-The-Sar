@@ -1,0 +1,19 @@
+:host { display: block; }
+.possible-events { display: grid; gap: var(--spacing-10); }
+.head, .row, .evidence, .actions, .history-row { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-10); }
+.head h2, .head p, .prediction p { margin: 0; }
+.empty { padding: var(--spacing-20) 0; color: var(--color-muted-text); }
+.cards { display: grid; gap: var(--spacing-10); padding: 0; margin: 0; list-style: none; }
+.prediction { display: grid; gap: var(--spacing-10); padding: var(--spacing-10); border-left: 3px solid var(--lv-amarillo); background: color-mix(in srgb, var(--color-dark-gunmetal) 70%, transparent); }
+.prediction[data-level='naranja'] { border-left-color: var(--lv-naranja); }
+.prediction[data-level='rojo'] { border-left-color: var(--lv-rojo); }
+.sub, .caption { color: var(--color-muted-text); }
+.why { color: var(--color-star-white); }
+.evidence { font-size: var(--text-label); color: var(--color-muted-text); }
+.prediction details { font-size: var(--text-label); }
+.prediction summary, .history summary { cursor: pointer; color: var(--color-muted-text); }
+.actions { justify-content: flex-start; }
+.history { display: grid; gap: var(--spacing-10); }
+.history-row { padding: 6px 0; border-bottom: var(--border-hairline) solid var(--color-dark-gunmetal); font-size: var(--text-label); }
+.history-row[data-status='confirmada'] strong { color: var(--lv-verde); }
+.history-row[data-status='falsa_alarma'] strong { color: var(--lv-naranja); }
