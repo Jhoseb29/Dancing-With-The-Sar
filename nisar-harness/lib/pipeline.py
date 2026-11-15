@@ -17,8 +17,9 @@ from .catalog import CatalogQuery, CatalogResult, Granule, search_granules
 from .catalog_sentinel1 import search_sentinel1
 from .credentials import AwsCredentials, check_sts_identity
 from .curation import curate
+from .drainage import build_corridor, write_channels
 from .exporters import DEFAULT_FORMATS
-from .hotspots import write_hotspots
+from .hotspots import THEME_KINDS, write_hotspots
 from .intent import Intent, offline_intent, parse_intent
 from .jsonio import read_json, write_json
 from .run_context import RunContext
@@ -260,7 +261,13 @@ def step_change(run: RunContext, req: PipelineRequest) -> dict[str, Any] | None:
             takes.append((date, run.run_dir / read_json(index)["globe"]))
     takes.sort()
     try:
-        summary = write_hotspots([p for _, p in takes], req.theme or "general", run.hotspots_geojson)
+        theme = req.theme or "general"
+        corridor = None
+        if len(takes) >= 2 and "nuevo_sedimento" in THEME_KINDS.get(theme, THEME_KINDS["general"]):
+            run.emit("change", "Buscando ríos y torrenteras del área para ubicar sedimento…", 0.82)
+            corridor = build_corridor(read_json(takes[-1][1]))
+            write_channels(corridor, run.channels_geojson)
+        summary = write_hotspots([p for _, p in takes], theme, run.hotspots_geojson, corridor)
     except ValueError as exc:  # grids differ (should not happen: same AOI)
         log.warning("Hotspots: %s", exc)
         summary = None

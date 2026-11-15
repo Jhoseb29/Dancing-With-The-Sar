@@ -151,7 +151,8 @@ def _with_hotspots(change: dict[str, Any] | None, run: RunContext) -> dict[str, 
     """Spatial change (cells, km², % of area) next to the aggregate deltas."""
     summary = _hotspot_summary(run)
     if change is not None and summary:
-        change["hotspots"] = {"kinds": summary["kinds"], "cell_area_km2": summary["cell_area_km2"]}
+        change["hotspots"] = {"kinds": summary["kinds"], "cell_area_km2": summary["cell_area_km2"],
+                              "sediment_corridor": summary.get("sediment_corridor")}
     return change
 
 
@@ -222,6 +223,7 @@ def build_globe(run: RunContext) -> dict[str, Any] | None:
         "bbox": run.manifest.get("request", {}).get("bbox"),
         "takes": takes,
         "hotspots": run.rel(run.hotspots_geojson) if run.hotspots_geojson.exists() else None,
+        "channels": run.rel(run.channels_geojson) if run.channels_geojson.exists() else None,
         "hotspots_summary": _hotspot_summary(run),
         "layers": GLOBE_LAYERS,
     }

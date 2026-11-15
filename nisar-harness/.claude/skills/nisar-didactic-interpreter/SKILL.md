@@ -22,7 +22,7 @@ Un único JSON (el contenido de `interpreter_context.json`). No hay otros archiv
 | `radar` | Misión (`NISAR` banda L ~24 cm, o `Sentinel-1` banda C ~5.5 cm cuando NISAR no tenía tomas), longitud de onda, ángulo de incidencia y polarizaciones (HH/HV en NISAR, VV/VH en Sentinel-1). |
 | `dates[]` | Por fecha (de la más antigua a la más reciente): estación, órbita, calidad, `% de dispersión` (agua, suelo, vegetación, urbano), dB medio, dB por polarización, RVI, CPR y método de clasificación. |
 | `change` | Diferencias ya calculadas entre la primera y la última fecha (`deltas`), cuáles son `significant_changes` y `caveats` de comparabilidad. Usa estos números; no restes tú. |
-| `change.hotspots` | Cambio **espacial** celda a celda: por tipo (`perdida_vegetacion`, `nueva_agua`, `perdida_agua`, `nuevo_urbano`) cuántas celdas, `area_km2` y `pct_of_area`. Es lo que la UI dibuja como puntos de calor en el globo. |
+| `change.hotspots` | Cambio **espacial** celda a celda: por tipo (`perdida_vegetacion`, `nuevo_sedimento`, `nueva_agua`, `perdida_agua`, `nuevo_urbano`) cuántas celdas, `area_km2` y `pct_of_area`. Es lo que la UI dibuja como puntos de calor en el globo. |
 | `media_shown_to_user` | Capas que la UI dibuja en el globo terráqueo (clases de dispersión, brillo HH, brillo HV, puntos de cambio) y que la persona puede alternar por fecha. Invita a mirarlas por su título; no describas lo que se ve: no lo has visto. |
 
 ## Cómo razonar
@@ -40,6 +40,7 @@ Un único JSON (el contenido de `interpreter_context.json`). No hay otros archiv
   - Sombras radar o asfalto pueden parecer "agua".
   - Si el método de clasificación empieza con `single_pol_threshold`, el bosque denso puede caer en "urbano".
   - Menciónalas solo si afectan la conclusión.
+- **`nuevo_sedimento`** es vegetación que pasó a suelo con pérdida de dispersión volumétrica: compatible con lodo de una mazamorra o un desborde, pero también con cosecha o labranza. Solo se cuenta dentro del corredor de cauces (`change.hotspots.sediment_corridor`: ríos y quebradas con nombre de OpenStreetMap + torrenteras del GAMC, ±300 m). Si `applied` es false, dilo: sin red de drenaje el sedimento puede ser cosecha o labranza. Aun dentro del corredor, preséntalo como «compatible con» lodo de una mazamorra o desborde, nunca como confirmación del evento.
 - **Cambio entre fechas:** léelo de `change`. Si `comparable` es false o hay `caveats` (versiones de producto distintas, corrimiento uniforme), trata el cambio como "a confirmar".
 - **Estación:** `epoca_seca` o `epoca_de_lluvias` condiciona lo que es normal (por ejemplo, poca agua en estiaje). Si `season` es `null`, el lugar no tiene calendario curado: menciona la fecha y, si hablas de estación, aclara que es una referencia general y no un dato del sistema.
 - **Nivel de alerta proporcional a la evidencia:**

@@ -90,6 +90,7 @@ const OBJECTS_LINE = 'nisar-objects-line';
 const OBJECTS_3D = 'nisar-objects-3d';
 const COLUMNS_ID = 'nisar-columns';
 const AOI_ID = 'nisar-aoi';
+const CHANNELS_ID = 'nisar-channels';
 /** Área mínima (km²) para levantar una mancha urbana en 3D. */
 const URBAN_3D_MIN_KM2 = 0.5;
 const DEM_TERRAIN = 'relief-terrain';
@@ -119,6 +120,8 @@ const KIND_COLOR = [
   '#00c8ff',
   'perdida_agua',
   '#8a6cff',
+  'nuevo_sedimento',
+  '#b8742a',
   'nuevo_urbano',
   '#ff2ad4',
   '#ffd000',
@@ -495,6 +498,40 @@ export class GeoEngine {
   }
 
   /** Contorno del área que pidió el usuario (para ver qué parte cubre el satélite). */
+  /** Ríos y torrenteras del corredor de sedimento: líneas finas apoyadas sobre el relieve. */
+  setChannels(lines: FeatureCollection | null): void {
+    if (!this.styleReady) {
+      this.map.once('style.load', () => this.setChannels(lines));
+      return;
+    }
+    const source = this.map.getSource(CHANNELS_ID) as GeoJSONSource | undefined;
+    if (!lines) {
+      if (source) {
+        this.map.removeLayer(CHANNELS_ID);
+        this.map.removeSource(CHANNELS_ID);
+      }
+      return;
+    }
+    if (source) {
+      source.setData(lines);
+      return;
+    }
+    this.map.addSource(CHANNELS_ID, { type: 'geojson', data: lines });
+    this.map.addLayer(
+      {
+        id: CHANNELS_ID,
+        type: 'line',
+        source: CHANNELS_ID,
+        paint: {
+          'line-color': '#5fb4ff',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.6, 13, 2],
+          'line-opacity': 0.75,
+        },
+      },
+      'basin-outline',
+    );
+  }
+
   setAoi(bbox: BBox | null): void {
     if (!this.styleReady) {
       this.map.once('style.load', () => this.setAoi(bbox));

@@ -208,7 +208,8 @@
       "nueva_agua": "Agua nueva",
       "perdida_agua": "Agua que desapareció",
       "nuevo_urbano": "Nuevo urbano / rebote doble",
-      "cambio": "Cambio de brillo"
+      "cambio": "Cambio de brillo",
+      "nuevo_sedimento": "Sedimento nuevo (lodo sobre vegetación)"
     },
     "objectArea": "Objeto de {{km2}} km²",
     "objectMean": "Promedio del objeto",

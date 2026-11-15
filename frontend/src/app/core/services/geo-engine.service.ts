@@ -170,6 +170,7 @@ export class GeoEngineService {
         untracked(() => {
           this.engine?.setRelief(onAnalysis ? RELIEF : null);
           this.engine?.setAoi(onAnalysis ? (this.analysis.active()?.globe.bbox ?? null) : null);
+          this.engine?.setChannels(onAnalysis ? this.analysis.channels() : null);
           this.engine?.setAnalysis(overlay);
           this.engine?.setObjects(objects as MapObjects | null);
           this.engine?.setColumns(columns as MapObjects | null);

@@ -103,6 +103,8 @@ export interface HarnessGlobe {
   bbox: [number, number, number, number];
   takes: GlobeTake[];
   hotspots: string | null;
+  /** Ríos y torrenteras del área (corredor donde el sedimento es plausible). */
+  channels?: string | null;
   hotspots_summary: HotspotSummary | null;
   layers: Record<GlobeLayerId | 'hotspots', { title: string; caption: string }>;
 }

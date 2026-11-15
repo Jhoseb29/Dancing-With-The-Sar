@@ -74,6 +74,8 @@ export class HarnessGlobeService {
   readonly grid = signal<GlobeGrid | null>(null);
   readonly objects = signal<TerrainObjects | null>(null);
   readonly hotspots = signal<HotspotPoints | null>(null);
+  /** Cauces significativos del área (líneas GeoJSON) usados como corredor del sedimento. */
+  readonly channels = signal<FeatureCollection | null>(null);
   readonly loading = signal(false);
   readonly inspected = signal<InspectedCell | null>(null);
   /** Se incrementa para pedir al mapa que encuadre el área (comando, no estado). */
@@ -156,6 +158,10 @@ export class HarnessGlobeService {
     await this.selectTake(globe.takes.length - 1);
     void this.load<HotspotPoints>(runId, globe.hotspots).then((fc) => {
       if (this.active()?.runId === runId) this.hotspots.set(fc);
+    });
+    this.channels.set(null);
+    void this.load<FeatureCollection>(runId, globe.channels ?? null).then((fc) => {
+      if (this.active()?.runId === runId) this.channels.set(fc);
     });
     if (this.scene.route() !== 'insights') {
       await this.scene.set('/route', 'insights');

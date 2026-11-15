@@ -9,6 +9,7 @@ Layout::
         granules/<granule_id>/formats/...
         interpreter_context.json
         hotspots.geojson                 (cambios entre la primera y la última toma)
+        channels.geojson                 (ríos y torrenteras del área: corredor de sedimento)
         events.jsonl                     (progreso para la UI)
         interpretation.md                (lección)
         interpretation_narrative.json    (mensaje corto de chat)
@@ -88,6 +89,10 @@ class RunContext:
     @property
     def narrative_json(self) -> Path:
         return self.run_dir / "interpretation_narrative.json"
+
+    @property
+    def channels_geojson(self) -> Path:
+        return self.run_dir / "channels.geojson"
 
     @property
     def hotspots_geojson(self) -> Path:

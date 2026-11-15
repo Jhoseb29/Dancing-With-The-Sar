@@ -208,7 +208,8 @@
       "nueva_agua": "New water",
       "perdida_agua": "Water that disappeared",
       "nuevo_urbano": "New urban / double bounce",
-      "cambio": "Brightness change"
+      "cambio": "Brightness change",
+      "nuevo_sedimento": "New sediment (mud over vegetation)"
     },
     "objectArea": "Object of {{km2}} km²",
     "objectMean": "Object average",
