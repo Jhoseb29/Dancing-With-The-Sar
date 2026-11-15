@@ -7,8 +7,8 @@
     "orbit": "Órbita",
     "basin": "Cuenca",
     "temporal": "Lab temporal",
-    "risk": "Riesgo",
-    "insights": "Análisis NISAR",
+    "risk": "Alertas",
+    "insights": "Ecos del radar",
     "provenance": "Procedencia",
     "language": "Idioma",
     "menu": "Menú",
@@ -67,9 +67,9 @@
   "basin": {
     "kicker": "Cuenca · Cochabamba",
     "title": "Del Tunari al Rocha",
-    "intro": "Cuencas, drenaje, emergencias y distritos reales del municipio. Activa capas, haz clic en el mapa para ver sus datos o busca un lugar arriba.",
+    "intro": "Las quebradas del Tunari bajan con fuerza hacia la ciudad. Toca una cuenca para ver qué peligro trae.",
     "toOrbit": "Volver a la órbita",
-    "gamcLayers": "Capas municipales (GAMC)",
+    "gamcLayers": "Capas municipales del GAMC (imágenes)",
     "gamcSource": "Datos reales del Gobierno Autónomo Municipal de Cochabamba · Proyecto 02",
     "status": {
       "loading": "cargando…",
@@ -79,7 +79,35 @@
     "pointInfo": "Datos en este punto",
     "close": "Cerrar",
     "querying": "Consultando al GAMC…",
-    "noData": "Sin datos en este punto."
+    "noData": "Sin datos en este punto.",
+    "all": "Todas las cuencas",
+    "tapHint": "Ordenadas de la más torrencial a la más tranquila.",
+    "noBasins": "Cargando cuencas…",
+    "type": {
+      "mazamorra": "Mazamorra",
+      "crecida_torrencial": "Crecida torrencial",
+      "inundacion": "Inundación"
+    },
+    "typeWhy": {
+      "mazamorra": "Cuenca pequeña y muy empinada: la lluvia arrastra barro y piedras de golpe.",
+      "crecida_torrencial": "Baja rápido y con fuerza: el río crece en minutos y lleva sedimento.",
+      "inundacion": "Pendiente suave: el agua sube más lento y se acumula en lo bajo."
+    },
+    "drop": "Baja {{m}} metros",
+    "fact": {
+      "drop": "de desnivel",
+      "steep": "laderas fuertes",
+      "area": "de superficie",
+      "slope": "pendiente media"
+    },
+    "radar": {
+      "title": "El radar vio {{ha}} ha de barro nuevo",
+      "when": "Entre {{from}} y {{to}} · ver análisis",
+      "none": "Sin pasada de radar reciente sobre esta cuenca."
+    },
+    "radarTag": "radar",
+    "technical": "Ver datos técnicos",
+    "meltonHelp": "relieve / √área; > 0,6 mazamorra, 0,3–0,6 crecida torrencial (Melton 1965; Wilford 2004)"
   },
   "common": {
     "km": "km",
@@ -97,9 +125,9 @@
     }
   },
   "harness": {
-    "title": "Análisis NISAR",
+    "title": "Ecos del radar",
     "subtitle": "Radar satelital NASA/ISRO · datos en vivo desde AWS",
-    "name": "NISAR",
+    "name": "Ecos",
     "you": "Tú",
     "open": "Pregúntale al satélite",
     "close": "Cerrar",
@@ -184,8 +212,8 @@
     "hide": "Ocultar"
   },
   "insights": {
-    "kicker": "Radar NISAR · análisis en el globo",
-    "title": "Análisis NISAR",
+    "kicker": "Ecos · el radar te explica",
+    "title": "Ecos del radar",
     "empty": "Haz una pregunta (en el chat o con un ejemplo) y el resultado aparecerá aquí sobre el globo: cada toma del satélite coloreada por mecanismo de dispersión y los puntos donde hubo cambios.",
     "focus": "Centrar en el área",
     "takes": "Tomas del satélite",
@@ -214,5 +242,157 @@
     "objectArea": "Objeto de {{km2}} km²",
     "objectMean": "Promedio del objeto",
     "band": "banda {{band}}"
+  },
+  "risk": {
+    "kicker": "Centinela · alerta temprana Cochabamba",
+    "title": "Alertas",
+    "connection": {
+      "open": "En vivo",
+      "connecting": "Conectando…",
+      "closed": "Sin conexión"
+    },
+    "tabs": {
+      "now": "Ahora",
+      "how": "¿Cómo sabemos?",
+      "eval": "¿Funciona?"
+    },
+    "hero": {
+      "rojo": "Peligro alto en la ciudad",
+      "naranja": "Atención: riesgo en varios distritos",
+      "amarillo": "Mantente atento",
+      "verde": "Todo tranquilo hoy",
+      "sin": "Calculando…"
+    },
+    "tapHint": "Toca un distrito en el mapa o en la lista.",
+    "noDistricts": "Todavía no hay datos.",
+    "all": "Todos los distritos",
+    "levels": {
+      "verde": "Verde",
+      "amarillo": "Amarillo",
+      "naranja": "Naranja",
+      "rojo": "Rojo",
+      "sin": "Sin dato"
+    },
+    "why": {
+      "lluvia": "Llovió fuerte en los últimos días.",
+      "suelo": "El suelo ya está empapado: un poco más de lluvia puede desbordar ríos y torrenteras.",
+      "radar": "El satélite vio cambios en el terreno.",
+      "calma": "No hay señales fuertes ahora."
+    },
+    "sig": {
+      "lluvia": "Lluvia",
+      "in3days": "en 3 días",
+      "suelo": "Suelo",
+      "soilHint": "agua acumulada",
+      "terreno": "Terreno",
+      "slopes": "{{pct}} % con laderas fuertes",
+      "radar": "Radar",
+      "in24h": "en 24 h"
+    },
+    "soil": {
+      "low": "Seco",
+      "mid": "Húmedo",
+      "high": "Empapado",
+      "none": "—"
+    },
+    "terrain": {
+      "low": "Poco propenso",
+      "mid": "Propenso",
+      "high": "Muy propenso",
+      "none": "—"
+    },
+    "radar": {
+      "low": "Sin cambios",
+      "mid": "Algunos cambios",
+      "high": "Cambios fuertes",
+      "none": "Sin pasada reciente"
+    },
+    "todo": {
+      "verde": "Vida normal.",
+      "amarillo": "Mira el cielo y sigue los avisos.",
+      "naranja": "No cruces ríos ni torrenteras. Ten lista tu mochila.",
+      "rojo": "Aléjate de cauces y laderas. Sigue al COE.",
+      "sin": "Espera la próxima actualización."
+    },
+    "score": "Riesgo {{v}}/100",
+    "updated": "Actualizado {{t}}",
+    "technical": "Ver datos técnicos",
+    "confidence": "Confianza",
+    "how": {
+      "title": "Juntamos 4 pistas desde el espacio y el terreno",
+      "lluvia": {
+        "title": "Lluvia",
+        "text": "Satélites de la NASA miden la lluvia cada 30 minutos."
+      },
+      "suelo": {
+        "title": "Suelo mojado",
+        "text": "Si llovió los días anteriores, el suelo ya no absorbe."
+      },
+      "terreno": {
+        "title": "Terreno",
+        "text": "El relieve dice por dónde baja el agua y el barro."
+      },
+      "radar": {
+        "title": "Radar",
+        "text": "NISAR ve a través de las nubes si apareció agua o barro."
+      },
+      "result": "Cada 30 minutos calculamos un color por distrito y lo enviamos al instante.",
+      "levelsTitle": "Qué significa cada color",
+      "formula": "núcleo = lluvia × (0,5 + 0,5 × terreno) — con suelo empapado los umbrales de lluvia bajan hasta 40 %\nriesgo = 100 × (0,8 × núcleo + 0,2 × radar)\nverde < 25 ≤ amarillo < 50 ≤ naranja < 75 ≤ rojo · sube al instante, baja tras 12 h",
+      "limits": "Fuentes: GPM IMERG, Copernicus DEM 30 m, distritos y torrenteras GAMC, NISAR / Sentinel-1. Límite: un píxel de lluvia mide ~10 km."
+    },
+    "eval": {
+      "hero": "Detectamos {{found}} de {{total}} emergencias reales",
+      "sub": "Lo probamos con {{n}} días reales de Bolivia: con y sin emergencias.",
+      "outcome": {
+        "acierto": "Emergencia detectada",
+        "negativo_correcto": "Día tranquilo bien identificado",
+        "falsa_alarma": "Falsa alarma",
+        "fallo": "Emergencia no detectada",
+        "error": "Sin dato"
+      },
+      "improving": "Aún damos {{n}} falsas alarmas en días de mucha lluvia sin daños. El satélite mide cuadrados de 10 km y no distingue una tormenta sobre una quebrada chica: para eso necesitamos pluviómetros en tierra (SENAMHI) y el registro de incidentes del GAMC.",
+      "versions": "Puntaje de cada versión",
+      "none": "Todavía no hay evaluación."
+    },
+    "rain": {
+      "title": "Lluvia medida desde el espacio",
+      "source": "NASA GPM IMERG · cada 30 min · últimas 24 h",
+      "onMap": "en el mapa",
+      "peak": "Lo más fuerte: {{mm}} mm/h el {{d}} a las {{t}}",
+      "now": "ahora",
+      "play": "Ver cómo llovió",
+      "stop": "Detener",
+      "total": "Columnas = lluvia total de 24 h (hasta {{mm}} mm)",
+      "howToRead": "Cada columna del mapa es un cuadrado de 10 × 10 km medido por el satélite: más alta y más oscura = más lluvia.",
+      "preliminary": "Las últimas horas son dato preliminar (llega con ~4 h de retraso)."
+    },
+    "src": {
+      "title": "¿Con qué lo detectamos?",
+      "rain": "Tormenta de {{mm}} mm/h el {{d}} a las {{t}}",
+      "rainSrc": "Satélites NASA GPM (IMERG)",
+      "rainNone": "Sin lluvia fuerte en las últimas 24 h",
+      "rainNoneSrc": "Satélites NASA GPM (IMERG)",
+      "soil": "El suelo guarda el agua de {{mm}} mm de lluvia reciente",
+      "soilSrc": "IMERG · lluvia de los últimos 30 días",
+      "soilCity": "Sumamos la lluvia de los últimos 30 días para saber si el suelo está empapado",
+      "soilCitySrc": "IMERG · 30 días",
+      "terrain": "{{pct}} % del distrito son laderas fuertes (pendiente media {{deg}}°)",
+      "terrainSrc": "Relieve Copernicus 30 m (ESA, en AWS)",
+      "terrainCity": "El relieve dice por dónde bajan el agua y el barro del Tunari",
+      "terrainCitySrc": "Relieve Copernicus 30 m (ESA, en AWS)",
+      "radarDone": "{{m}} ya pasó el {{d}}: podemos verificar con radar si hubo agua o barro nuevo",
+      "radarNext": "El radar aún no pasó después de la lluvia. {{m}} vuelve ~{{d}}: ahí verificamos agua o barro nuevo",
+      "radarUnknown": "Sin calendario de radar por ahora",
+      "lastPasses": "Últimas pasadas: {{list}}"
+    },
+    "bulletin": {
+      "number": "Aviso N° {{n}}",
+      "validity": "Vigencia",
+      "fromTo": "Desde {{from}} · al menos hasta {{to}}",
+      "coverage": "Cobertura",
+      "coverageValue": "Distrito {{id}} · {{comuna}}",
+      "issuer": "Emitido por Centinela con datos de NASA, ESA y GAMC. No reemplaza los avisos oficiales de SENAMHI ni del COE."
+    }
   }
 }

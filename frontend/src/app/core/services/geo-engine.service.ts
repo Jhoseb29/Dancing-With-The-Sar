@@ -1,4 +1,7 @@
 import { EffectRef, Injectable, Injector, effect, inject, signal, untracked } from '@angular/core';
+import type { Feature, FeatureCollection, Polygon } from 'geojson';
+import type { RainPayload } from '../alerts/alerts.model';
+import type { BBox } from '../config/runtime-config.model';
 import { RuntimeConfigService } from '../config/runtime-config.service';
 import { UiConfigService } from '../config/ui-config.service';
 import {
@@ -14,9 +17,13 @@ import type {
   MapObjects,
   MapOverlay,
   MapRelief,
+  ZoneGroup,
 } from '../map-engine/geo-engine';
 import { SceneStore } from '../scene/scene.store';
 import { EventService } from './event.service';
+import { AlertsService } from './alerts.service';
+import { BasinsService } from './basins.service';
+import { BASIN_TYPE_HEX, LEVEL_HEX, NO_DATA_HEX } from '../alerts/zone-colors';
 import { HarnessGlobeService, ObjectProps } from './harness-globe.service';
 
 /** Relieve 3D público (AWS Open Data · Terrain Tiles, Terrarium). Sin key. */
@@ -28,6 +35,8 @@ const RELIEF: MapRelief = {
 };
 /** Inclinación de la cámara al mostrar un análisis (deja ver relieve y objetos 3D). */
 const ANALYSIS_PITCH = 55;
+/** En alertas, inclinación suficiente para leer la altura de los bloques de riesgo. */
+const RISK_PITCH = 50;
 import { ensureStylesheet } from './lazy-stylesheet';
 
 export interface MapView {
@@ -68,8 +77,12 @@ export class GeoEngineService {
   private readonly injector = inject(Injector);
   private readonly events = inject(EventService);
   private readonly analysis = inject(HarnessGlobeService);
+  private readonly alerts = inject(AlertsService);
+  private readonly basins = inject(BasinsService);
   private engine: GeoEngine | null = null;
   private effects: EffectRef[] = [];
+  /** Última elección encuadrada por grupo de zonas. */
+  private readonly framed = new Map<ZoneGroup, string>();
 
   readonly view = signal<MapView | null>(null);
   readonly ready = signal(false);
@@ -103,6 +116,7 @@ export class GeoEngineService {
         this.scene.reportCamera({ lon: view.lon, lat: view.lat, zoom: view.zoom });
       },
       onLayerStatus: (presetId, status) => this.scene.reportLayer(presetId, status),
+      onZone: (group, id) => (group === 'districts' ? this.alerts.selectDistrict(id) : this.basins.select(id)),
       onClick: (click) => {
         if (this.scene.route() === 'insights') {
           this.analysis.inspect(click.lon, click.lat, click.analysisObject as ObjectProps | null);
@@ -146,11 +160,11 @@ export class GeoEngineService {
         // en el resto, las capas GAMC del shadow (/layers). Así no se pisan.
         const route = this.scene.route();
         const event = this.scene.state().event;
-        // En el análisis NISAR solo se ve el resultado del harness (sin capas municipales).
+        // En el análisis NISAR y en alertas solo se ven sus propios datos (sin imágenes municipales).
         const layers =
           route === 'events' && event
             ? this.events.layersFor(event.type)
-            : route === 'insights'
+            : route === 'insights' || route === 'risk'
               ? []
               : this.scene.layers().filter((l) => this.ui.layer(l.presetId)?.kind === 'gamc-wms');
         const date = this.scene.time().date;
@@ -158,6 +172,69 @@ export class GeoEngineService {
           const overlays = this.toOverlays(layers, date);
           this.scene.pruneReportedLayers(overlays.map((o) => o.presetId));
           this.engine?.setOverlays(overlays);
+        });
+      }, options),
+      // Alertas: distritos en 3D (color = nivel, altura = riesgo); se encuadran al entrar y al elegir uno.
+      effect(() => {
+        const onRisk = this.scene.route() === 'risk';
+        const districts = onRisk ? this.alerts.districts() : null;
+        const selected = onRisk ? this.alerts.selectedDistrictId() : null;
+        untracked(() => {
+          this.engine?.setZones(
+            'districts',
+            districts && {
+              type: 'FeatureCollection',
+              features: districts.features.map((f) => ({
+                ...f,
+                properties: {
+                  id: f.properties.id,
+                  label: f.properties.id,
+                  centro: f.properties.centro,
+                  color: LEVEL_HEX[f.properties.estado?.nivel ?? ''] ?? NO_DATA_HEX,
+                  height: 4 * (f.properties.estado?.indice ?? 0), // 0–100 → 0–400 m (la lluvia va encima)
+                },
+              })),
+            },
+            selected,
+          );
+          if (!onRisk) {
+            this.framed.delete('districts');
+            return;
+          }
+          this.frameZones('districts', districts?.features.map((f) => f.properties) ?? [], selected);
+        });
+      }, options),
+      // Alertas: lluvia IMERG como columnas (acumulado 24 h o la media hora elegida).
+      effect(() => {
+        const onRisk = this.scene.route() === 'risk' && this.alerts.rainVisible();
+        const rain = onRisk ? this.alerts.rain() : null;
+        const frame = this.alerts.rainFrame();
+        untracked(() => this.engine?.setRain(rain ? rainCells(rain, frame) : null));
+      }, options),
+      // Cuenca: cuencas torrenciales como polígonos coloreados por tipo (Melton), con etiqueta.
+      effect(() => {
+        const onBasin = this.scene.route() === 'basin';
+        const basins = onBasin ? this.basins.basins() : null;
+        const selected = onBasin ? this.basins.selectedId() : null;
+        untracked(() => {
+          this.engine?.setZones(
+            'basins',
+            basins && {
+              type: 'FeatureCollection',
+              features: basins.features.map((f) => ({
+                ...f,
+                properties: {
+                  id: f.properties.id,
+                  label: f.properties.nombre,
+                  centro: f.properties.centro,
+                  color: BASIN_TYPE_HEX[f.properties.tipo] ?? NO_DATA_HEX,
+                },
+              })),
+            },
+            selected,
+          );
+          if (onBasin) this.frameZones('basins', basins?.features.map((f) => f.properties) ?? [], selected, false);
+          else this.framed.delete('basins');
         });
       }, options),
       // Análisis NISAR: grilla coloreada en el navegador + puntos de cambio.
@@ -168,7 +245,9 @@ export class GeoEngineService {
         const columns = onAnalysis ? this.analysis.hotspotColumns() : null;
         const hotspots = onAnalysis ? this.analysis.visibleHotspots() : null;
         untracked(() => {
-          this.engine?.setRelief(onAnalysis ? RELIEF : null);
+          // relieve 3D también bajo los bloques de alerta
+          const route = this.scene.route();
+          this.engine?.setRelief(onAnalysis || route === 'risk' || route === 'basin' ? RELIEF : null);
           this.engine?.setAoi(onAnalysis ? (this.analysis.active()?.globe.bbox ?? null) : null);
           this.engine?.setChannels(onAnalysis ? this.analysis.channels() : null);
           this.engine?.setAnalysis(overlay);
@@ -202,6 +281,31 @@ export class GeoEngineService {
         });
       }, options),
     );
+  }
+
+  /**
+   * Encuadra la zona elegida (inclinada, para ver relieve) o todas las zonas; solo cuando cambia
+   * la elección, no en cada actualización de datos.
+   */
+  private frameZones(group: ZoneGroup, zones: { id: string; bbox: number[] }[], selectedId: string | null, all = true): void {
+    const key = selectedId ?? (all ? '*' : '');
+    if (!zones.length || this.framed.get(group) === key) return;
+    this.framed.set(group, key);
+    const pick = zones.find((z) => z.id === selectedId);
+    if (pick) {
+      this.engine?.fitArea(pick.bbox as BBox, RISK_PITCH);
+    } else if (all) {
+      const b = zones.map((z) => z.bbox);
+      this.engine?.fitArea(
+        [
+          Math.min(...b.map((x) => x[0])),
+          Math.min(...b.map((x) => x[1])),
+          Math.max(...b.map((x) => x[2])),
+          Math.max(...b.map((x) => x[3])),
+        ],
+        RISK_PITCH,
+      );
+    }
   }
 
   private toOverlays(layers: ReturnType<SceneStore['layers']>, date: string | null): MapOverlay[] {
@@ -319,6 +423,49 @@ export class GeoEngineService {
     );
     this.featureInfo.set({ lon: click.lon, lat: click.lat, loading: false, results });
   }
+}
+
+/** Rampa de DATOS de lluvia (celeste → azul → violeta) sobre 0..1. */
+const RAIN_RAMP = ['#9fd3ff', '#3a8dff', '#1f3fd1', '#8a2be2'];
+
+function rainColor(t: number): string {
+  return RAIN_RAMP[Math.min(RAIN_RAMP.length - 1, Math.floor(Math.max(0, t) * RAIN_RAMP.length))];
+}
+
+/**
+ * Celdas IMERG → barras finas (22 % de la celda) con `h` (m) y `c` (color). Escalas distintas:
+ * media hora en mm/h (20 mm/h = tope) o acumulado 24 h en mm (60 mm = tope), máx. ~1,2 km de alto.
+ */
+function rainCells(rain: RainPayload, frame: number | null): FeatureCollection<Polygon, { mm: number; h: number; c: string }> {
+  const total = frame === null;
+  const grid = total ? rain.acumulado_mm : rain.slots[frame]?.mm_h;
+  const top = total ? 60 : 20;
+  const half = (rain.celda_grados * 0.22) / 2;
+  const features: Feature<Polygon, { mm: number; h: number; c: string }>[] = [];
+  rain.lons.forEach((lon, i) =>
+    rain.lats.forEach((lat, j) => {
+      const mm = grid?.[i]?.[j];
+      if (mm === null || mm === undefined || mm < 0.2) return;
+      const t = Math.min(1, mm / top);
+      features.push({
+        type: 'Feature',
+        properties: { mm, h: 80 + t * 1200, c: rainColor(t) },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [lon - half, lat - half],
+              [lon + half, lat - half],
+              [lon + half, lat + half],
+              [lon - half, lat + half],
+              [lon - half, lat - half],
+            ],
+          ],
+        },
+      });
+    }),
+  );
+  return { type: 'FeatureCollection', features };
 }
 
 function yesterday(): string {

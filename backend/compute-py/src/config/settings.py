@@ -36,9 +36,10 @@ class Settings(BaseSettings):
 
     # Alertas (alert-harness/): el harness escribe JSON en output/alerts; el WebSocket los empuja a la UI.
     alerts_dir: Path = REPO_ROOT / "alert-harness" / "output" / "alerts"
+    alerts_harness_dir: Path = REPO_ROOT / "alert-harness"
     alerts_schema_dir: Path = REPO_ROOT / "alert-harness" / "schemas"
     alerts_poll_s: float = 3.0
-    alerts_initial: int = 20
+    alerts_initial: int = 60
 
     @property
     def harness_output_dir(self) -> Path:

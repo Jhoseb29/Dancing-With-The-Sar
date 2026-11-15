@@ -1,0 +1,29 @@
+{
+  "id": "viloma-lluvia-2026-01-16",
+  "nombre": "Río Viloma, Sipe Sipe (Cochabamba)",
+  "bbox": [
+    -66.45,
+    -17.55,
+    -66.25,
+    -17.4
+  ],
+  "fecha": "2026-01-16",
+  "precision_fecha": "día",
+  "peligro": "mazamorra",
+  "ocurrio": false,
+  "fuente": "Búsqueda en prensa (Los Tiempos, Opinión) sin reporte de desborde/mazamorra ese día; verificación parcial",
+  "radar_run": null,
+  "notas": "NEGATIVO DIFÍCIL: llovió fuerte y no se encontró evento reportado. IMERG: 102 mm en 72 h, una semana antes de la mazamorra real.",
+  "esperado": {
+    "nivel_min": "verde",
+    "nivel_max": "amarillo",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": ">=",
+        "valor": 15,
+        "por_que": "Es un día lluvioso de verdad (si no, no sería un negativo difícil)."
+      }
+    ]
+  }
+}

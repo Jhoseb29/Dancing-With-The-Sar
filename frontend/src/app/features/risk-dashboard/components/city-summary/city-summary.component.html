@@ -1,0 +1,38 @@
+<h1 class="hero" [attr.data-level]="worst()">{{ 'risk.hero.' + worst() | transloco }}</h1>
+
+<div class="strip">
+  @for (d of ranking(); track d.id) {
+    <button
+      type="button"
+      [attr.data-level]="d.estado?.nivel ?? 'sin'"
+      [title]="d.id + ' · ' + d.comuna"
+      [attr.aria-label]="d.id + ' · ' + d.comuna"
+      (click)="pick.emit(d.id)"
+    ></button>
+  }
+</div>
+<div class="counts">
+  @for (c of counts(); track c.level) {
+    <span><i class="dot" [attr.data-level]="c.level"></i> {{ c.n }} {{ 'risk.levels.' + c.level | transloco }}</span>
+  }
+</div>
+<!-- Lluvia y fuentes (las pone la página) -->
+<ng-content />
+
+<p class="hint">{{ 'risk.tapHint' | transloco }}</p>
+
+<ul class="ranking">
+  @for (d of ranking(); track d.id) {
+    <li>
+      <button type="button" (click)="pick.emit(d.id)">
+        <i class="dot" [attr.data-level]="d.estado?.nivel ?? 'sin'"></i>
+        <span class="name"><strong>{{ d.id }}</strong> {{ d.comuna }}</span>
+        <app-risk-icon class="cause" [name]="d.estado?.datos?.causa ?? 'calma'" [title]="'risk.why.' + (d.estado?.datos?.causa ?? 'calma') | transloco" />
+        <span class="bar"><span [attr.data-level]="d.estado?.nivel ?? 'sin'" [style.width.%]="d.estado?.indice ?? 0"></span></span>
+      </button>
+    </li>
+  } @empty {
+    <li class="muted">{{ 'risk.noDistricts' | transloco }}</li>
+  }
+</ul>
+<p class="caption">{{ 'risk.updated' | transloco: { t: updated() } }}</p>

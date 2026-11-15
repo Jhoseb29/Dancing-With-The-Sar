@@ -1,4 +1,4 @@
-# CLAUDE.md - Harness NISAR ("Dancing with the SARs")
+# CLAUDE.md - Harness NISAR ("Ecos del radar" en la web · Dancing with the SARs)
 
 Pregunta en lenguaje natural → datos radar **NISAR L2 GCOV** leídos directamente de AWS → mapas, métricas y una explicación didáctica para personas sin formación técnica.
 

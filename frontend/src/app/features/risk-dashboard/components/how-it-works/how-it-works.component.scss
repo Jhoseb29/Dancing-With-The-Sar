@@ -1,0 +1,77 @@
+@use '../../risk' as *;
+
+:host {
+  @include level-vars;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-15);
+}
+
+p,
+h2 {
+  margin: 0;
+}
+
+.hero {
+  @include hero;
+}
+
+.dot {
+  @include dot;
+}
+
+.steps,
+.legend {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.steps {
+  gap: var(--spacing-15);
+
+  li {
+    display: flex;
+    gap: var(--spacing-12);
+    align-items: flex-start;
+  }
+}
+
+.step-ico {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border: var(--border-hairline) solid var(--color-dim-steel);
+  border-radius: 50%;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-10);
+  padding: var(--spacing-12);
+  border: var(--border-hairline) solid var(--color-dark-gunmetal);
+  border-radius: var(--radius-md);
+}
+
+.legend {
+  gap: var(--spacing-4);
+  font-size: var(--text-label);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-10);
+  }
+}
+
+pre {
+  white-space: pre-wrap;
+  font-size: var(--text-caption);
+}
+
+@include details;

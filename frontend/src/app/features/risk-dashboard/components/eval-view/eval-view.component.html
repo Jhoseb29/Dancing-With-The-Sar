@@ -1,0 +1,47 @@
+@if (summary(); as ev) {
+  <h1 class="hero">{{ 'risk.eval.hero' | transloco: { found: events().found, total: events().total } }}</h1>
+  <p class="muted">{{ 'risk.eval.sub' | transloco: { n: ev.casos } }}</p>
+
+  <div class="dots">
+    @for (c of cases(); track c.case_id) {
+      <i [attr.data-result]="c.resultado" [title]="c.case_id"></i>
+    }
+  </div>
+  <ul class="legend">
+    @for (r of outcomes; track r) {
+      <li><i class="rdot" [attr.data-result]="r"></i>{{ 'risk.eval.outcome.' + r | transloco }}</li>
+    }
+  </ul>
+
+  @if (events().falseAlarms > 0) {
+    <p class="note">{{ 'risk.eval.improving' | transloco: { n: events().falseAlarms } }}</p>
+  }
+
+  <h2 class="label">{{ 'risk.eval.versions' | transloco }}</h2>
+  <div class="versions">
+    @for (v of versions(); track v.id) {
+      <div class="version" [title]="v.id">
+        <span class="caption tabular">{{ v.score }}</span>
+        <span class="col"><span [style.height.%]="v.score"></span></span>
+        <span class="caption">#{{ v.label }}</span>
+      </div>
+    }
+  </div>
+
+  <details>
+    <summary>{{ 'risk.technical' | transloco }}</summary>
+    <p class="caption">POD {{ ev.pod ?? '—' }} · FAR {{ ev.far ?? '—' }} · CSI {{ ev.componentes.csi }} · {{ ev.puntaje }}/100</p>
+    <table class="table">
+      <tbody>
+        @for (c of cases(); track c.case_id) {
+          <tr>
+            <td><i class="rdot" [attr.data-result]="c.resultado"></i> {{ c.case_id }}</td>
+            <td>{{ c.nivel ?? '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </details>
+} @else {
+  <p class="muted">{{ 'risk.eval.none' | transloco }}</p>
+}

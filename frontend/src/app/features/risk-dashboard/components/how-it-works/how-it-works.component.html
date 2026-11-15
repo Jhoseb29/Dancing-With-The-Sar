@@ -1,0 +1,34 @@
+<h1 class="hero">{{ 'risk.how.title' | transloco }}</h1>
+
+<ol class="steps">
+  @for (s of clues; track s) {
+    <li>
+      <span class="step-ico"><app-risk-icon [name]="s" /></span>
+      <div>
+        <strong>{{ 'risk.how.' + s + '.title' | transloco }}</strong>
+        <p class="muted">{{ 'risk.how.' + s + '.text' | transloco }}</p>
+      </div>
+    </li>
+  }
+</ol>
+
+<div class="result">
+  <app-risk-icon name="aviso" />
+  <p>{{ 'risk.how.result' | transloco }}</p>
+</div>
+
+<h2 class="label">{{ 'risk.how.levelsTitle' | transloco }}</h2>
+<ul class="legend">
+  @for (l of levels; track l) {
+    <li>
+      <i class="dot" [attr.data-level]="l"></i>
+      <span><strong>{{ 'risk.levels.' + l | transloco }}</strong> · {{ 'risk.todo.' + l | transloco }}</span>
+    </li>
+  }
+</ul>
+
+<details>
+  <summary>{{ 'risk.technical' | transloco }}</summary>
+  <pre>{{ 'risk.how.formula' | transloco }}</pre>
+  <p class="caption">{{ 'risk.how.limits' | transloco }}</p>
+</details>

@@ -1,0 +1,121 @@
+@use '../../risk' as *;
+
+:host {
+  @include level-vars;
+  display: block;
+}
+
+p,
+h2 {
+  margin: 0;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-15);
+  padding-left: var(--spacing-12);
+  border-left: 4px solid var(--lv-sin);
+  @include by-level(border-left-color);
+}
+
+.back {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-muted-text);
+  font: inherit;
+  font-size: var(--text-label);
+  cursor: pointer;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-10);
+
+  h2 {
+    font-size: 20px;
+    text-transform: capitalize;
+  }
+}
+
+.badge {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  color: #000;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  background: var(--lv-sin);
+  @include by-level(background);
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-10);
+  margin: 0;
+  padding: var(--spacing-10) 0;
+  border-top: var(--border-hairline) solid var(--color-dark-gunmetal);
+  border-bottom: var(--border-hairline) solid var(--color-dark-gunmetal);
+
+  dd {
+    margin: 2px 0 0;
+    font-size: var(--text-label);
+  }
+}
+
+.why {
+  font-size: var(--text-body-lg);
+  line-height: 1.35;
+}
+
+.signals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-10);
+}
+
+.signal {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--spacing-10);
+  border-radius: var(--radius-md);
+  background: var(--color-hover-fill);
+
+  strong {
+    font-size: 15px;
+  }
+
+  &.off {
+    opacity: 0.4;
+  }
+}
+
+.meter {
+  height: 4px;
+  margin-top: var(--spacing-4);
+  border-radius: 2px;
+  background: var(--color-dark-gunmetal);
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    background: var(--color-star-white);
+  }
+}
+
+.todo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-10);
+  padding: var(--spacing-12);
+  border: var(--border-hairline) solid var(--color-dark-gunmetal);
+  border-radius: var(--radius-md);
+}
+
+@include details;

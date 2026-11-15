@@ -7,8 +7,8 @@
     "orbit": "Orbit",
     "basin": "Basin",
     "temporal": "Time lab",
-    "risk": "Risk",
-    "insights": "NISAR analysis",
+    "risk": "Alerts",
+    "insights": "Radar Echoes",
     "provenance": "Provenance",
     "language": "Language",
     "menu": "Menu",
@@ -67,9 +67,9 @@
   "basin": {
     "kicker": "Basin · Cochabamba",
     "title": "From the Tunari to the Rocha",
-    "intro": "Real municipal basins, drainage, emergencies and districts. Toggle layers, click the map to see their data or search a place above.",
+    "intro": "Tunari's ravines rush down toward the city. Tap a basin to see what hazard it brings.",
     "toOrbit": "Back to orbit",
-    "gamcLayers": "Municipal layers (GAMC)",
+    "gamcLayers": "GAMC municipal layers (images)",
     "gamcSource": "Real data from the Autonomous Municipal Government of Cochabamba · Project 02",
     "status": {
       "loading": "loading…",
@@ -79,7 +79,35 @@
     "pointInfo": "Data at this point",
     "close": "Close",
     "querying": "Querying GAMC…",
-    "noData": "No data at this point."
+    "noData": "No data at this point.",
+    "all": "All basins",
+    "tapHint": "Sorted from most to least torrential.",
+    "noBasins": "Loading basins…",
+    "type": {
+      "mazamorra": "Debris flow",
+      "crecida_torrencial": "Flash flood",
+      "inundacion": "Flooding"
+    },
+    "typeWhy": {
+      "mazamorra": "Small, very steep basin: rain drags mud and rocks down all at once.",
+      "crecida_torrencial": "Fast and powerful: the stream rises in minutes and carries sediment.",
+      "inundacion": "Gentle slope: water rises slower and pools in low areas."
+    },
+    "drop": "Drops {{m}} metres",
+    "fact": {
+      "drop": "elevation drop",
+      "steep": "steep slopes",
+      "area": "area",
+      "slope": "mean slope"
+    },
+    "radar": {
+      "title": "Radar saw {{ha}} ha of new mud",
+      "when": "Between {{from}} and {{to}} · see analysis",
+      "none": "No recent radar pass over this basin."
+    },
+    "radarTag": "radar",
+    "technical": "Show technical data",
+    "meltonHelp": "relief / √area; > 0.6 debris flow, 0.3–0.6 flash flood (Melton 1965; Wilford 2004)"
   },
   "common": {
     "km": "km",
@@ -97,9 +125,9 @@
     }
   },
   "harness": {
-    "title": "NISAR analysis",
+    "title": "Radar Echoes",
     "subtitle": "NASA/ISRO satellite radar · live data from AWS",
-    "name": "NISAR",
+    "name": "Ecos",
     "you": "You",
     "open": "Ask the satellite",
     "close": "Close",
@@ -184,8 +212,8 @@
     "hide": "Hide"
   },
   "insights": {
-    "kicker": "NISAR radar · analysis on the globe",
-    "title": "NISAR analysis",
+    "kicker": "Ecos · the radar explains",
+    "title": "Radar Echoes",
     "empty": "Ask a question (in the chat or with an example) and the result will appear here on the globe: each satellite take coloured by scattering mechanism and the spots where things changed.",
     "focus": "Center on the area",
     "takes": "Satellite takes",
@@ -214,5 +242,157 @@
     "objectArea": "Object of {{km2}} km²",
     "objectMean": "Object average",
     "band": "{{band}} band"
+  },
+  "risk": {
+    "kicker": "Centinela · Cochabamba early warning",
+    "title": "Alerts",
+    "connection": {
+      "open": "Live",
+      "connecting": "Connecting…",
+      "closed": "Offline"
+    },
+    "tabs": {
+      "now": "Now",
+      "how": "How we know",
+      "eval": "Does it work?"
+    },
+    "hero": {
+      "rojo": "High danger in the city",
+      "naranja": "Warning: risk in several districts",
+      "amarillo": "Stay alert",
+      "verde": "All calm today",
+      "sin": "Calculating…"
+    },
+    "tapHint": "Tap a district on the map or in the list.",
+    "noDistricts": "No data yet.",
+    "all": "All districts",
+    "levels": {
+      "verde": "Green",
+      "amarillo": "Yellow",
+      "naranja": "Orange",
+      "rojo": "Red",
+      "sin": "No data"
+    },
+    "why": {
+      "lluvia": "It rained hard in the last days.",
+      "suelo": "The ground is soaked: a little more rain can overflow rivers and gullies.",
+      "radar": "The satellite saw changes on the ground.",
+      "calma": "No strong signals right now."
+    },
+    "sig": {
+      "lluvia": "Rain",
+      "in3days": "in 3 days",
+      "suelo": "Soil",
+      "soilHint": "stored water",
+      "terreno": "Terrain",
+      "slopes": "{{pct}} % steep slopes",
+      "radar": "Radar",
+      "in24h": "in 24 h"
+    },
+    "soil": {
+      "low": "Dry",
+      "mid": "Moist",
+      "high": "Soaked",
+      "none": "—"
+    },
+    "terrain": {
+      "low": "Low exposure",
+      "mid": "Exposed",
+      "high": "Very exposed",
+      "none": "—"
+    },
+    "radar": {
+      "low": "No changes",
+      "mid": "Some changes",
+      "high": "Strong changes",
+      "none": "No recent pass"
+    },
+    "todo": {
+      "verde": "Business as usual.",
+      "amarillo": "Watch the sky and follow the warnings.",
+      "naranja": "Don't cross rivers or gullies. Keep your go-bag ready.",
+      "rojo": "Stay away from channels and slopes. Follow civil defense.",
+      "sin": "Wait for the next update."
+    },
+    "score": "Risk {{v}}/100",
+    "updated": "Updated {{t}}",
+    "technical": "Show technical data",
+    "confidence": "Confidence",
+    "how": {
+      "title": "We combine 4 clues from space and the ground",
+      "lluvia": {
+        "title": "Rain",
+        "text": "NASA satellites measure rain every 30 minutes."
+      },
+      "suelo": {
+        "title": "Wet soil",
+        "text": "If it rained in previous days, the ground can't absorb more."
+      },
+      "terreno": {
+        "title": "Terrain",
+        "text": "Relief tells where water and mud flow down."
+      },
+      "radar": {
+        "title": "Radar",
+        "text": "NISAR sees through clouds whether water or mud appeared."
+      },
+      "result": "Every 30 minutes we compute a color per district and send it instantly.",
+      "levelsTitle": "What each color means",
+      "formula": "núcleo = lluvia × (0,5 + 0,5 × terreno) — con suelo empapado los umbrales de lluvia bajan hasta 40 %\nriesgo = 100 × (0,8 × núcleo + 0,2 × radar)\nverde < 25 ≤ amarillo < 50 ≤ naranja < 75 ≤ rojo · sube al instante, baja tras 12 h",
+      "limits": "Sources: GPM IMERG, Copernicus DEM 30 m, GAMC districts and gullies, NISAR / Sentinel-1. Limit: one rain pixel spans ~10 km."
+    },
+    "eval": {
+      "hero": "We caught {{found}} of {{total}} real emergencies",
+      "sub": "Tested on {{n}} real days in Bolivia, with and without emergencies.",
+      "outcome": {
+        "acierto": "Emergency caught",
+        "negativo_correcto": "Calm day correctly identified",
+        "falsa_alarma": "False alarm",
+        "fallo": "Emergency missed",
+        "error": "No data"
+      },
+      "improving": "We still raise {{n}} false alarms on very rainy days without damage. The satellite measures 10 km squares and can't single out a storm over a small ravine: that needs ground rain gauges (SENAMHI) and the GAMC incident record.",
+      "versions": "Score by version",
+      "none": "No evaluation yet."
+    },
+    "rain": {
+      "title": "Rain measured from space",
+      "source": "NASA GPM IMERG · every 30 min · last 24 h",
+      "onMap": "on map",
+      "peak": "Strongest: {{mm}} mm/h on {{d}} at {{t}}",
+      "now": "now",
+      "play": "Replay the rain",
+      "stop": "Stop",
+      "total": "Columns = total rain in 24 h (up to {{mm}} mm)",
+      "howToRead": "Each map column is a 10 × 10 km square measured by the satellite: taller and darker = more rain.",
+      "preliminary": "The latest hours are preliminary (about 4 h delay)."
+    },
+    "src": {
+      "title": "How did we detect it?",
+      "rain": "Storm of {{mm}} mm/h on {{d}} at {{t}}",
+      "rainSrc": "NASA GPM satellites (IMERG)",
+      "rainNone": "No heavy rain in the last 24 h",
+      "rainNoneSrc": "NASA GPM satellites (IMERG)",
+      "soil": "The ground holds the water of {{mm}} mm of recent rain",
+      "soilSrc": "IMERG · last 30 days of rain",
+      "soilCity": "We add up 30 days of rain to know if the ground is soaked",
+      "soilCitySrc": "IMERG · 30 days",
+      "terrain": "{{pct}} % of the district are steep slopes (mean slope {{deg}}°)",
+      "terrainSrc": "Copernicus 30 m relief (ESA, on AWS)",
+      "terrainCity": "Relief shows where water and mud flow down from the Tunari",
+      "terrainCitySrc": "Copernicus 30 m relief (ESA, on AWS)",
+      "radarDone": "{{m}} already passed on {{d}}: we can check with radar for new water or mud",
+      "radarNext": "Radar hasn't passed since the rain. {{m}} returns ~{{d}}: then we check for new water or mud",
+      "radarUnknown": "No radar schedule for now",
+      "lastPasses": "Last passes: {{list}}"
+    },
+    "bulletin": {
+      "number": "Warning No. {{n}}",
+      "validity": "Valid",
+      "fromTo": "From {{from}} · at least until {{to}}",
+      "coverage": "Coverage",
+      "coverageValue": "District {{id}} · {{comuna}}",
+      "issuer": "Issued by Centinela with NASA, ESA and GAMC data. Does not replace official SENAMHI or COE warnings."
+    }
   }
 }

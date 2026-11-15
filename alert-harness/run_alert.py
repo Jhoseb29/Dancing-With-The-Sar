@@ -14,6 +14,7 @@ import sys
 
 from alerts.engine import Request, evaluate
 from alerts.evaluate import load_cases
+from alerts.publish import publish
 from alerts.settings import Settings
 
 
@@ -39,10 +40,7 @@ def main() -> int:
         req = Request(args.nombre, tuple(args.bbox), args.fecha, args.peligro, args.radar_run, args.radar)
 
     alert = evaluate(req, st)
-    out = st.output_dir / "alerts"
-    out.mkdir(parents=True, exist_ok=True)
-    path = out / f"{alert['created_at'].replace(':', '').replace('-', '')[:15]}_{alert['id']}.json"
-    path.write_text(json.dumps(alert, ensure_ascii=False, indent=2), encoding="utf-8")
+    path = publish(alert, st.output_dir)
     print(json.dumps({k: alert[k] for k in ("nivel", "indice_riesgo", "confianza", "componentes", "motivos")},
                      ensure_ascii=False, indent=2))
     print(f"→ {path}")

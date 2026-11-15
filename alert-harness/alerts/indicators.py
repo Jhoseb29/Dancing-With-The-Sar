@@ -31,7 +31,7 @@ def _ind(id_: str, valor: float, unidad: str, metodo: str, evidencia: str, confi
 def rain(series: list[DayRain], ref_day: str, cfg: dict[str, Any]) -> list[Indicator]:
     by_day = {r.day: r for r in series}
     ref = date.fromisoformat(ref_day)
-    window = lambda n: [by_day.get((ref - timedelta(d)).isoformat()) for d in range(n)]  # noqa: E731
+    window = lambda n: [by_day.get((ref - timedelta(d)).isoformat()) for d in range(n)]
     products = sorted({r.product for r in series if r.max_mm is not None})
     missing = sum(r.max_mm is None for r in series)
     conf = "baja" if missing > len(series) * 0.2 else "media"

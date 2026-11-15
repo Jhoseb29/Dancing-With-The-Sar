@@ -6,14 +6,25 @@ import { RuntimeConfigService } from '../../../../core/config/runtime-config.ser
 import { UiConfigService } from '../../../../core/config/ui-config.service';
 import { gamcLegendUrl } from '../../../../core/data-access/gamc-wms.client';
 import { SceneStore } from '../../../../core/scene/scene.store';
+import { BasinsService } from '../../../../core/services/basins.service';
 import { GeoEngineService } from '../../../../core/services/geo-engine.service';
 import { MapCanvasComponent } from '../../../../shared/components/map-canvas/map-canvas.component';
 import { CoordinatePipe } from '../../../../shared/pipes/coordinate.pipe';
+import { BasinCardComponent } from '../../components/basin-card/basin-card.component';
+import { BasinListComponent } from '../../components/basin-list/basin-list.component';
 
-/** Vista de la cuenca (motor 2.5D) con capas municipales reales del GAMC. Smart. */
+/** Vista de la cuenca: cuencas torrenciales interactivas (vector) + capas municipales del GAMC. Smart. */
 @Component({
   selector: 'app-basin-map-page',
-  imports: [MapCanvasComponent, SidePanelComponent, TranslocoPipe, RouterLink, CoordinatePipe],
+  imports: [
+    MapCanvasComponent,
+    SidePanelComponent,
+    TranslocoPipe,
+    RouterLink,
+    CoordinatePipe,
+    BasinCardComponent,
+    BasinListComponent,
+  ],
   templateUrl: './basin-map-page.component.html',
   styleUrl: './basin-map-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,6 +32,8 @@ import { CoordinatePipe } from '../../../../shared/pipes/coordinate.pipe';
 export class BasinMapPageComponent {
   protected readonly map = inject(GeoEngineService);
   protected readonly scene = inject(SceneStore);
+  protected readonly basins = inject(BasinsService);
+  protected readonly basinList = computed(() => (this.basins.basins()?.features ?? []).map((f) => f.properties));
   private readonly ui = inject(UiConfigService);
   private readonly apiBaseUrl = inject(RuntimeConfigService).value.apiBaseUrl;
 
@@ -42,7 +55,11 @@ export class BasinMapPageComponent {
   });
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.map.detach());
+    void this.basins.load();
+    inject(DestroyRef).onDestroy(() => {
+      this.map.detach();
+      this.basins.select(null);
+    });
   }
 
   protected onCanvasReady(container: HTMLElement): void {

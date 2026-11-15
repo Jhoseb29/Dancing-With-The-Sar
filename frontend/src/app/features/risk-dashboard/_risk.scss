@@ -1,0 +1,70 @@
+// Colores de DATOS de alerta (los mismos que el mapa) y utilidades compartidas de la vista.
+@mixin level-vars {
+  --lv-verde: #4caf7a;
+  --lv-amarillo: #e3c341;
+  --lv-naranja: #e8893a;
+  --lv-rojo: #e0524a;
+  --lv-sin: #777777;
+}
+
+@mixin by-level($prop) {
+  @each $lv in verde, amarillo, naranja, rojo, sin {
+    &[data-level='#{$lv}'] {
+      #{$prop}: var(--lv-#{$lv});
+    }
+  }
+}
+
+@mixin by-result($prop) {
+  &[data-result='acierto'] {
+    #{$prop}: var(--lv-verde);
+  }
+
+  &[data-result='falsa_alarma'] {
+    #{$prop}: var(--lv-naranja);
+  }
+
+  &[data-result='fallo'],
+  &[data-result='error'] {
+    #{$prop}: var(--lv-rojo);
+  }
+}
+
+@mixin dot {
+  display: inline-block;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--lv-sin);
+  @include by-level(background);
+}
+
+@mixin hero {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.15;
+  font-weight: var(--font-weight-bold);
+}
+
+@mixin details {
+  details {
+    font-size: var(--text-label);
+
+    summary {
+      color: var(--color-muted-text);
+      cursor: pointer;
+    }
+  }
+
+  .table {
+    width: 100%;
+    margin-top: var(--spacing-10);
+    border-collapse: collapse;
+
+    td {
+      padding: 3px var(--spacing-10) 3px 0;
+      border-bottom: var(--border-hairline) solid var(--color-dark-gunmetal);
+    }
+  }
+}

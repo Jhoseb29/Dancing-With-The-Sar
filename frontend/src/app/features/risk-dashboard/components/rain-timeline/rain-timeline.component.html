@@ -1,0 +1,56 @@
+<div class="head">
+  <app-risk-icon name="lluvia" />
+  <div>
+    <h2 class="label">{{ 'risk.rain.title' | transloco }}</h2>
+    <p class="caption">{{ 'risk.rain.source' | transloco }}</p>
+  </div>
+  <label class="switch">
+    <input type="checkbox" [checked]="visible()" (change)="toggle.emit($any($event.target).checked)" />
+    <span class="caption">{{ 'risk.rain.onMap' | transloco }}</span>
+  </label>
+</div>
+
+@if (rain().pico.max_30min_mm_h; as peak) {
+  <p class="big">
+    {{ 'risk.rain.peak' | transloco: { mm: peak.toFixed(1), t: time(rain().pico.cuando), d: day(rain().pico.cuando) } }}
+  </p>
+}
+
+<div class="bars" role="group" [attr.aria-label]="'risk.rain.title' | transloco">
+  @for (b of bars(); track b.i) {
+    <button
+      type="button"
+      [class.on]="frame() === b.i"
+      [title]="time(b.time) + ' · ' + b.mm + ' mm/h'"
+      (click)="pick.emit(frame() === b.i ? null : b.i)"
+    >
+      <span [style.height.%]="b.pct"></span>
+    </button>
+  }
+</div>
+<div class="axis caption">
+  <span>{{ time(bars()[0]?.time) }}</span>
+  <span>{{ 'risk.rain.now' | transloco }}</span>
+</div>
+
+<div class="row">
+  @if (playing()) {
+    <button class="btn-pill" type="button" (click)="stop.emit()">■ {{ 'risk.rain.stop' | transloco }}</button>
+  } @else {
+    <button class="btn-pill" type="button" (click)="play.emit()">▶ {{ 'risk.rain.play' | transloco }}</button>
+  }
+  <p class="caption">
+    @if (current(); as c) {
+      {{ day(c.time) }} {{ time(c.time) }} · <strong>{{ c.mm }} mm/h</strong>
+    } @else {
+      {{ 'risk.rain.total' | transloco: { mm: total() } }}
+    }
+  </p>
+</div>
+
+<p class="caption">
+  {{ 'risk.rain.howToRead' | transloco }}
+  @if (preliminary()) {
+    {{ 'risk.rain.preliminary' | transloco }}
+  }
+</p>

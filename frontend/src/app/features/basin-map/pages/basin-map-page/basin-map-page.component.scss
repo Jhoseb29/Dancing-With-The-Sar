@@ -23,6 +23,10 @@ p {
   }
 }
 
+.more summary {
+  cursor: pointer;
+}
+
 .row {
   display: flex;
   flex-wrap: wrap;

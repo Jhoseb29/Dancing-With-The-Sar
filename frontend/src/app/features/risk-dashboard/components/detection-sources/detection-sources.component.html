@@ -1,0 +1,19 @@
+<h2 class="label">{{ 'risk.src.title' | transloco }}</h2>
+<ul>
+  @for (c of clues(); track c.key) {
+    <li>
+      <app-risk-icon [name]="c.icon" />
+      <div>
+        <p>{{ c.key | transloco: c.params }}</p>
+        <a class="caption" [href]="c.href" target="_blank" rel="noopener">{{ c.key + 'Src' | transloco }} ↗</a>
+      </div>
+    </li>
+  }
+  <li class="radar">
+    <app-risk-icon name="radar" />
+    <div>
+      <p>{{ verify().key | transloco: verify().params }}</p>
+      <span class="caption">{{ 'risk.src.lastPasses' | transloco: { list: lastPasses() || '—' } }}</span>
+    </div>
+  </li>
+</ul>

@@ -11,6 +11,8 @@ try {
 
 const GAMC_UPSTREAM = 'https://serviciosgamc.cochabamba.bo';
 const GAMC_KEY = process.env.GAMC_WMS_KEY ?? '';
+// backend/compute-py (harness + alertas); se puede apuntar a otro puerto con COMPUTE_URL.
+const COMPUTE_URL = process.env.COMPUTE_URL ?? 'http://localhost:8000';
 
 // Solo los service_id declarados en layers.json (OpenSpec 07, gamc-local-layers).
 const layers = JSON.parse(readFileSync(new URL('./src/assets/config/layers.json', import.meta.url), 'utf8')).layers;
@@ -56,20 +58,20 @@ export default {
   // Harness NISAR: compute-py en desarrollo; gateway-ts en producción.
   // Respuesta en streaming (NDJSON): el proxy no debe bufferizar.
   '/api/harness': {
-    target: 'http://localhost:8000',
+    target: COMPUTE_URL,
     changeOrigin: true,
     timeout: 1_300_000,
     proxyTimeout: 1_300_000,
   },
   // Alertas tempranas (alert-harness): REST + WebSocket en compute-py.
   '/api/alerts': {
-    target: 'http://localhost:8000',
+    target: COMPUTE_URL,
     ws: true,
     changeOrigin: true,
   },
   // Eventos (OpenSpec 09): estadísticas FIRMS en compute-py.
   '/api/events': {
-    target: 'http://localhost:8000',
+    target: COMPUTE_URL,
     changeOrigin: true,
   },
   '/api': {

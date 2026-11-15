@@ -1,7 +1,7 @@
 """Evaluation loop: run every case, compare with what we expected, score, keep history.
 
 Score (0–100), documented so changes are comparable run to run:
-  40 · CSI          hits / (hits + misses + false alarms), alert = level >= ALERT_FROM
+  40 · CSI          hits / (hits + misses + false alarms), alert = level >= ALERT_FROM (naranja)
   25 · nivel        fraction of cases whose level falls inside [nivel_min, nivel_max]
   25 · expectativas fraction of indicator expectations met (op/valor per case)
   10 · schema       fraction of alerts + indicators that validate
@@ -13,7 +13,7 @@ import json
 import logging
 import operator
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -23,7 +23,7 @@ from .settings import HARNESS_DIR, Settings
 
 log = logging.getLogger("alerts.eval")
 
-ALERT_FROM = "amarillo"
+ALERT_FROM = "naranja"  # amarillo = vigilar, naranja = actuar (eval v2: antes era amarillo)
 OPS = {">=": operator.ge, "<=": operator.le, ">": operator.gt, "<": operator.lt}
 WEIGHTS = {"csi": 40, "nivel": 25, "expectativas": 25, "schema": 10}
 
@@ -61,7 +61,7 @@ def run_case(case: dict[str, Any], st: Settings, radar_mode: str) -> CaseResult:
                   radar_run=case.get("radar_run"), radar_mode=radar_mode, case_id=case["id"])
     try:
         alert = evaluate(req, st)
-    except Exception as exc:  # noqa: BLE001 - one broken case must not stop the evaluation
+    except Exception as exc:
         log.exception("Caso %s falló", case["id"])
         return CaseResult(case, None, str(exc), "error", False, [])
     lv = LEVELS.index(alert["nivel"])
@@ -100,7 +100,7 @@ def score(results: list[CaseResult]) -> dict[str, Any]:
 
 
 def write_report(results: list[CaseResult], summary: dict[str, Any], st: Settings, note: str) -> Path:
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
     out = st.output_dir / "evals" / ts
     out.mkdir(parents=True, exist_ok=True)
     history = st.output_dir / "evals" / "history.jsonl"

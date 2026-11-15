@@ -1,0 +1,29 @@
+{
+  "id": "tunari-2026-11-14",
+  "nombre": "D13 Tunari (laderas norte)",
+  "bbox": [
+    -66.19133,
+    -17.36633,
+    -66.10503,
+    -17.25731
+  ],
+  "fecha": "2026-11-14",
+  "precision_fecha": "día",
+  "peligro": "mazamorra",
+  "ocurrio": false,
+  "fuente": "Búsqueda en prensa (Los Tiempos, Opinión) sin reporte de desborde/mazamorra ese día; verificación parcial + dato del usuario",
+  "radar_run": null,
+  "notas": "NEGATIVO DIFÍCIL: llovió fuerte y no se encontró evento reportado. Dato del usuario: llovió en casi toda Cochabamba; sin mazamorras reportadas al consultar.",
+  "esperado": {
+    "nivel_min": "verde",
+    "nivel_max": "amarillo",
+    "expectativas": [
+      {
+        "indicador": "lluvia_acumulada_72h_mm",
+        "op": ">=",
+        "valor": 15,
+        "por_que": "Es un día lluvioso de verdad (si no, no sería un negativo difícil)."
+      }
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+p {
+  margin: 0;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-10);
+}
+
+.live::before {
+  content: '● ';
+  color: #777777;
+}
+
+.live[data-state='open']::before {
+  color: #4caf7a; // dato: conexión en vivo
+}
+
+.tabs {
+  display: flex;
+  border-bottom: var(--border-hairline) solid var(--color-dark-gunmetal);
+
+  button {
+    flex: 1;
+    padding: var(--spacing-10) 0;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--color-muted-text);
+    font: inherit;
+    cursor: pointer;
+
+    &[aria-selected='true'] {
+      color: var(--color-star-white);
+      border-bottom-color: var(--color-star-white);
+    }
+  }
+}

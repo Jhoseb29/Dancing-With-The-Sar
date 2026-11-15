@@ -1,0 +1,61 @@
+<app-map-canvas (ready)="onCanvasReady($event)" />
+
+<app-side-panel
+  [open]="scene.panels().layerPanel"
+  [label]="'risk.title' | transloco"
+  [hideLabel]="'panel.hide' | transloco"
+  (openChange)="setPanelOpen($event)"
+>
+  <div class="top">
+    <p class="caption">{{ 'risk.kicker' | transloco }}</p>
+    <p class="caption live" [attr.data-state]="alerts.connection()">
+      {{ 'risk.connection.' + alerts.connection() | transloco }}
+    </p>
+  </div>
+
+  <div class="tabs" role="tablist">
+    @for (t of tabs; track t) {
+      <button type="button" role="tab" [attr.aria-selected]="tab() === t" (click)="tab.set(t)">
+        {{ 'risk.tabs.' + t | transloco }}
+      </button>
+    }
+  </div>
+
+  @switch (tab()) {
+    @case ('now') {
+      @if (alerts.selectedDistrict(); as d) {
+        <app-district-card
+          [district]="d"
+          [alert]="alerts.districtAlert()"
+          [rain]="alerts.rain()"
+          [radar]="alerts.radar()"
+          (back)="pick(null)"
+        />
+      } @else {
+        <app-city-summary [districts]="districts()" (pick)="pick($event)">
+          @if (alerts.rain(); as rain) {
+            @if (rain.slots.length) {
+              <app-rain-timeline
+                [rain]="rain"
+                [frame]="alerts.rainFrame()"
+                [playing]="alerts.rainPlaying()"
+                [visible]="alerts.rainVisible()"
+                (pick)="alerts.stopRain(); alerts.rainFrame.set($event)"
+                (play)="alerts.playRain()"
+                (stop)="alerts.stopRain()"
+                (toggle)="alerts.rainVisible.set($event)"
+              />
+            }
+          }
+          <app-detection-sources [rain]="alerts.rain()" [radar]="alerts.radar()" />
+        </app-city-summary>
+      }
+    }
+    @case ('how') {
+      <app-how-it-works />
+    }
+    @case ('eval') {
+      <app-eval-view [evaluation]="alerts.evaluation()" />
+    }
+  }
+</app-side-panel>

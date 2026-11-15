@@ -1,5 +1,8 @@
 """Alert engine: indicators -> components (0..1) -> risk index (0..100) -> level + actions.
 
+Risk model v3 (thresholds.yaml): index = 100 · disparo × terrain factor (+ radar evidence);
+disparo = 24/72 h rain against thresholds lowered by wet antecedent conditions (API).
+
 Everything here is deterministic and driven by config/thresholds.yaml and config/protocols.yaml.
 Missing components (e.g. no radar pass around the date) are left out and their weight is
 redistributed, but confidence drops accordingly - the alert says what it could NOT see.
@@ -8,7 +11,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from . import indicators as ind
@@ -74,9 +77,12 @@ def evaluate(req: Request, st: Settings) -> dict[str, Any]:
 
     # --- components (0..1)
     lt = th["lluvia"]
-    disparo = max(scale(found["lluvia_max_24h_mm"]["valor"], lt["max_24h_mm"]),
-                  scale(found["lluvia_acumulada_72h_mm"]["valor"], lt["acumulada_72h_mm"]),
-                  0.6 * scale(found["lluvia_api_mm"]["valor"], lt["api_mm"]))
+    # v3: wet antecedent conditions lower the rain thresholds instead of adding to the trigger.
+    wet = scale(found["lluvia_api_mm"]["valor"], lt["api_mm"])
+    factor = 1.0 - lt["reduccion_umbral_suelo_humedo"] * wet
+    lower = lambda bands: {k: v * factor for k, v in bands.items()}  # noqa: E731
+    disparo = max(scale(found["lluvia_max_24h_mm"]["valor"], lower(lt["max_24h_mm"])),
+                  scale(found["lluvia_acumulada_72h_mm"]["valor"], lower(lt["acumulada_72h_mm"])))
     steep = min(1.0, found["fraccion_pendiente_fuerte_pct"]["valor"] / th["terreno"]["fraccion_fuerte_alta_pct"])
     susceptibilidad = steep if hazard in ("mazamorra", "deslizamiento") else 1.0 - 0.5 * steep
     evidencia = None
@@ -89,20 +95,22 @@ def evaluate(req: Request, st: Settings) -> dict[str, Any]:
         missing.append("radar sin tomas antes y después del evento")
     comps = {"disparo": disparo, "susceptibilidad": susceptibilidad, "evidencia_radar": evidencia}
 
-    weights = th["pesos"]
-    used = {k: v for k, v in comps.items() if v is not None}
-    w_sum = sum(weights[k] for k in used)
-    risk = 100 * sum(weights[k] * v for k, v in used.items()) / w_sum
+    # v2: rain is necessary; terrain modulates it (x f_min .. x1); radar adds observed evidence.
+    f_min = th["susceptibilidad_factor_min"]
+    core = disparo * (f_min + (1 - f_min) * susceptibilidad)
+    w_radar = th["pesos"]["evidencia_radar"]
+    risk = 100 * ((1 - w_radar) * core + w_radar * evidencia if evidencia is not None else core)
     level = max((lv for lv in LEVELS if risk >= th["niveles"][lv]), key=LEVELS.index)
 
-    # --- confidence: indicator quality x share of weight actually observed
+    # --- confidence: indicator quality x share of the model actually observed (radar missing -> less)
     quality = sum(CONF_VALUE[i["confianza"]] for i in found.values()) / len(found)
-    conf_pct = round(100 * quality * w_sum / sum(weights.values()), 1)
+    observed = 1.0 if evidencia is not None else 1.0 - w_radar
+    conf_pct = round(100 * quality * observed, 1)
     conf_label = "alta" if conf_pct >= 70 else "media" if conf_pct >= 45 else "baja"
 
     alert = {
         "id": hashlib.sha1(f"{req.case_id}|{req.bbox}|{req.fecha}|{hazard}".encode()).hexdigest()[:12],
-        "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "case_id": req.case_id,
         "area": {"nombre": req.nombre, "bbox": list(req.bbox)},
         "fecha_referencia": req.fecha,

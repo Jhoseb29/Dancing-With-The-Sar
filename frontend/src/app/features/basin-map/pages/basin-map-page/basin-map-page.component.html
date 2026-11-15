@@ -11,6 +11,15 @@
   <p>{{ 'basin.intro' | transloco }}</p>
 
   <section class="block">
+    @if (basins.selected(); as b) {
+      <app-basin-card [basin]="b" (back)="basins.select(null)" />
+    } @else {
+      <app-basin-list [basins]="basinList()" (pick)="basins.select($event)" />
+    }
+  </section>
+
+  <details class="block more">
+    <summary class="label">{{ 'basin.gamcLayers' | transloco }}</summary>
     <div class="row">
       @for (placeId of quickPlaces; track placeId) {
         <button
@@ -28,10 +37,6 @@
         {{ v.lat | coordinate: 'lat' : scene.lang() }} · {{ v.lon | coordinate: 'lon' : scene.lang() }} · z{{ v.zoom.toFixed(1) }}
       </p>
     }
-  </section>
-
-  <section class="block">
-    <h2 class="label">{{ 'basin.gamcLayers' | transloco }}</h2>
     <p class="caption">{{ 'basin.gamcSource' | transloco }}</p>
     <ul class="layers">
       @for (item of gamcLayers(); track item.preset.id) {
@@ -55,7 +60,7 @@
         </li>
       }
     </ul>
-  </section>
+  </details>
 
   @if (map.featureInfo(); as info) {
     <section class="block" aria-live="polite">

@@ -2,6 +2,7 @@
 // Se carga solo desde las vistas de cuenca mediante import() dinámico.
 import {
   Map as MapLibreMap,
+  Marker,
   setWorkerUrl,
   type GeoJSONSource,
   type ImageSource,
@@ -47,6 +48,9 @@ export type MapHotspots = FeatureCollection<
   { kind: string; intensity: number; magnitude_db: number }
 >;
 
+/** Grupos de zonas interactivas que dibuja el motor. */
+export type ZoneGroup = 'districts' | 'basins';
+
 export interface MapClick extends FeatureInfoQuery {
   lon: number;
   lat: number;
@@ -75,6 +79,8 @@ export interface GeoEngineOptions {
   onViewChange: (view: { lon: number; lat: number; zoom: number }) => void;
   onLayerStatus: (presetId: string, status: 'loading' | 'ready' | 'error') => void;
   onClick: (click: MapClick) => void;
+  /** Clic sobre una zona interactiva (polígono o etiqueta). */
+  onZone?: (group: ZoneGroup, id: string) => void;
   /** El panel lateral está visible al crear el mapa (el encuadre le deja espacio). */
   panelOpen: boolean;
 }
@@ -90,6 +96,7 @@ const OBJECTS_LINE = 'nisar-objects-line';
 const OBJECTS_3D = 'nisar-objects-3d';
 const COLUMNS_ID = 'nisar-columns';
 const AOI_ID = 'nisar-aoi';
+const RAIN_ID = 'imerg-rain';
 const CHANNELS_ID = 'nisar-channels';
 /** Área mínima (km²) para levantar una mancha urbana en 3D. */
 const URBAN_3D_MIN_KM2 = 0.5;
@@ -139,6 +146,9 @@ export class GeoEngine {
   private pendingColumns: MapObjects | null | undefined;
   private pendingRelief: MapRelief | null | undefined;
   private readonly tileUrls = new Map<string, string>();
+  private readonly zoneMarkers = new Map<ZoneGroup, Marker[]>();
+  /** id de capa MapLibre → grupo de zonas. */
+  private readonly zoneLayers = new Map<string, ZoneGroup>();
 
   constructor(private readonly options: GeoEngineOptions) {
     setWorkerUrl(options.workerUrl);
@@ -205,6 +215,12 @@ export class GeoEngine {
     });
 
     this.map.on('click', (event) => {
+      const zoneLayers = [...this.zoneLayers.keys()].filter((id) => this.map.getLayer(id));
+      const zone = zoneLayers.length ? this.map.queryRenderedFeatures(event.point, { layers: zoneLayers })[0] : undefined;
+      if (zone) {
+        options.onZone?.(this.zoneLayers.get(zone.layer.id) as ZoneGroup, String(zone.properties?.['id']));
+        return;
+      }
       const canvas = this.map.getCanvas();
       const bounds = this.map.getBounds();
       const [minX, minY] = lonLatTo3857(bounds.getWest(), bounds.getSouth());
@@ -497,7 +513,87 @@ export class GeoEngine {
     });
   }
 
-  /** Contorno del área que pidió el usuario (para ver qué parte cubre el satélite). */
+  /**
+   * Zonas interactivas (distritos de alerta, cuencas): polígonos de color con etiqueta HTML.
+   * Propiedades planas (MapLibre no lee objetos anidados): id, label, color, centro y,
+   * opcional, height (m) para levantarlas en 3D. Clic en zona o etiqueta → onZone(grupo, id).
+   */
+  setZones(group: ZoneGroup, zones: FeatureCollection | null, selectedId: string | null = null): void {
+    if (!this.styleReady) {
+      this.map.once('style.load', () => this.setZones(group, zones, selectedId));
+      return;
+    }
+    const id = `zones-${group}`;
+    const source = this.map.getSource(id) as GeoJSONSource | undefined;
+    this.zoneMarkers.get(group)?.forEach((m) => m.remove());
+    this.zoneMarkers.set(group, []);
+    if (!zones) {
+      if (source) {
+        [`${id}-sel`, `${id}-line`, id].forEach((l) => this.map.removeLayer(l));
+        this.map.removeSource(id);
+      }
+      return;
+    }
+    const extruded = zones.features.some((f) => (f.properties?.['height'] ?? 0) > 0);
+    if (source) {
+      source.setData(zones);
+    } else {
+      this.map.addSource(id, { type: 'geojson', data: zones });
+      this.map.addLayer(
+        extruded
+          ? {
+              id,
+              type: 'fill-extrusion',
+              source: id,
+              paint: {
+                'fill-extrusion-color': ['get', 'color'],
+                'fill-extrusion-height': ['coalesce', ['get', 'height'], 0],
+                'fill-extrusion-opacity': 0.72,
+              },
+            }
+          : { id, type: 'fill', source: id, paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.5 } },
+      );
+      this.map.addLayer({
+        id: `${id}-line`,
+        type: 'line',
+        source: id,
+        paint: { 'line-color': '#f0f0fa', 'line-width': 0.8, 'line-opacity': 0.7 },
+      });
+      this.map.addLayer({
+        id: `${id}-sel`,
+        type: 'line',
+        source: id,
+        filter: ['==', ['get', 'id'], ''],
+        paint: { 'line-color': '#ffffff', 'line-width': 3.5 },
+      });
+      this.map.on('mouseenter', id, () => (this.map.getCanvas().style.cursor = 'pointer'));
+      this.map.on('mouseleave', id, () => (this.map.getCanvas().style.cursor = ''));
+      this.zoneLayers.set(id, group);
+    }
+    this.map.setFilter(`${id}-sel`, ['==', ['get', 'id'], selectedId ?? '']);
+
+    const markers: Marker[] = [];
+    for (const f of zones.features) {
+      const p = f.properties as { id: string; label?: string; color: string; centro?: [number, number] };
+      if (!p.centro) continue;
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.textContent = p.label ?? p.id;
+      const active = p.id === selectedId;
+      el.style.cssText =
+        `font:600 11px/1 system-ui,sans-serif;padding:4px 7px;border-radius:999px;cursor:pointer;white-space:nowrap;` +
+        `border:2px solid ${p.color};color:${active ? '#000' : '#fff'};` +
+        `background:${active ? p.color : 'rgba(0,0,0,.72)'};` +
+        (active ? 'transform:scale(1.2);z-index:2;' : '');
+      el.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        this.options.onZone?.(group, p.id);
+      });
+      markers.push(new Marker({ element: el }).setLngLat(p.centro).addTo(this.map));
+    }
+    this.zoneMarkers.set(group, markers);
+  }
+
   /** Ríos y torrenteras del corredor de sedimento: líneas finas apoyadas sobre el relieve. */
   setChannels(lines: FeatureCollection | null): void {
     if (!this.styleReady) {
@@ -532,6 +628,41 @@ export class GeoEngine {
     );
   }
 
+  /**
+   * Lluvia satelital (IMERG, celdas de 0,1°) como barras azules. Cada celda trae `h` (m) y `c`
+   * (color) ya escalados por quien llama (media hora en mm/h o acumulado en mm).
+   */
+  setRain(cells: FeatureCollection | null): void {
+    if (!this.styleReady) {
+      this.map.once('style.load', () => this.setRain(cells));
+      return;
+    }
+    const source = this.map.getSource(RAIN_ID) as GeoJSONSource | undefined;
+    if (!cells) {
+      if (source) {
+        this.map.removeLayer(RAIN_ID);
+        this.map.removeSource(RAIN_ID);
+      }
+      return;
+    }
+    if (source) {
+      source.setData(cells);
+      return;
+    }
+    this.map.addSource(RAIN_ID, { type: 'geojson', data: cells });
+    this.map.addLayer({
+      id: RAIN_ID,
+      type: 'fill-extrusion',
+      source: RAIN_ID,
+      paint: {
+        'fill-extrusion-color': ['get', 'c'],
+        'fill-extrusion-height': ['get', 'h'],
+        'fill-extrusion-opacity': 0.8,
+      },
+    });
+  }
+
+  /** Contorno del área que pidió el usuario (para ver qué parte cubre el satélite). */
   setAoi(bbox: BBox | null): void {
     if (!this.styleReady) {
       this.map.once('style.load', () => this.setAoi(bbox));
@@ -658,6 +789,7 @@ export class GeoEngine {
   }
 
   destroy(): void {
+    this.zoneMarkers.forEach((list) => list.forEach((m) => m.remove()));
     this.map.remove();
   }
 }

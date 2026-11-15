@@ -1,0 +1,88 @@
+<section class="card" [attr.data-level]="level()">
+  <button class="back" type="button" (click)="back.emit()">← {{ 'risk.all' | transloco }}</button>
+
+  <!-- Encabezado del aviso -->
+  <div class="head">
+    <div>
+      <p class="caption">{{ 'risk.bulletin.number' | transloco: { n: number() } }}</p>
+      <h2>{{ district().id }} · {{ district().comuna }}</h2>
+    </div>
+    <span class="badge" [attr.data-level]="level()">{{ 'risk.levels.' + level() | transloco }}</span>
+  </div>
+
+  <dl class="meta">
+    <div>
+      <dt class="caption">{{ 'risk.bulletin.validity' | transloco }}</dt>
+      <dd>{{ 'risk.bulletin.fromTo' | transloco: { from: from(), to: until() } }}</dd>
+    </div>
+    <div>
+      <dt class="caption">{{ 'risk.bulletin.coverage' | transloco }}</dt>
+      <dd>{{ 'risk.bulletin.coverageValue' | transloco: { id: district().id, comuna: district().comuna } }}</dd>
+    </div>
+  </dl>
+
+  @if (data(); as d) {
+    <p class="why">{{ 'risk.why.' + d.causa | transloco }}</p>
+
+    <div class="signals">
+      <div class="signal">
+        <app-risk-icon name="lluvia" />
+        <span class="caption">{{ 'risk.sig.lluvia' | transloco }}</span>
+        <strong>{{ round(d.rafaga?.acumulado_24h_mm ?? d.valores.lluvia_24h_mm) }} mm</strong>
+        <span class="caption">{{ 'risk.sig.in24h' | transloco }}</span>
+        <span class="meter"><span [style.width.%]="(d.senales.lluvia ?? 0) * 100"></span></span>
+      </div>
+      <div class="signal">
+        <app-risk-icon name="suelo" />
+        <span class="caption">{{ 'risk.sig.suelo' | transloco }}</span>
+        <strong>{{ 'risk.soil.' + band(d.senales.suelo) | transloco }}</strong>
+        <span class="caption">{{ 'risk.sig.soilHint' | transloco }}</span>
+        <span class="meter"><span [style.width.%]="(d.senales.suelo ?? 0) * 100"></span></span>
+      </div>
+      <div class="signal">
+        <app-risk-icon name="terreno" />
+        <span class="caption">{{ 'risk.sig.terreno' | transloco }}</span>
+        <strong>{{ 'risk.terrain.' + band(d.senales.terreno) | transloco }}</strong>
+        <span class="caption">{{ 'risk.sig.slopes' | transloco: { pct: round(d.valores.ladera_fuerte_pct) } }}</span>
+        <span class="meter"><span [style.width.%]="(d.senales.terreno ?? 0) * 100"></span></span>
+      </div>
+      <div class="signal" [class.off]="d.senales.radar === null">
+        <app-risk-icon name="radar" />
+        <span class="caption">{{ 'risk.sig.radar' | transloco }}</span>
+        <strong>{{ 'risk.radar.' + band(d.senales.radar) | transloco }}</strong>
+        <span class="caption">NISAR / Sentinel-1</span>
+        <span class="meter"><span [style.width.%]="(d.senales.radar ?? 0) * 100"></span></span>
+      </div>
+    </div>
+  }
+
+  <div class="todo">
+    <app-risk-icon name="aviso" />
+    <p>{{ 'risk.todo.' + level() | transloco }}</p>
+  </div>
+
+  <app-detection-sources [district]="district()" [rain]="rain()" [radar]="radar()" />
+
+  <p class="caption">{{ 'risk.score' | transloco: { v: round(district().estado?.indice) } }} · {{ 'risk.bulletin.issuer' | transloco }}</p>
+
+  @if (alert(); as a) {
+    <details>
+      <summary>{{ 'risk.technical' | transloco }}</summary>
+      <table class="table">
+        <tbody>
+          @for (i of a.indicadores; track i.id) {
+            <tr [title]="i.metodo">
+              <td>{{ i.id }}</td>
+              <td class="tabular">{{ i.valor }} {{ i.unidad }}</td>
+              <td>{{ i.confianza }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <p class="caption">{{ 'risk.confidence' | transloco }}: {{ a.confianza.porcentaje }}%</p>
+      @for (x of a.acciones.tecnicos; track $index) {
+        <p class="caption">• {{ x }}</p>
+      }
+    </details>
+  }
+</section>

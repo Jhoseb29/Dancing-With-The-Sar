@@ -32,8 +32,8 @@
       "id": "risk",
       "path": "riesgo",
       "titleKey": "nav.risk",
-      "engine": "none",
-      "status": "pending-backend"
+      "engine": "map",
+      "status": "ready"
     },
     {
       "id": "insights",

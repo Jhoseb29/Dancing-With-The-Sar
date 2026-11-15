@@ -1,6 +1,6 @@
 # Parámetros del motor de alertas. CADA valor declara su fuente o que es un supuesto inicial.
 # Se ajustan solo con el ciclo de evaluación (run_eval.py) y cada cambio debe mejorar el score.
-version: 1
+version: 3
 
 area:
   # La lluvia que causa una mazamorra cae en la cuenca de aporte, no solo en el punto afectado.
@@ -14,7 +14,16 @@ lluvia:
   acumulada_72h_mm: {moderada: 25, fuerte: 50, extrema: 80}
   api_mm:          {moderada: 30, fuerte: 60, extrema: 90}
   api_k: 0.9          # índice de precipitación antecedente: API_t = k·API_{t-1} + P_t
+  # v3: la lluvia antecedente NO dispara; baja los umbrales de 24/72 h (suelo húmedo -> la lluvia pesa más).
+  # factor = 1 − reduccion · escala(API)  (con API "extrema" los umbrales bajan un 40 %).
+  reduccion_umbral_suelo_humedo: 0.4
+  # v2 sumaba 0.6·escala(API) al disparo: con suelo húmedo, cualquier día lluvioso llegaba a naranja
+  # (6 falsas alarmas en negativos difíciles, eval 20261115_125209).
   dias_api: 30
+  # v4 (RECHAZADA, 2026-11-15, output/evals/v4_intensidad_imerg_hh.json): pico IMERG por media hora
+  # en 48 h no separa eventos de negativos difíciles. Eventos de Cochabamba 4.9–8.8 mm/h (Tiquipaya
+  # 2020, Viloma, Pampahasi, Rocha) vs días lluviosos sin daño 9.3–25.8 mm/h. El píxel de ~10 km diluye
+  # celdas convectivas sobre cuencas chicas: hace falta lluvia en tierra (SENAMHI) o registros GAMC.
   fuente: >-
     Rangos operativos de intensidad diaria usados en alertas hidrometeorológicas andinas
     (orden de magnitud); supuesto inicial por calibrar con los casos. Ojo: IMERG suaviza
@@ -30,15 +39,25 @@ radar:
   agua_nueva_alta_km2: 0.5
   fuente: "nisar-harness (NISAR o Sentinel-1): hotspots relativos al corrimiento de escena; sedimento solo en corredor de cauces"
 
-# Índice de riesgo (0–100) = 100 · Σ peso·componente (cada componente 0–1). NO es probabilidad.
+# Índice de riesgo (0–100). NO es probabilidad.
+#   núcleo = disparo × (f_min + (1 − f_min) · susceptibilidad)      # sin lluvia no hay alerta (v2)
+#   índice = 100 · [(1 − w_radar) · núcleo + w_radar · evidencia_radar]  si hay radar alrededor del evento
+#   índice = 100 · núcleo                                              si no
+# v1 sumaba susceptibilidad + disparo: una ladera seca llegaba a amarillo (4 falsas alarmas en la línea base).
+susceptibilidad_factor_min: 0.5   # terreno poco susceptible reduce el riesgo a la mitad (supuesto inicial)
 pesos:
-  disparo: 0.55          # lluvia (lo que dispara el evento)
-  susceptibilidad: 0.25  # relieve (dónde el agua/lodo se moviliza)
   evidencia_radar: 0.20  # confirmación posterior (radar ve el efecto días después)
-fuente_pesos: "supuesto inicial; analizar sensibilidad con run_eval.py --sensibilidad"
+fuente_pesos: "supuesto inicial; v2 pasa de suma a producto (eval 20261115_074324 → siguiente)"
 
 niveles:   # límite inferior del índice para cada nivel
   verde: 0
   amarillo: 30
   naranja: 50
   rojo: 70
+
+# Monitoreo automático (run_monitor.py): estado con memoria por distrito.
+monitor:
+  intervalo_min: 30          # IMERG Early publica cada 30 min (con ~4 h de retraso)
+  horas_para_bajar: 12       # un nivel sube al instante, pero baja solo si se mantiene más bajo este tiempo
+  utc_offset_horas: -4       # Bolivia (BOT): el "día" de lluvia se evalúa en hora local
+  fuente: "supuesto operativo inicial: evita alertas que parpadean (rojo-verde-rojo)"

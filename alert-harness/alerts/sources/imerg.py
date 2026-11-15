@@ -12,13 +12,13 @@ import io
 import json
 import logging
 import math
+import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
 
 import h5py
-import numpy as np
 import requests
 
 log = logging.getLogger("alerts.imerg")
@@ -44,6 +44,22 @@ def _indices(bbox: tuple[float, ...]) -> tuple[int, int, int, int]:
     return max(i0, 0), min(i1, 3599), max(j0, 0), min(j1, 1799)
 
 
+def _get_with_retry(url: str, params: dict, token: str, tries: int = 4) -> requests.Response:
+    """OPeNDAP occasionally drops connections under parallel load: retry with backoff."""
+    for attempt in range(tries):
+        try:
+            resp = requests.get(url, params=params, headers={"Authorization": f"Bearer {token}"}, timeout=90)
+            if resp.status_code < 500:
+                resp.raise_for_status()
+                return resp
+        except requests.ConnectionError:
+            if attempt == tries - 1:
+                raise
+        time.sleep(2 ** attempt)
+    resp.raise_for_status()
+    return resp
+
+
 def _opendap_url(product: str, day: str) -> str | None:
     params = {"short_name": product, "version": "07", "page_size": 1,
               "temporal": f"{day}T00:00:00Z,{day}T23:59:59Z"}
@@ -51,6 +67,16 @@ def _opendap_url(product: str, day: str) -> str | None:
     if not entries:
         return None
     return next((l["href"] for l in entries[0]["links"] if "opendap" in l["href"].lower()), None)
+
+
+STABLE_AFTER_DAYS = 3  # Late is final enough after a few days; Early / today's data keep changing
+
+
+def _final_enough(product: str, day: str) -> bool:
+    """Only cache what will not change: Final, or Late older than STABLE_AFTER_DAYS (never 'sin dato')."""
+    if product == "GPM_3IMERGDF":
+        return True
+    return product == "GPM_3IMERGDL" and (date.today() - date.fromisoformat(day)).days > STABLE_AFTER_DAYS
 
 
 def _fetch_day(day: str, bbox: tuple[float, ...], token: str, cache: Path) -> DayRain:
@@ -63,16 +89,15 @@ def _fetch_day(day: str, bbox: tuple[float, ...], token: str, cache: Path) -> Da
         if not url:
             continue
         ce = f"/precipitation[0][{i0}:{i1}][{j0}:{j1}]"
-        resp = requests.get(f"{url}.dap.nc4", params={"dap4.ce": ce},
-                            headers={"Authorization": f"Bearer {token}"}, timeout=90)
-        resp.raise_for_status()
+        resp = _get_with_retry(f"{url}.dap.nc4", {"dap4.ce": ce}, token)
         with h5py.File(io.BytesIO(resp.content)) as f:
             p = f["precipitation"][:].astype(float).ravel()
         p = p[p > FILL / 2]
         result = DayRain(day, product, round(float(p.max()), 2) if p.size else None,
                          round(float(p.mean()), 2) if p.size else None, int(p.size))
-        cache.mkdir(parents=True, exist_ok=True)
-        key.write_text(json.dumps(result.__dict__))
+        if _final_enough(product, day):
+            cache.mkdir(parents=True, exist_ok=True)
+            key.write_text(json.dumps(result.__dict__))
         return result
     return DayRain(day, "sin_dato", None, None, 0)
 
