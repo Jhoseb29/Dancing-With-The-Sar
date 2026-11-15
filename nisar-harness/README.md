@@ -109,8 +109,10 @@ En Angular, el chat `layout/harness-dock` permite preguntar por texto o por voz 
 | `EARTHDATA_TOKEN` | Streaming HTTPS desde ASF/AWS | — |
 | `NISAR_AWS_CREDENTIALS` | JSON STS temporal (S3 directo, solo in-region us-west-2) | `../aws-nisar-data-credentials.json` |
 | `NISAR_OUTPUT_DIR` | Carpeta de corridas | `./output` |
-| `CLAUDE_INTENT_MODEL` / `CLAUDE_INTERPRET_MODEL` | Modelos | `haiku` / `sonnet` |
-| `CLAUDE_BIN`, `CLAUDE_TIMEOUT_S` | CLI de Claude Code | `claude`, `300` |
+| `CLAUDE_BACKEND` | `cli` = Claude Code con tu suscripción · `api` = API de Anthropic (`ANTHROPIC_API_KEY`) · `auto` = api si hay key, si no cli | `auto` |
+| `ANTHROPIC_API_KEY` | Solo para `api` (nunca se envía al frontend) | — |
+| `CLAUDE_INTENT_MODEL` / `CLAUDE_INTERPRET_MODEL` | Modelos (alias `haiku`/`sonnet`/`opus` o id exacto) | `haiku` / `haiku` |
+| `CLAUDE_BIN`, `CLAUDE_TIMEOUT_S` | CLI de Claude Code / timeout por llamada | `claude`, `300` |
 
 ## Pasos individuales (sobre `output/latest` o `--run-dir`)
 

@@ -93,6 +93,7 @@ def parse_intent(text: str, settings: Settings, today: date | None = None) -> In
         schema=INTENT_SCHEMA,
         model=settings.intent_model,
         settings=settings,
+        effort="low",  # extraction: place, dates, theme
     )
     intent = normalise(text, result.data, today)
     intent.usage = result.usage

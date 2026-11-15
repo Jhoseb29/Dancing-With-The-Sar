@@ -190,6 +190,7 @@ def explain(run: RunContext, settings: Settings, role: str, context: dict[str, A
         schema=OUTPUT_SCHEMA,
         model=model or settings.interpret_model,
         settings=settings,
+        effort="medium",
     )
     chat = result.data["chat"]
     if level:

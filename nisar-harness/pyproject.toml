@@ -17,6 +17,7 @@ dependencies = [
     "requests>=2.31.0",
     "s3fs>=2024.2.0",
     "shapely>=2.0",
+    "anthropic>=2.8",
 ]
 
 [tool.uv]

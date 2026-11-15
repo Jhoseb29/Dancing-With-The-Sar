@@ -1,5 +1,11 @@
-"""Single-shot, tool-less calls to Claude Code (user's subscription) with structured JSON output.
+"""Single-shot, tool-less calls to Claude with structured JSON output. The only entry point for the models.
 
+Two backends, same contract (CLAUDE_BACKEND):
+  cli   Claude Code CLI with the user's subscription (below)
+  api   Anthropic API with ANTHROPIC_API_KEY (claude_api.py)
+  auto  api if an API key is configured, otherwise cli (default)
+
+CLI backend:
 Token-lean by design:
   * --system-prompt replaces Claude Code's large default prompt with ours
   * --tools ""            no tool definitions, no agent loop: exactly one model turn
@@ -29,8 +35,25 @@ class ClaudeResult:
     usage: dict[str, Any]
 
 
+def backend(settings: Settings) -> str:
+    if settings.claude_backend in ("cli", "api"):
+        return settings.claude_backend
+    has_key = bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
+    return "api" if has_key else "cli"
+
+
 def ask_structured(system_prompt: str, user_prompt: str, schema: dict[str, Any],
-                   model: str, settings: Settings) -> ClaudeResult:
+                   model: str, settings: Settings, effort: str | None = None) -> ClaudeResult:
+    """`effort` (low|medium|high) applies to the API backend; the CLI uses its own default."""
+    if backend(settings) == "api":
+        from .claude_api import ask_structured_api  # SDK only imported when used
+        data, usage = ask_structured_api(system_prompt, user_prompt, schema, model, settings, effort)
+        return ClaudeResult(data, usage)
+    return _ask_cli(system_prompt, user_prompt, schema, model, settings)
+
+
+def _ask_cli(system_prompt: str, user_prompt: str, schema: dict[str, Any],
+             model: str, settings: Settings) -> ClaudeResult:
     binary = shutil.which(settings.claude_bin)
     if not binary:
         raise FileNotFoundError(f"No se encontró el CLI de Claude Code ('{settings.claude_bin}'). "
@@ -63,6 +86,7 @@ def ask_structured(system_prompt: str, user_prompt: str, schema: dict[str, Any],
         data = json.loads(out.get("result") or "{}")
     usage = {
         "model": model,
+        "backend": "cli",
         "duration_ms": out.get("duration_ms"),
         "num_turns": out.get("num_turns"),
         "cost_usd_equivalent": out.get("total_cost_usd"),
