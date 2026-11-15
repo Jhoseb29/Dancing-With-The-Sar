@@ -12,13 +12,18 @@
 
 - patrones como dump smart component.
 
-### integracias de harnes
+### integración del harness (Harness Unificado)
 
-Habras 2 harness:
+Ahora se define **1 solo Harness Integral** con un pipeline determinista en Python y **1 sola Skill de Inteligencia Artificial para Claude Code**:
 
-1. Analista de los datos en base a ./data-map.json, creara skills analizando la base al de los datos, tambien debe validar lo encontrado, usar scripts dentro de las skills, dar un score y juzgar su analisis el objetivo es que en base a este input con ayuda del harness que creamos nos de un output para usar esta data en el siguiente harness.
+1. **Capa Determinista (Python / uv):**
+   - **Catálogo y Consulta (`input_data.py` / `test_aws_nisar.py`):** Valida STS en AWS y consulta en vivo NASA CMR para recuperar gránulos y URIs S3/HTTPS.
+   - **Exportación Multi-Formato (`export_nisar_formats.py`):** Genera GeoTIFF (`.tif`), PNG en dB, Falso Color RGB, KML 3D y GeoJSON en `output/formats/`.
+   - **Curación Física y Matemáticas SAR (`curate_sar_physics.py`):** Filtra ruido de moteado (speckle), corrige píxeles inválidos, calcula RVI, CPR y normalización angular, generando `output/curated_sar_metrics.json`.
 
-2. Interpretador del output y ahora genera un otput mejorado, entendible para todo tipo de usuario y didactico. Aca debe ser capaz que con el output del anterio harness cree el output esperado y se entrende nuestro harness con toda la data y luego lo guardaremos en un set de datos la data ya entrenada e interpretada.
+2. **Capa Cognitiva · Única Skill de Claude Code (`nisar-didactic-interpreter`):**
+   - Recibe las métricas físicas curadas y los formatos derivados.
+   - Traduce la física radar en Banda L a explicaciones accesibles, correlaciona el contexto de la Cuenca de Cochabamba (Parque Tunari, Río Rocha, Laguna Alalay) y genera los payloads en Markdown y JSON para la UI en Angular.
 
 ## constraints
 

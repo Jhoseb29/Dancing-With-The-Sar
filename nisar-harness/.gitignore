@@ -1,0 +1,5 @@
+# Cada corrida genera resultados distintos: no se versionan
+output/
+.env
+.venv/
+__pycache__/

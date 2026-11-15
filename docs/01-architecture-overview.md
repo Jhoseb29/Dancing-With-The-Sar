@@ -11,7 +11,7 @@ flowchart LR
     subgraph Backend["Backend Monolito Modular (./backend)"]
         direction TB
         GW["gateway-ts (NestJS / TypeScript)<br/>- orchestrator<br/>- gamc-proxy (3 capas)<br/>- catalog-tiles (3 capas)<br/>- risk-assessment (Hexagonal)"]
-        PY["compute-py (FastAPI / Python)<br/>- ingestion (Hexagonal)<br/>- geoprocessing (Pipeline/Hex)<br/>- llm-advisor (Hexagonal)<br/>- harness-analyst [H1]<br/>- harness-interpreter [H2]"]
+        PY["compute-py (FastAPI / Python)<br/>- ingestion (Hexagonal)<br/>- geoprocessing (Pipeline/Hex)<br/>- llm-advisor (Hexagonal)<br/>- harness-unified (3 Skills: Query, Export, Interpreter)"]
         GW <-->|"HTTP Interno / Contratos OpenAPI"| PY
     end
 

@@ -19,46 +19,63 @@ Este documento detalla cómo transformamos las fuentes definidas en [`data-map.j
 
 ---
 
-## 2. Flujo del Pipeline Geoespacial (`COG` + `Zarr` + `PMTiles`)
+---
+
+## 2. Flujo del Pipeline Geoespacial y Harness Unificado
 
 ```mermaid
 flowchart TD
-    DM["data-map.json"] --> H1["Harness 1: Analyst & Skill Creator"]
-    H1 -->|"Manifiestos validados + Reglas de calidad"| ING["Módulo ingestion (earthaccess / asf_search / S3)"]
-    ING -->|"Streaming + Subsetting al AOI Cuenca"| RAW["data/raw/ (HDF5 / NetCDF - no git)"]
-    RAW --> GEO["Módulo geoprocessing"]
-    GEO --> COG["data/processed/cog/ (COGs EPSG:3857/UTM + overviews)"]
-    GEO --> ZARR["data/processed/zarr/ (Cubos time, y, x)"]
-    GEO --> PMT["data/processed/pmtiles/ (Capas vectoriales/riesgo rápidas)"]
-    GEO --> TBL["data/processed/tables/ (Parquet/CSV lluvia y stats)"]
-    COG & ZARR & PMT & TBL --> H1
-    H1 -->|"Análisis validado + Score + Juicio"| H2["Harness 2: Interpreter & Dataset Builder"]
-    H2 -->|"Explicaciones didácticas + Dataset entrenado"| DS["data/datasets/ (JSONL / Parquet)"]
-```
+    IN["Input de Entrada (AOI Cuenca Cochabamba, Fechas, Colecciones)"] --> H["Harness Unificado NISAR"]
+    
+    subgraph H["Harness Unificado NISAR"]
+        direction TB
+        subgraph DET["Capa Determinística (Python / uv)"]
+            P1["1. Catálogo y Consulta<br/>- input_data.py / test_aws_nisar.py<br/>- Output: output/consulta_resultados.json"]
+            P2["2. Generación Multi-Formato<br/>- export_nisar_formats.py<br/>- Output: GeoTIFF, PNG, RGB, KML, GeoJSON"]
+            P3["3. Curación Física y Matemáticas SAR<br/>- curate_sar_physics.py (Filtro speckle, RVI, CPR, calidad)<br/>- Output: output/curated_sar_metrics.json"]
+            P1 --> P2 --> P3
+        end
+        
+        subgraph AI["Capa Cognitiva (Claude Code)"]
+            S1["Skill nisar-didactic-interpreter<br/>- Lee: output/curated_sar_metrics.json y formatos<br/>- Traduce: Jerga radar a narrativa didáctica multi-audiencia<br/>- Output: Reportes JSON y Markdown para UI Angular"]
+        end
+        
+        P3 -->|"Métricas curadas"| S1
+    end
 
-### ¿Por qué combinar COG + Zarr + PMTiles?
-* **COG:** Evita descargar archivos completos al navegador o al servidor de mapas; permite leer solo los tiles visibles mediante peticiones `HTTP Range`.
-* **Zarr:** Organiza las adquisiciones repetidas (ciclo de 12 días de NISAR) como un arreglo multidimensional chunked `(time, y, x)`, permitiendo extraer una serie temporal de cualquier píxel o cuenca en milisegundos.
-* **PMTiles:** Empaqueta capas vectoriales derivadas (polígonos de riesgo por cuenca, zonas críticas, contornos) en un único archivo estático consultable vía `HTTP Range` directamente desde MapLibre GL, sin administrar PostGIS ni servidores vectoriales adicionales.
+    H --> OUT["output/ + data/datasets/<br/>(Productos GIS listos para UI Angular + Explicación didáctica)"]
+```
 
 ---
 
-## 3. Diseño de los 2 Harnesses (Módulos en `backend/compute-py/modules/`)
+## 3. Diseño del Harness Unificado
 
-### Harness 1 · `harness-analyst` (Analista, Creador de Skills, Validador y Juez)
-Opera como un ciclo agéntico estructurado con trazabilidad completa:
-1. **Lectura y exploración de `data-map.json`:** Inspecciona las fuentes, short names (incluyendo los marcados como *verify* como `GPM_3IMERGDF`, `OPERA_L2_RTC-S1_V1`, `OPERA_L3_DSWX-S1_V1`), ventanas temporales y reglas de selección.
-2. **Creación dinámica de Skills + Scripts ejecutables:** Por cada dominio de datos (p. ej. `nisar-gcov-audit`, `nisar-gunw-coherence`, `gpm-rainfall-check`, `gamc-wms-health`), genera/registra una *skill* con su especificación y **scripts Python ejecutables** para inspeccionar metadatos HDF5, verificar cobertura exacta sobre el bbox de la cuenca, comprobar consistencia `track/frame`, detectar nulos o gaps y validar la respuesta real de los endpoints WMS del GAMC.
-3. **Ejecución, Scoring y Juicio (Self-Judge):**
-   * Corre los scripts de sus skills sobre los manifiestos y productos reales (`data/manifests/`, `data/processed/`).
-   * Calcula un **score cuantitativo** (0–100) desglosado por: cobertura espacial sobre la cuenca, continuidad temporal, consistencia geométrica (`track/frame`), nivel de madurez/calibración y completitud hidrometeorológica.
-   * Emite un **reporte-juicio estructurado (JSON)** con hallazgos, anomalías físicas detectadas, advertencias metodológicas y veredicto de aptitud para alimentar al Harness 2.
+Se consolida **un único Harness continuo** compuesto por:
 
-### Harness 2 · `harness-interpreter` (Interpretador Didáctico y Constructor de Dataset)
-Toma la salida validada y puntuada del **Harness 1** junto con las métricas reales procesadas:
-1. **Traducción multi-audiencia y didáctica:** Convierte métricas técnicas (`gamma0 = -16.4 dB`, caída de coherencia InSAR, desplazamiento LoS en mm, precipitación acumulada GPM y proximidad a torrenteras/Cota 2750) en narrativas claras, visuales y accionables para distintos perfiles:
-   * **Ciudadanía:** Qué significa en su barrio/distrito (zona norte vs zona sur) y qué señales observar.
-   * **Técnico Municipal / Defensa Civil (GAMC):** Qué microcuenca priorizar, qué indicador SAR lo respalda y qué incertidumbre/madurez tiene el dato.
-   * **Científico / Jurado NASA:** Explicación física rigurosa de la interacción de microondas banda L con agua, vegetación y terreno.
-2. **Ciclo de mejora y entrenamiento/refinamiento:** Evalúa la claridad, fidelidad numérica (que ningún número contradiga el output del Harness 1) y cobertura didáctica, retroalimentando ejemplos validados (*few-shot / curated traces*) dentro del propio harness.
-3. **Persistencia en Dataset (`data/datasets/`):** Guarda cada registro validado e interpretado (entrada técnica del Harness 1 + contexto territorial + salidas didácticas por audiencia + score de fidelidad) en un dataset estructurado (JSONL/Parquet), listo para ser consumido por el frontend (`didactic-insights`), auditado y reutilizado.
+### A. Capa Determinística (Scripts CLI en Python)
+1. **Catálogo y Consulta (`input_data.py` / `test_aws_nisar.py`):** Valida credenciales AWS STS y consulta en vivo NASA CMR para listar gránulos y enlaces S3/HTTPS.
+2. **Exportación Multi-Formato (`export_nisar_formats.py`):** Genera GeoTIFF (`.tif`), PNG en dB, RGB polarimétrico, KML 3D y GeoJSON.
+3. **Curación Física y Matemáticas SAR (`curate_sar_physics.py`):** Suprime ruido de moteado (filtro de mediana 2D), descarta píxeles espurios, y calcula el índice de vegetación radar (RVI) y razón co/cruzada (CPR).
+
+### B. Capa Cognitiva (Skill de Claude Code)
+* **Skill `nisar-didactic-interpreter`:** Única skill agéntica de Claude Code. Recibe el JSON curado `curated_sar_metrics.json` y sintetiza explicaciones comprensibles y contextualizadas para la Cuenca de Cochabamba (Parque Tunari, Río Rocha, Laguna Alalay) orientadas a la ciudadanía, técnicos municipales y el jurado científico.
+- **Función:**
+  1. Abre el gránulo (local o mediante streaming remoto con `consult_s3_h5_stream.py` sin descargar gigabytes a disco).
+  2. Extrae las bandas de retrodispersión (\(\gamma^0\)) calibradas y las transforma a decibeles (\(\text{dB} = 10 \cdot \log_{10}(\gamma^0)\)).
+  3. Exporta los 5 productos derivados en `output/formats/`:
+     * **GeoTIFF (`.tif`):** Georreferenciado en EPSG:32720 / EPSG:32719 para consumo en QGIS, ArcGIS y servicios de losetas.
+     * **Visual (`.png`):** Escala de grises con barras de dB para visualización rápida en UI.
+     * **Falso Color RGB (`.png`):** Composición polarimétrica (R=HH, G=HV, B=HH/HV) donde la vegetación se resalta en verde, estructuras en rojo/amarillo y agua en azul/negro.
+     * **Google Earth (`.kml`):** Capa GroundOverlay con coordenadas WGS84 para vuelo 3D.
+     * **Huella GeoJSON (`.geojson`):** Polígono territorial con atributos para Leaflet/Mapbox en Angular.
+
+### Skill 3 · `nisar-didactic-interpreter` (Interpretador Didáctico con Claude)
+- **Motor:** Agente Claude con prompts especializados y acceso a herramientas de cálculo/scripts auxiliares.
+- **Función:**
+  1. **Reconocimiento integral:** Analiza conjuntamente las estadísticas radiométricas del JSON, los porcentajes de efectos físicos (agua, suelo descubierto, vegetación y rebote doble) y las imágenes exportadas.
+  2. **Traducción didáctica multi-perfil:** Transforma los decibeles y términos de ingeniería radar en información clara y comprensible:
+     * **Ciudadanía:** Estado de las torrenteras, riesgo en distritos específicos y recomendaciones en lenguaje simple.
+     * **Defensa Civil / Técnico Municipal:** Zonas con incremento de reflectancia húmeda, umbrales de alerta y microcuencas prioritarias.
+     * **Científico / Jurado NASA:** Explicación física rigurosa de la interacción de la banda L (24 cm) con el dosel vegetal y la saturación del suelo.
+  3. **Generación limpia:** Emite el reporte final pulido, estructurado y listo para alimentar la UI en Angular y guardarse en `data/datasets/` para alimentar la base de conocimiento del proyecto.
+
