@@ -1,0 +1,41 @@
+// Colores de DATOS de nivel (los mismos del mapa).
+.box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-10) 0;
+  border-bottom: var(--border-hairline) solid var(--color-dark-gunmetal);
+}
+
+.alerts-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-10);
+  font-size: var(--text-label);
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #777777;
+
+  &[data-level='verde'] { background: #4caf7a; }
+  &[data-level='amarillo'] { background: #e3c341; }
+  &[data-level='naranja'] { background: #e8893a; }
+  &[data-level='rojo'] { background: #e0524a; }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}

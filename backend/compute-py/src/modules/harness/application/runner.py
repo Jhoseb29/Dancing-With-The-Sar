@@ -89,14 +89,15 @@ class HarnessRunner:
         self._slots = threading.BoundedSemaphore(max_concurrent)
         self._log_file = harness_dir / "output" / "backend-runs.log"
 
-    def start(self, question: str) -> HarnessRun:
+    def start(self, question: str, sensor: str = "auto") -> HarnessRun:
         if not (self._harness_dir / "run.py").is_file():
             raise HarnessError("harness_missing", f"No se encontró el harness en {self._harness_dir}.")
         if not self._slots.acquire(blocking=False):
             raise HarnessError("busy", "Hay demasiados análisis en curso; intenta en unos minutos.")
         try:
             # `--` evita que una pregunta que empiece con "-" se lea como opción.
-            cmd = [self._uv_bin, "run", "--project", str(self._harness_dir), "python", "run.py", "--events", "--", question]
+            cmd = [self._uv_bin, "run", "--project", str(self._harness_dir), "python", "run.py", "--events",
+                   "--sensor", sensor, "--", question]
             env = {k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
             self._log_file.parent.mkdir(parents=True, exist_ok=True)
             with self._log_file.open("a", encoding="utf-8") as stderr_log:

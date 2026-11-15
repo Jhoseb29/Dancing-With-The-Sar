@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { SceneStore } from '../../../../core/scene/scene.store';
 import { AlertsService } from '../../../../core/services/alerts.service';
 import { BasinsService } from '../../../../core/services/basins.service';
+import { HarnessService } from '../../../../core/services/harness.service';
 import { GeoEngineService } from '../../../../core/services/geo-engine.service';
 import { MapCanvasComponent } from '../../../../shared/components/map-canvas/map-canvas.component';
 import { SidePanelComponent } from '../../../../shared/components/side-panel/side-panel.component';
@@ -43,6 +44,8 @@ export class RiskPageComponent {
   protected readonly districts = computed(() => (this.alerts.districts()?.features ?? []).map((f) => f.properties));
   private readonly basinsSvc = inject(BasinsService);
   private readonly router = inject(Router);
+  private readonly harness = inject(HarnessService);
+  private readonly i18n = inject(TranslocoService);
   /** Cuencas que bajan al distrito elegido. */
   protected readonly districtBasins = computed(() => {
     const id = this.alerts.selectedDistrictId();
@@ -65,6 +68,14 @@ export class RiskPageComponent {
 
   protected setPanelOpen(open: boolean): void {
     void this.scene.set('/panels/layerPanel', open);
+  }
+
+  /** Mismo chat de toda la app: pregunta por qué este distrito tiene su nivel. */
+  protected askAbout(): void {
+    const d = this.alerts.selectedDistrict();
+    if (!d) return;
+    const nivel = this.i18n.translate(`risk.levels.${d.estado?.nivel ?? 'sin'}`).toLowerCase();
+    this.harness.openWith(this.i18n.translate('harness.alertsBox.why', { id: d.id, nivel }));
   }
 
   /** Abre la cuenca en la vista Cuenca, ya seleccionada. */

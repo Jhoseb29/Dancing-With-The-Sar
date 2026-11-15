@@ -61,6 +61,7 @@ class Settings:
     intent_model: str
     interpret_model: str
     claude_timeout_s: int
+    alert_harness_dir: Path  # Centinela outputs, read-only (single chat explains its alerts)
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -82,6 +83,7 @@ class Settings:
             intent_model=os.environ.get("CLAUDE_INTENT_MODEL", "haiku"),
             interpret_model=os.environ.get("CLAUDE_INTERPRET_MODEL", "sonnet"),
             claude_timeout_s=int(os.environ.get("CLAUDE_TIMEOUT_S", "300")),
+            alert_harness_dir=_env_path("ALERT_HARNESS_DIR", PROJECT_ROOT / "alert-harness"),
         )
 
 

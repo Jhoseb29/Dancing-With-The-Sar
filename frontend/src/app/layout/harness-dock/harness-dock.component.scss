@@ -241,3 +241,10 @@ button[disabled] {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.sensors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-4);
+}

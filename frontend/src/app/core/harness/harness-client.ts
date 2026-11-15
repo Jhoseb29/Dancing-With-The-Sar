@@ -10,6 +10,9 @@ export class HarnessHttpError extends Error {
   }
 }
 
+/** Satélite: auto = NISAR y, si no cubre la zona, Sentinel-1. */
+export type HarnessSensor = 'auto' | 'nisar' | 'sentinel-1';
+
 /**
  * POST /api/harness/ask y lectura del stream NDJSON (una línea JSON por evento).
  * Se usa fetch (no EventSource) porque es POST y no debe re-ejecutarse al reconectar.
@@ -19,11 +22,12 @@ export async function streamAsk(
   text: string,
   onEvent: (event: HarnessEvent) => void,
   signal?: AbortSignal,
+  sensor: HarnessSensor = 'auto',
 ): Promise<void> {
   const response = await fetch(`${apiBaseUrl}/harness/ask`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', accept: 'application/x-ndjson' },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ text, sensor }),
     signal,
   });
   if (!response.ok || !response.body) {

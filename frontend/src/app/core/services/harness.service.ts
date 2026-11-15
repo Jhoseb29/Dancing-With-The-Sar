@@ -1,7 +1,9 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
-import { HarnessHttpError, runFileUrl, streamAsk } from '../harness/harness-client';
+import { Router } from '@angular/router';
+import { HarnessHttpError, runFileUrl, streamAsk, HarnessSensor } from '../harness/harness-client';
 import { HarnessEvent, HarnessMedia, HarnessPayload } from '../harness/harness.model';
 import { RuntimeConfigService } from '../config/runtime-config.service';
+import { AlertsService } from './alerts.service';
 import { HarnessGlobeService } from './harness-globe.service';
 import { VoiceService } from './voice.service';
 
@@ -28,11 +30,17 @@ export class HarnessService {
   private readonly apiBaseUrl = inject(RuntimeConfigService).value.apiBaseUrl;
   private readonly globe = inject(HarnessGlobeService);
   private readonly voice = inject(VoiceService);
+  private readonly alerts = inject(AlertsService);
+  private readonly router = inject(Router);
   private abort: AbortController | null = null;
   private nextId = 1;
 
   readonly turns = signal<HarnessTurn[]>([]);
   readonly busy = computed(() => this.turns().some((t) => t.state === 'running'));
+  /** El chat es uno solo para toda la app: cualquier vista puede abrirlo con una pregunta. */
+  readonly dockOpen = signal(false);
+  /** Satélite elegido para aprender y navegar (la pregunta también puede nombrarlo). */
+  readonly sensor = signal<HarnessSensor>('auto');
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.abort?.abort());
@@ -61,7 +69,7 @@ export class HarnessService {
 
     this.abort = new AbortController();
     try {
-      await streamAsk(this.apiBaseUrl, text, (event) => this.onEvent(id, event), this.abort.signal);
+      await streamAsk(this.apiBaseUrl, text, (event) => this.onEvent(id, event), this.abort.signal, this.sensor());
       this.present(id);
       this.update(id, (t) =>
         t.state === 'running' ? { ...t, state: 'error', errorCode: 'harness_failed' } : t,
@@ -78,6 +86,18 @@ export class HarnessService {
     } finally {
       this.abort = null;
     }
+  }
+
+  /** Abre el chat y, si se da, pregunta (p. ej. desde la ficha de un distrito). */
+  openWith(question?: string): void {
+    this.dockOpen.set(true);
+    if (question) void this.ask(question);
+  }
+
+  /** Lleva una respuesta sobre alertas al mapa de alertas, con su distrito elegido. */
+  showAlerts(turn: HarnessTurn): void {
+    const focus = turn.payload?.alerts?.focus ?? [];
+    void this.router.navigate(['/riesgo']).then(() => this.alerts.selectedDistrictId.set(focus[0] ?? null));
   }
 
   cancel(): void {
@@ -130,7 +150,11 @@ export class HarnessService {
   private present(id: number): void {
     const turn = this.turns().find((t) => t.id === id);
     if (turn?.state !== 'done' || !turn.payload) return;
-    this.showOnGlobe(turn);
+    if (turn.payload.mode === 'alertas') {
+      this.showAlerts(turn);
+    } else {
+      this.showOnGlobe(turn);
+    }
     void this.voice.speak(turn.payload.chat?.message ?? '');
   }
 

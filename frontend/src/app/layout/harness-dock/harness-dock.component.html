@@ -24,6 +24,11 @@
       </div>
     </header>
 
+    <!-- Apartado de alertas: el mismo chat explica lo que detectó Centinela -->
+    @if (alertSummary(); as a) {
+      <app-chat-alerts-box [summary]="a" [busy]="harness.busy()" (ask)="sendExample($event.key, $event.params)" />
+    }
+
     <ol #log class="log" aria-live="polite">
       @if (harness.turns().length === 0) {
         <li class="intro">
@@ -108,7 +113,13 @@
                   <p class="muted">{{ 'harness.dataOnly' | transloco }}</p>
                 }
 
-                @if (payload.query; as query) {
+                @if (payload.mode === 'alertas') {
+                  @if (payload.alerts?.focus?.length) {
+                    <button class="btn-ghost small" type="button" (click)="harness.showAlerts(turn)">
+                      {{ 'harness.showOnAlerts' | transloco: { ids: payload.alerts!.focus.join(', ') } }}
+                    </button>
+                  }
+                } @else if (payload.query; as query) {
                   <p class="caption">
                     {{ query.place_name }} · {{ query.start_date }} → {{ query.end_date }}
                   </p>
@@ -209,6 +220,24 @@
     @if (voice.error(); as verr) {
       <p class="caption">{{ 'harness.voice.errors.' + verr | transloco }}</p>
     }
+
+    <div class="sensors" role="radiogroup" [attr.aria-label]="'harness.sensor.label' | transloco">
+      <span class="caption">{{ 'harness.sensor.label' | transloco }}</span>
+      @for (s of sensors; track s) {
+        <button
+          class="btn-pill small"
+          type="button"
+          role="radio"
+          [attr.aria-checked]="harness.sensor() === s"
+          [attr.aria-pressed]="harness.sensor() === s"
+          [title]="'harness.sensor.hint.' + s | transloco"
+          [disabled]="harness.busy()"
+          (click)="harness.sensor.set(s)"
+        >
+          {{ 'harness.sensor.' + s | transloco }}
+        </button>
+      }
+    </div>
 
     <form class="composer" (submit)="$event.preventDefault(); send()">
       <label class="sr-only" for="harness-input">{{ 'harness.placeholder' | transloco }}</label>

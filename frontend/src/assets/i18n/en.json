@@ -126,7 +126,7 @@
   },
   "harness": {
     "title": "Radar Echoes",
-    "subtitle": "NASA/ISRO satellite radar · live data from AWS",
+    "subtitle": "Centinela alerts and NISAR / Sentinel-1 radar · live data",
     "name": "Ecos",
     "you": "You",
     "open": "Ask the satellite",
@@ -137,8 +137,9 @@
     "running": "Analyzing…",
     "starting": "Starting the analysis…",
     "placeholder": "E.g.: Were there recent fires in the Chiquitania? (Enter to send)",
-    "intro": "Ask about any place: fires, floods, watersheds, forests or cities. I read NISAR radar images directly from AWS, so the analysis takes a few minutes.",
+    "intro": "Ask about the alerts or have the satellite look at a place or date.",
     "examples": {
+      "yesterday": "What happened yesterday at the Taquiña ravine?",
       "fires": "Were there recent fires in the Chiquitania?",
       "basin": "How are the lagoons of the Cochabamba basin?",
       "flood": "Is there flooding in La Mojana, Colombia?"
@@ -182,7 +183,25 @@
         "language-not-supported": "The browser does not recognize speech in this language.",
         "start-failed": "Could not start the microphone. Try again."
       }
-    }
+    },
+    "sensor": {
+      "label": "Satellite:",
+      "auto": "Auto",
+      "sentinel-1": "Sentinel-1",
+      "nisar": "NISAR",
+      "hint": {
+        "auto": "NISAR, or Sentinel-1 if NISAR doesn't cover the area",
+        "sentinel-1": "Sentinel-1 (ESA, C-band): every ~6 days, best for watching",
+        "nisar": "NISAR (NASA-ISRO, L-band): sees under vegetation, best for confirming"
+      }
+    },
+    "alertsBox": {
+      "title": "Alerts now",
+      "explainToday": "Explain today's alerts",
+      "why": "Why is {{id}} {{nivel}}?",
+      "basins": "Which ravines drain into {{id}}?"
+    },
+    "showOnAlerts": "Show {{ids}} on the alerts map"
   },
   "events": {
     "kicker": "Events · NASA imagery by day",
@@ -397,7 +416,8 @@
     "basins": {
       "title": "Basins draining here",
       "rain": "{{mm}} mm/h at {{t}}"
-    }
+    },
+    "askEcos": "Ask Ecos why {{id}} has this level"
   },
   "satSaw": {
     "title": "What the satellite saw (last 24 h)",

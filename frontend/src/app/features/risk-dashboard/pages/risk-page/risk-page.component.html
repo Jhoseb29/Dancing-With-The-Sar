@@ -32,6 +32,7 @@
           [basins]="districtBasins()"
           (back)="pick(null)"
           (openBasin)="openBasin($event)"
+          (ask)="askAbout()"
         />
       } @else {
         <app-city-summary [districts]="districts()" (pick)="pick($event)">

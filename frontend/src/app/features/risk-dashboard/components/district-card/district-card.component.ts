@@ -33,6 +33,8 @@ export class DistrictCardComponent {
   readonly basins = input<BasinProps[]>([]);
   readonly back = output<void>();
   readonly openBasin = output<string>();
+  /** Abrir el chat (Ecos) con una pregunta sobre este distrito. */
+  readonly ask = output<void>();
 
   protected readonly band = signalBand;
   protected readonly level = computed(() => this.district().estado?.nivel ?? 'sin');

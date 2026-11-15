@@ -1,0 +1,35 @@
+<section class="box" [attr.aria-label]="'harness.alertsBox.title' | transloco">
+  <div class="alerts-head">
+    <span class="label">{{ 'harness.alertsBox.title' | transloco }}</span>
+    @for (c of summary().counts; track c.level) {
+      <span class="count"><i class="dot" [attr.data-level]="c.level"></i>{{ c.n }} {{ level(c.level) }}</span>
+    }
+  </div>
+  <div class="chips">
+    <button class="btn-pill small" type="button" [disabled]="busy()" (click)="ask.emit({ key: 'harness.alertsBox.explainToday' })">
+      {{ 'harness.alertsBox.explainToday' | transloco }}
+    </button>
+    @if (summary().picked; as d) {
+      <button
+        class="btn-pill small"
+        type="button"
+        [disabled]="busy()"
+        (click)="ask.emit({ key: 'harness.alertsBox.why', params: { id: d.id, nivel: level(d.estado?.nivel) } })"
+      >
+        {{ 'harness.alertsBox.why' | transloco: { id: d.id, nivel: level(d.estado?.nivel) } }}
+      </button>
+      <button class="btn-pill small" type="button" [disabled]="busy()" (click)="ask.emit({ key: 'harness.alertsBox.basins', params: { id: d.id } })">
+        {{ 'harness.alertsBox.basins' | transloco: { id: d.id } }}
+      </button>
+    } @else {
+      <button
+        class="btn-pill small"
+        type="button"
+        [disabled]="busy()"
+        (click)="ask.emit({ key: 'harness.alertsBox.why', params: { id: summary().top.id, nivel: level(summary().top.estado?.nivel) } })"
+      >
+        {{ 'harness.alertsBox.why' | transloco: { id: summary().top.id, nivel: level(summary().top.estado?.nivel) } }}
+      </button>
+    }
+  </div>
+</section>

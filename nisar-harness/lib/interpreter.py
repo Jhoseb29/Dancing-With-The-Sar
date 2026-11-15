@@ -4,6 +4,7 @@
 2. interpret()           ONE tool-less Claude call (role = the nisar-didactic-interpreter skill)
                          -> interpretation_narrative.json (short chat message) + interpretation.md (lesson)
 3. assemble_ui_payload() deterministic metrics + media (images with fixed captions) + model text
+Alert mode (same chat): explain() with the alert-advisor role over Centinela's data, see alerts_bridge.
 """
 from __future__ import annotations
 
@@ -125,6 +126,7 @@ def build_context(run: RunContext) -> dict[str, Any]:
         "theme": {"key": theme.key, "label": theme.label, "radar_signal": theme.radar_signal,
                   "focus_metrics": list(theme.focus_metrics)},
         "period": {"start": intent.get("start_date"), "end": intent.get("end_date")},
+        "event": _event_timing(intent.get("event_date"), metrics),
         "regions": [{"name": r["name"], "landmarks": r["landmarks"]} for r in sref.get("regions", [])],
         "aoi": {"intersects_granule": sref.get("aoi_intersects_granule"),
                 "covered_fraction": sref.get("aoi_covered_fraction")},
@@ -141,6 +143,16 @@ def build_context(run: RunContext) -> dict[str, Any]:
     }
     write_json(run.context_json, context)
     return context
+
+
+def _event_timing(event_date: str | None, metrics: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """For a one-day question: which takes are before / after the event (radar sees it only after)."""
+    if not event_date:
+        return None
+    days = sorted({(m["acquisition"].get("start_time") or "")[:10] for m in metrics if m.get("acquisition")} - {""})
+    after = [d for d in days if d > event_date]
+    return {"date": event_date, "takes_before": [d for d in days if d <= event_date], "takes_after": after,
+            "radar_saw_after_event": bool(after)}
 
 
 def _hotspot_summary(run: RunContext) -> dict[str, Any] | None:
@@ -165,14 +177,24 @@ def _skill_role() -> str:
 
 def interpret(run: RunContext, settings: Settings, model: str | None = None) -> dict[str, Any]:
     context = read_json(run.context_json) if run.context_json.exists() else build_context(run)
+    return explain(run, settings, _skill_role(), context, model)
+
+
+def explain(run: RunContext, settings: Settings, role: str, context: dict[str, Any],
+            model: str | None = None, level: str | None = None) -> dict[str, Any]:
+    """ONE tool-less call: role + compact context -> chat bubble + lesson. With `level`, the
+    deterministic level overrides whatever the model wrote (the model explains, never decides)."""
     result = ask_structured(
-        system_prompt=_skill_role(),
+        system_prompt=role,
         user_prompt=json.dumps(context, ensure_ascii=False, separators=(",", ":")),
         schema=OUTPUT_SCHEMA,
         model=model or settings.interpret_model,
         settings=settings,
     )
-    write_json(run.narrative_json, result.data["chat"])
+    chat = result.data["chat"]
+    if level:
+        chat["alert_level"] = level
+    write_json(run.narrative_json, chat)
     run.interpretation_md.write_text(result.data["lesson_markdown"], encoding="utf-8")
     return result.usage
 
@@ -239,6 +261,7 @@ def assemble_ui_payload(run: RunContext, usage: list[dict[str, Any]] | None = No
     newest = context["dates"][-1] if context["dates"] else None
     payload = {
         "schema_version": "3.0",
+        "mode": "radar",
         "run_id": run.run_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "status": "complete" if chat and lesson and not issues else "data_only",
@@ -253,6 +276,31 @@ def assemble_ui_payload(run: RunContext, usage: list[dict[str, Any]] | None = No
         "globe": build_globe(run),
         "map": {"aoi_bbox": run.manifest.get("request", {}).get("bbox"),
                 "regions": context["regions"]},
+        "usage": usage or [],
+    }
+    write_json(run.ui_payload_json, payload)
+    return payload
+
+
+def assemble_alerts_payload(run: RunContext, context: dict[str, Any],
+                            usage: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    """Chat answer about Centinela's alerts: model text + the districts it talks about (for the map)."""
+    chat = read_json(run.narrative_json) if run.narrative_json.exists() else None
+    lesson = run.interpretation_md.read_text(encoding="utf-8") if run.interpretation_md.exists() else None
+    payload = {
+        "schema_version": "3.0",
+        "mode": "alertas",
+        "run_id": run.run_id,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "status": "complete" if chat and lesson else "data_only",
+        "validation_issues": [],
+        "query": run.manifest.get("intent"),
+        "chat": chat,
+        "lesson_markdown": lesson,
+        "alerts": {"focus": [d["id"] for d in context["focus"]], "asked": context["asked_districts"],
+                   "levels": context["city"]["levels"]},
+        "metrics": None, "time_series": [], "change": None, "media": [], "globe": None,
+        "map": {"aoi_bbox": run.manifest.get("request", {}).get("bbox"), "regions": []},
         "usage": usage or [],
     }
     write_json(run.ui_payload_json, payload)
