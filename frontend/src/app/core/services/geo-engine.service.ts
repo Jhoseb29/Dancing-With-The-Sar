@@ -1,4 +1,6 @@
 import { EffectRef, Injectable, Injector, effect, inject, signal, untracked } from '@angular/core';
+import { DETAIL_IMAGERY } from '../config/detail-imagery';
+import { ALERT_HEX, RED_DISTRICTS, Station } from '../alerts/stations.model';
 import type { Feature, FeatureCollection, Polygon } from 'geojson';
 import type { RainPayload } from '../alerts/alerts.model';
 import type { BBox } from '../config/runtime-config.model';
@@ -11,6 +13,7 @@ import {
   sanitizeFeatureProperties,
 } from '../data-access/gamc-wms.client';
 import { FireDay, fetchFireDay } from '../data-access/fires.client';
+import { BasinPointDiagnostics, fetchBasinPoint } from '../data-access/basin-risk.client';
 import type {
   GeoEngine,
   MapClick,
@@ -18,11 +21,13 @@ import type {
   MapOverlay,
   MapRelief,
   ZoneGroup,
+  ZoneOverlay,
 } from '../map-engine/geo-engine';
 import { SceneStore } from '../scene/scene.store';
 import { EventService } from './event.service';
 import { AlertsService } from './alerts.service';
 import { BasinsService } from './basins.service';
+import { StationsService } from './stations.service';
 import { BASIN_TYPE_HEX, LEVEL_HEX, NO_DATA_HEX } from '../alerts/zone-colors';
 import { HarnessGlobeService, ObjectProps } from './harness-globe.service';
 
@@ -78,6 +83,8 @@ export class GeoEngineService {
   private readonly events = inject(EventService);
   private readonly analysis = inject(HarnessGlobeService);
   private readonly alerts = inject(AlertsService);
+  private readonly stations = inject(StationsService);
+  private attachedAt = 0;
   private readonly basins = inject(BasinsService);
   private engine: GeoEngine | null = null;
   private effects: EffectRef[] = [];
@@ -87,8 +94,17 @@ export class GeoEngineService {
   readonly view = signal<MapView | null>(null);
   readonly ready = signal(false);
   readonly featureInfo = signal<FeatureInfoState | null>(null);
+  readonly pointDem = signal<BasinPointDiagnostics | null>(null);
+  readonly pointDemLoading = signal(false);
+  readonly terrain3d = signal(false);
+  readonly nisarDate = signal<string>('2026-10-25');
+  readonly operaDate = signal<string>('2026-11-13');
+  readonly imergDate = signal<string>('2026-11-13');
+  readonly sarBeforeDate = signal<string>('2026-10-13');
+  readonly sarAfterDate = signal<string>('2026-10-25');
   readonly fires = signal<FiresState>({ status: 'idle' });
   private firesKey = '';
+  private pendingZoneOverlays: ZoneOverlay[] | null = null;
 
   async attach(container: HTMLElement): Promise<void> {
     this.detach();
@@ -101,12 +117,15 @@ export class GeoEngineService {
       throw new Error('places.json debe definir cochabamba-city y cochabamba-basin');
     }
     const placeId = this.scene.camera().placeId;
-    const initial = (placeId && this.ui.place(placeId)?.bbox) || city.bbox;
+    const route = this.scene.route();
+    const fallbackBox = route === 'basin' || route === 'risk' ? basin.bbox : city.bbox;
+    const initial = (placeId && placeId !== 'bolivia' ? this.ui.place(placeId)?.bbox : undefined) || fallbackBox;
     const basemap = this.ui.basemap();
 
     this.engine = new GeoEngine({
       container,
       basemap: { url: basemap.url, maxZoom: basemap.maxZoom, attribution: basemap.attribution },
+      detailImagery: DETAIL_IMAGERY,
       initialBBox: initial,
       outlines: { city: city.bbox, basin: basin.bbox },
       apiBaseUrl: this.config.value.apiBaseUrl,
@@ -127,7 +146,11 @@ export class GeoEngineService {
       panelOpen: this.scene.panels().layerPanel,
     });
     this.ready.set(true);
+    this.attachedAt = performance.now();
     this.bindScene();
+    if (this.pendingZoneOverlays) {
+      this.engine.setZoneOutlines(this.pendingZoneOverlays);
+    }
   }
 
   fitPlace(placeId: string): void {
@@ -137,8 +160,39 @@ export class GeoEngineService {
     }
   }
 
+  fitBBox(bbox: BBox): void {
+    this.engine?.fitArea(bbox);
+  }
+
+  setTerrain3d(enabled: boolean): void {
+    this.terrain3d.set(enabled);
+  }
+
+  setNisarDate(date: string): void {
+    this.nisarDate.set(date);
+  }
+
+  setOperaDate(date: string): void {
+    this.operaDate.set(date);
+  }
+
+  setImergDate(date: string): void {
+    this.imergDate.set(date);
+  }
+
+  setSarDates(before: string, after: string): void {
+    this.sarBeforeDate.set(before);
+    this.sarAfterDate.set(after);
+  }
+
+  setZoneOverlays(zones: ZoneOverlay[] | null): void {
+    this.pendingZoneOverlays = zones;
+    this.engine?.setZoneOutlines(zones);
+  }
+
   clearFeatureInfo(): void {
     this.featureInfo.set(null);
+    this.pointDem.set(null);
   }
 
   detach(): void {
@@ -148,6 +202,9 @@ export class GeoEngineService {
     this.engine = null;
     this.ready.set(false);
     this.featureInfo.set(null);
+    this.pointDem.set(null);
+    this.pointDemLoading.set(false);
+    this.pendingZoneOverlays = null;
     this.firesKey = '';
     this.fires.set({ status: 'idle' });
   }
@@ -156,8 +213,7 @@ export class GeoEngineService {
     const options = { injector: this.injector };
     this.effects.push(
       effect(() => {
-        // Cada vista tiene sus capas: en eventos, las del evento (events.json);
-        // en el resto, las capas GAMC del shadow (/layers). Así no se pisan.
+        // En eventos: capas de events.json; en cuenca/riesgo: capas del shadow (/layers) incluyendo GAMC, DEM y NISAR.
         const route = this.scene.route();
         const event = this.scene.state().event;
         // En el análisis NISAR y en alertas solo se ven sus propios datos (sin imágenes municipales).
@@ -166,10 +222,18 @@ export class GeoEngineService {
             ? this.events.layersFor(event.type)
             : route === 'insights' || route === 'risk'
               ? []
-              : this.scene.layers().filter((l) => this.ui.layer(l.presetId)?.kind === 'gamc-wms');
-        const date = this.scene.time().date;
+              : this.scene.layers().filter((l) => {
+                  const kind = this.ui.layer(l.presetId)?.kind;
+                  return kind === 'gamc-wms' || kind === 'xyz-tile' || kind === 'gibs-wmts';
+                });
+        const eventDate = route === 'events' ? this.scene.time().date : null;
+        const nisar = this.nisarDate();
+        const opera = this.operaDate();
+        const imerg = this.imergDate();
+        const sarBefore = this.sarBeforeDate();
+        const sarAfter = this.sarAfterDate();
         untracked(() => {
-          const overlays = this.toOverlays(layers, date);
+          const overlays = this.toOverlays(layers, eventDate, route, { nisar, opera, imerg, sarBefore, sarAfter });
           this.scene.pruneReportedLayers(overlays.map((o) => o.presetId));
           this.engine?.setOverlays(overlays);
         });
@@ -190,8 +254,8 @@ export class GeoEngineService {
                   id: f.properties.id,
                   label: f.properties.id,
                   centro: f.properties.centro,
-                  color: LEVEL_HEX[f.properties.estado?.nivel ?? ''] ?? NO_DATA_HEX,
-                  height: 4 * (f.properties.estado?.indice ?? 0), // 0–100 → 0–400 m (la lluvia va encima)
+                  color: RED_DISTRICTS.has(f.properties.id) ? ALERT_HEX.ROJA : '#f0f0fa',
+                  height: 0,
                 },
               })),
             },
@@ -203,6 +267,49 @@ export class GeoEngineService {
           }
           this.frameZones('districts', districts?.features.map((f) => f.properties) ?? [], selected);
         });
+      }, options),
+      // Alertas (sistema HidroGlobe): estaciones con su recuadro, torrenteras y mancha del escenario.
+      effect(() => {
+        const onRisk = this.scene.route() === 'risk';
+        const stations = onRisk ? this.stations.filtered() : [];
+        untracked(() =>
+          this.engine?.setStations(
+            stations.length
+              ? {
+                  type: 'FeatureCollection',
+                  features: stations.map((st) => ({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: [st.lon, st.lat] },
+                    properties: { id: st.id, nombre: st.nombre, color: st.color, popup: stationPopup(st) },
+                  })),
+                }
+              : null,
+          ),
+        );
+      }, options),
+      effect(() => {
+        const onRisk = this.scene.route() === 'risk';
+        const flood = onRisk ? this.stations.scenario() : null;
+        const channels = onRisk ? this.stations.torrenteras() : null;
+        const view = this.stations.scenarioView();
+        this.stations.scenarioRequest();
+        untracked(() => {
+          this.engine?.setHazard(flood, channels);
+          if (onRisk && flood && view) {
+            const wait = Math.max(0, 2500 - (performance.now() - this.attachedAt));
+            setTimeout(() => this.engine?.flyToPoint(view.lon, view.lat, view.zoom), wait);
+          }
+        });
+      }, options),
+      // Tarjeta de estación tocada en el panel: volar a ella y abrir su recuadro.
+      effect(() => {
+        const request = this.stations.focusRequest();
+        const id = this.stations.focusedId();
+        if (request && id) {
+          // Recién abierto el mapa, el encuadre inicial de los distritos pisaría el vuelo: esperar.
+          const wait = Math.max(0, 2500 - (performance.now() - this.attachedAt));
+          untracked(() => setTimeout(() => this.engine?.openStation(id), wait));
+        }
       }, options),
       // Alertas: lluvia IMERG como columnas (acumulado 24 h o la media hora elegida).
       effect(() => {
@@ -264,6 +371,11 @@ export class GeoEngineService {
         });
       }, options),
       effect(() => {
+        const enabled = this.terrain3d();
+        const url = tileTemplateUrl(`${this.config.value.apiBaseUrl}/basin/tiles/terrain/{z}/{x}/{y}.png`);
+        untracked(() => this.engine?.setTerrainEnabled(enabled, url));
+      }, options),
+      effect(() => {
         const open = this.scene.panels().layerPanel;
         untracked(() => this.engine?.setPanelOpen(open));
       }, options),
@@ -308,37 +420,70 @@ export class GeoEngineService {
     }
   }
 
-  private toOverlays(layers: ReturnType<SceneStore['layers']>, date: string | null): MapOverlay[] {
+  private toOverlays(
+    layers: ReturnType<SceneStore['layers']>,
+    eventDate: string | null,
+    route: ReturnType<SceneStore['route']> = this.scene.route(),
+    dates: { nisar: string; opera: string; imerg: string; sarBefore: string; sarAfter: string } = {
+      nisar: this.nisarDate(),
+      opera: this.operaDate(),
+      imerg: this.imergDate(),
+      sarBefore: this.sarBeforeDate(),
+      sarAfter: this.sarAfterDate(),
+    },
+  ): MapOverlay[] {
     const apiBaseUrl = this.config.value.apiBaseUrl;
+    const scope = route === 'events' ? 'all' : 'basin';
     return layers.flatMap((layer): MapOverlay[] => {
       const preset = this.ui.layer(layer.presetId);
       if (!preset || !preset.engines.includes('map')) {
         return [];
       }
       if (preset.kind === 'gamc-wms') {
-        const tiles = new URL(
-          gamcTileUrl(apiBaseUrl, preset.serviceId),
-          document.baseURI,
-        ).href.replace('%7Bbbox-epsg-3857%7D', '{bbox-epsg-3857}');
+        const tiles = tileTemplateUrl(gamcTileUrl(apiBaseUrl, preset.serviceId));
+        return [{ presetId: preset.id, tiles, visible: layer.visible, opacity: layer.opacity, attribution: preset.attribution }];
+      }
+      if (preset.kind === 'gibs-wmts') {
+        let day = eventDate ?? preset.coverageTo ?? yesterday();
+        if (!eventDate) {
+          if (preset.id === 'gibs-nisar-gcov') day = dates.nisar;
+          else if (preset.id === 'gibs-opera-dswx-s1') day = dates.opera;
+          else if (preset.id === 'gibs-imerg-precip') day = dates.imerg;
+        }
+        let tiles = preset.url.replace('{Time}', day);
+        let maxZoom = preset.maxZoom;
+        if (preset.id === 'gibs-opera-dswx-s1') {
+          tiles = tileTemplateUrl(`/api/basin/tiles/opera-dswx/${day}/{z}/{x}/{y}.png?scope=${scope}`);
+        } else if (scope === 'basin' && preset.id === 'gibs-nisar-gcov') {
+          tiles = tileTemplateUrl(`/api/basin/tiles/nisar-basin/${day}/{z}/{x}/{y}.png?scope=basin`);
+        } else if (scope === 'basin' && preset.id === 'gibs-imerg-precip') {
+          tiles = tileTemplateUrl(`/api/basin/tiles/imerg-basin/${day}/{z}/{x}/{y}.png?scope=basin`);
+          maxZoom = 12;
+        }
         return [
           {
             presetId: preset.id,
             tiles,
+            maxZoom,
             visible: layer.visible,
-            opacity: layer.opacity,
+            opacity: layer.opacity ?? preset.defaultOpacity ?? 0.85,
             attribution: preset.attribution,
           },
         ];
       }
-      if (preset.kind === 'gibs-wmts') {
-        const day = date ?? preset.coverageTo ?? yesterday();
+      if (preset.kind === 'xyz-tile') {
+        const rawUrl =
+          preset.id === 'basin-sar-change'
+            ? preset.url.replace('{before}', dates.sarBefore).replace('{after}', dates.sarAfter)
+            : preset.url;
+        const tiles = tileTemplateUrl(rawUrl);
         return [
           {
             presetId: preset.id,
-            tiles: preset.url.replace('{Time}', day),
+            tiles,
             maxZoom: preset.maxZoom,
             visible: layer.visible,
-            opacity: layer.opacity,
+            opacity: layer.opacity ?? preset.defaultOpacity ?? 0.8,
             attribution: preset.attribution,
           },
         ];
@@ -383,23 +528,32 @@ export class GeoEngineService {
   }
 
   private async queryFeatureInfo(click: MapClick): Promise<void> {
-    const targets = this.scene
-      .layers()
-      .filter((l) => {
-        const preset = this.ui.layer(l.presetId);
-        return l.visible && preset?.kind === 'gamc-wms' && preset.featureInfo;
-      })
-      .flatMap((l) => {
-        const preset = this.ui.layer(l.presetId);
-        return preset?.kind === 'gamc-wms'
-          ? [{ presetId: preset.id, serviceId: preset.serviceId }]
-          : [];
-      });
+    const apiBaseUrl = this.config.value.apiBaseUrl;
+    const targets = this.scene.layers().filter((l) => {
+      const preset = this.ui.layer(l.presetId);
+      return l.visible && preset?.kind === 'gamc-wms' && preset.featureInfo;
+    }).flatMap((l) => {
+      const preset = this.ui.layer(l.presetId);
+      return preset?.kind === 'gamc-wms' ? [{ presetId: preset.id, serviceId: preset.serviceId }] : [];
+    });
+
+    const route = this.scene.route();
+    const askDem = route === 'basin' || route === 'risk';
+    if (askDem) {
+      this.pointDemLoading.set(true);
+      void fetchBasinPoint(apiBaseUrl, click.lon, click.lat)
+        .then((diag) => this.pointDem.set(diag))
+        .catch(() => this.pointDem.set(null))
+        .finally(() => this.pointDemLoading.set(false));
+    }
+
     if (targets.length === 0) {
+      if (askDem) {
+        this.featureInfo.set({ lon: click.lon, lat: click.lat, loading: false, results: [] });
+      }
       return;
     }
     this.featureInfo.set({ lon: click.lon, lat: click.lat, loading: true, results: [] });
-    const apiBaseUrl = this.config.value.apiBaseUrl;
     const results = await Promise.all(
       targets.map(async (layer): Promise<FeatureInfoResult> => {
         try {
@@ -470,4 +624,34 @@ function rainCells(rain: RainPayload, frame: number | null): FeatureCollection<P
 
 function yesterday(): string {
   return new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+}
+
+/** HTML del recuadro de una estación (todo el texto se escapa). */
+function stationPopup(st: Station): string {
+  const esc = (v: unknown) =>
+    String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+  const margen =
+    st.falta_desborde > 0
+      ? `<b>${esc(st.falta_desborde)} m</b>`
+      : `<b style="color:${ALERT_HEX.ROJA}">DESBORDADO (${esc(Math.abs(st.falta_desborde))} m)</b>`;
+  return `
+    <div class="dws-popup-head">
+      <strong>${esc(st.nombre)}</strong>
+      <span class="dws-popup-tag" style="border-color:${st.color};color:${st.color}">${esc(st.alerta)}</span>
+    </div>
+    <div><b>Cauce / Río:</b> ${esc(st.rio)}</div>
+    <div class="muted">${esc(st.cuenca)} (${esc(st.zona)})</div>
+    <div class="dws-popup-box">
+      <div>Nivel actual: <b>${esc(st.nivel_actual)} m</b> / Umbral: <b>${esc(st.nivel_roja)} m</b></div>
+      <div>Margen desborde: ${margen}</div>
+      <div>Prob. GloFAS: <b>${esc(st.glofas_prob_desborde)} %</b> | Lluvia 24 h: <b>${esc(st.precipitacion_24h)} mm</b></div>
+      <div>Humedad del suelo: <b>${esc(st.humedad_suelo_pct)} %</b></div>
+    </div>
+    <div class="muted"><b>Tendencia GAMC:</b> ${esc(st.tendencia)}</div>
+  `;
+}
+
+/** Resuelve URL relativa contra baseURI preservando marcadores de tesela sin codificar. */
+function tileTemplateUrl(path: string): string {
+  return new URL(path, document.baseURI).href.replace(/%7B(z|x|y|bbox-epsg-3857)%7D/gi, '{$1}');
 }

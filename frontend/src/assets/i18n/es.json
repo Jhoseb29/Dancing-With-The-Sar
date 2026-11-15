@@ -67,7 +67,7 @@
   "basin": {
     "kicker": "Cuenca · Cochabamba",
     "title": "Del Tunari al Rocha",
-    "intro": "Las quebradas del Tunari bajan con fuerza hacia la ciudad. Toca una cuenca para ver qué peligro trae.",
+    "intro": "Topografía Copernicus DEM (30 m), lluvia NASA y radar NISAR sobre Cochabamba. Activa capas, haz clic en el mapa para diagnosticar cualquier punto o busca una zona arriba.",
     "toOrbit": "Volver a la órbita",
     "gamcLayers": "Capas municipales del GAMC (imágenes)",
     "gamcSource": "Datos reales del Gobierno Autónomo Municipal de Cochabamba · Proyecto 02",
@@ -76,10 +76,10 @@
       "error": "no disponible"
     },
     "legendOf": "Leyenda de {{name}}",
-    "pointInfo": "Datos en este punto",
+    "pointInfo": "Diagnóstico del punto",
     "close": "Cerrar",
     "querying": "Consultando al GAMC…",
-    "noData": "Sin datos en este punto.",
+    "noData": "Punto fuera del recorte DEM de Cochabamba.",
     "all": "Todas las cuencas",
     "tapHint": "Ordenadas de la más torrencial a la más tranquila.",
     "noBasins": "Cargando cuencas…",
@@ -107,7 +107,71 @@
     },
     "radarTag": "radar",
     "technical": "Ver datos técnicos",
-    "meltonHelp": "relieve / √área; > 0,6 mazamorra, 0,3–0,6 crecida torrencial (Melton 1965; Wilford 2004)"
+    "meltonHelp": "relieve / √área; > 0,6 mazamorra, 0,3–0,6 crecida torrencial (Melton 1965; Wilford 2004)",
+    "toRisk": "Tablero de riesgo",
+    "satelliteLayers": "Satélite y terreno (NASA / Copernicus)",
+    "satelliteSource": "NISAR banda L + OPERA DSWx-S1 + GPM IMERG + Copernicus DEM (30 m)",
+    "modesTitle": "Qué analizar en la cuenca",
+    "modesHint": "Elige la vista operativa derivada de Copernicus DEM (30 m), lluvia NASA y radar sobre Cochabamba.",
+    "mode": {
+      "integrated": {
+        "title": "Alerta integrada (recomendada)",
+        "desc": "Cruza torrenteras del Tunari, Cota 2750 m, lluvia diaria y agua superficial OPERA."
+      },
+      "change": {
+        "title": "Cambio radar (antes vs. después)",
+        "desc": "Compara dos fechas SAR mostrando expansión hídrica y máscara geométrica en laderas >= 25°."
+      },
+      "water": {
+        "title": "Agua superficial y drenaje",
+        "desc": "Espejos OPERA DSWx-S1 (30 m) junto a red de torrenteras y Cota 2750 del DEM."
+      },
+      "nisar": {
+        "title": "Radar L-band NISAR",
+        "desc": "Clasificación física de retrodispersión (agua, vegetación y área urbana) dentro de la cuenca."
+      },
+      "rain": {
+        "title": "Lluvia satelital GPM IMERG",
+        "desc": "Tasa diaria estimada sobre el corredor hidrológico de Cochabamba."
+      }
+    },
+    "advancedLayers": "Inspección individual por capa",
+    "summaryTitle": "Resumen operativo en cuenca",
+    "operaWaterArea": "Agua superficial OPERA",
+    "nisarCoverage": "Cobertura NISAR en cuenca",
+    "anchorNote": "Para análisis polarimétrico completo HDF5 (RVI y calibración dual-pol):",
+    "openAnchor": "Abrir análisis polarimétrico",
+    "imergClipped": "sobre la cuenca",
+    "legendTorrent": "Torrentera crítica > 2750 m",
+    "legendOpenWater": "Agua / saturación OPERA",
+    "legendSarWet": "Nueva agua / saturación",
+    "legendSarRough": "Cambio de humedad / suelo",
+    "legendSarCaution": "Pendiente >= 25° (cautela SAR)",
+    "legendNisarSpecular": "Agua / superficie saturada",
+    "legendNisarCanopy": "Vegetación / ladera húmeda",
+    "legendNisarUrban": "Urbano / doble rebote",
+    "nisarDate": "Fecha NISAR",
+    "operaDate": "Fecha Sentinel-1",
+    "sarBefore": "Antes",
+    "sarAfter": "Después",
+    "imergDate": "Último IMERG GIBS",
+    "legendCota2750": "Cota 2750 m (DEM)",
+    "legendDrainage": "Torrenteras (TPI)",
+    "legendSlope": "Laderas / torrenteras",
+    "legendFlood": "Convergencia / valle",
+    "terrain3d": "Relieve 3D (Copernicus DEM)",
+    "demTitle": "Diagnóstico del punto (DEM 30 m)",
+    "subbasin": "Subcuenca",
+    "torrentNetwork": "Red hidrográfica",
+    "inTorrent": "Sobre torrentera / vaguada D8",
+    "outsideTorrent": "Fuera de cauce principal",
+    "elevation": "Elevación",
+    "slope": "Pendiente",
+    "above2750": "Sobre Cota 2750",
+    "below2750": "Bajo 2750 m",
+    "rain7d": "Lluvia 7 días",
+    "queryingDem": "Consultando elevación Copernicus DEM…",
+    "sarTerrainCaution": "Pendiente ≥ 25°: posible escorzo o sombra radar en laderas del Tunari."
   },
   "common": {
     "km": "km",
@@ -180,7 +244,9 @@
         "audio-capture": "No se encontró un micrófono.",
         "network": "El reconocimiento de voz necesita conexión a internet.",
         "language-not-supported": "El navegador no reconoce voz en este idioma.",
-        "start-failed": "No se pudo iniciar el micrófono. Intenta de nuevo."
+        "start-failed": "No se pudo iniciar el micrófono. Intenta de nuevo.",
+        "no-speech": "No te escuché. Toca Hablar e intenta de nuevo.",
+        "stt-failed": "No se pudo transcribir el audio. Intenta de nuevo o escribe tu pregunta."
       }
     }
   },

@@ -11,20 +11,6 @@
   <p>{{ 'basin.intro' | transloco }}</p>
 
   <section class="block">
-    @if (basins.selected(); as b) {
-      <app-basin-card
-        [basin]="b"
-        [rain]="alerts.rain()?.cuencas?.[b.id] ?? null"
-        [radar]="alerts.radar()"
-        (back)="basins.select(null)"
-      />
-    } @else {
-      <app-basin-list [basins]="basinList()" (pick)="basins.select($event)" />
-    }
-  </section>
-
-  <details class="block more">
-    <summary class="label">{{ 'basin.gamcLayers' | transloco }}</summary>
     <div class="row">
       @for (placeId of quickPlaces; track placeId) {
         <button
@@ -42,30 +28,182 @@
         {{ v.lat | coordinate: 'lat' : scene.lang() }} · {{ v.lon | coordinate: 'lon' : scene.lang() }} · z{{ v.zoom.toFixed(1) }}
       </p>
     }
-    <p class="caption">{{ 'basin.gamcSource' | transloco }}</p>
-    <ul class="layers">
-      @for (item of gamcLayers(); track item.preset.id) {
-        <li>
-          <label class="toggle">
-            <input
-              type="checkbox"
-              [checked]="item.visible"
-              (change)="toggle(item.preset.id, $any($event.target).checked)"
-            />
-            <span>{{ item.preset.name[scene.lang()] }}</span>
-            @if (item.status === 'loading') {
-              <span class="caption">{{ 'basin.status.loading' | transloco }}</span>
-            } @else if (item.status === 'error') {
-              <span class="caption error">{{ 'basin.status.error' | transloco }}</span>
-            }
-          </label>
-          @if (item.visible && item.preset.legend) {
-            <img class="legend" [src]="item.legendUrl" [alt]="'basin.legendOf' | transloco: { name: item.preset.name[scene.lang()] }" loading="lazy" />
-          }
-        </li>
+  </section>
+
+  <section class="block">
+    <h2 class="label">{{ 'basin.modesTitle' | transloco }}</h2>
+    <p class="caption">{{ 'basin.modesHint' | transloco }}</p>
+    <div class="mode-list" role="radiogroup" [attr.aria-label]="'basin.modesTitle' | transloco">
+      @for (mode of modes; track mode) {
+        <button
+          type="button"
+          class="mode-btn"
+          [class.active]="activeMode() === mode"
+          [attr.aria-checked]="activeMode() === mode"
+          role="radio"
+          (click)="selectMode(mode)"
+        >
+          <span class="label">{{ ('basin.mode.' + mode + '.title') | transloco }}</span>
+          <span class="caption">{{ ('basin.mode.' + mode + '.desc') | transloco }}</span>
+        </button>
       }
-    </ul>
-  </details>
+    </div>
+
+    @if (activeMode() === 'integrated') {
+      <div class="ramp-legend">
+        <span class="swatch slope-swatch" aria-hidden="true"></span>
+        <span class="caption">{{ 'basin.legendTorrent' | transloco }}</span>
+        <span class="swatch cota-swatch" aria-hidden="true"></span>
+        <span class="caption">{{ 'basin.legendCota2750' | transloco }}</span>
+        <span class="swatch flood-swatch" aria-hidden="true"></span>
+        <span class="caption">{{ 'basin.legendOpenWater' | transloco }}</span>
+      </div>
+    } @else if (activeMode() === 'change') {
+      <div class="subcontrol wrap">
+        <label class="caption" for="sar-before-select">{{ 'basin.sarBefore' | transloco }}</label>
+        <select
+          id="sar-before-select"
+          class="select-date tabular"
+          [value]="map.sarBeforeDate()"
+          (change)="onSarBeforeChange($any($event.target).value)"
+        >
+          @for (d of sarCompareDates(); track d) {
+            <option [value]="d" [selected]="d === map.sarBeforeDate()">{{ d }}</option>
+          }
+        </select>
+        <label class="caption" for="sar-after-select">{{ 'basin.sarAfter' | transloco }}</label>
+        <select
+          id="sar-after-select"
+          class="select-date tabular"
+          [value]="map.sarAfterDate()"
+          (change)="onSarAfterChange($any($event.target).value)"
+        >
+          @for (d of sarCompareDates(); track d) {
+            <option [value]="d" [selected]="d === map.sarAfterDate()">{{ d }}</option>
+          }
+        </select>
+      </div>
+      <div class="ramp-legend">
+        <span class="swatch flood-swatch" aria-hidden="true"></span>
+        <span class="caption">{{ 'basin.legendSarWet' | transloco }}</span>
+        <span class="swatch slope-swatch" aria-hidden="true"></span>
+        <span class="caption">{{ 'basin.legendSarRough' | transloco }}</span>
+        <span class="swatch caution-swatch" aria-hidden="true"></span>
+        <span class="caption">{{ 'basin.legendSarCaution' | transloco }}</span>
+      </div>
+    } @else if (activeMode() === 'water') {
+      @if (operaDates().length > 0) {
+        <div class="subcontrol">
+          <label class="caption" for="opera-date-select">{{ 'basin.operaDate' | transloco }}</label>
+          <select
+            id="opera-date-select"
+            class="select-date tabular"
+            [value]="map.operaDate()"
+            (change)="onOperaDateChange($any($event.target).value)"
+          >
+            @for (d of operaDates(); track d) {
+              <option [value]="d">{{ d }}</option>
+            }
+          </select>
+        </div>
+      }
+      <div class="ramp-legend">
+        <span class="swatch flood-swatch" aria-hidden="true"></span>
+        <span class="caption">{{ 'basin.legendOpenWater' | transloco }}</span>
+        <span class="swatch cota-swatch" aria-hidden="true"></span>
+        <span class="caption">{{ 'basin.legendCota2750' | transloco }}</span>
+        <span class="swatch drainage-swatch" aria-hidden="true"></span>
+        <span class="caption">{{ 'basin.legendDrainage' | transloco }}</span>
+      </div>
+    } @else if (activeMode() === 'nisar') {
+      @if (nisarDates().length > 0) {
+        <div class="subcontrol">
+          <label class="caption" for="nisar-date-select">{{ 'basin.nisarDate' | transloco }}</label>
+          <select
+            id="nisar-date-select"
+            class="select-date tabular"
+            [value]="map.nisarDate()"
+            (change)="onNisarDateChange($any($event.target).value)"
+          >
+            @for (d of nisarDates(); track d) {
+              <option [value]="d">{{ d }}</option>
+            }
+          </select>
+        </div>
+      }
+      <div class="ramp-legend">
+        <span class="swatch flood-swatch" aria-hidden="true"></span>
+        <span class="caption">{{ 'basin.legendNisarSpecular' | transloco }}</span>
+        <span class="swatch cota-swatch" aria-hidden="true"></span>
+        <span class="caption">{{ 'basin.legendNisarCanopy' | transloco }}</span>
+        <span class="swatch slope-swatch" aria-hidden="true"></span>
+        <span class="caption">{{ 'basin.legendNisarUrban' | transloco }}</span>
+      </div>
+    } @else if (activeMode() === 'rain') {
+      <p class="caption subnote tabular">{{ 'basin.imergDate' | transloco }}: {{ imergDateLabel() }} · {{ 'basin.imergClipped' | transloco }}</p>
+    }
+
+    <label class="toggle">
+      <input
+        type="checkbox"
+        [checked]="map.terrain3d()"
+        (change)="toggleTerrain3d($any($event.target).checked)"
+      />
+      <span>{{ 'basin.terrain3d' | transloco }}</span>
+    </label>
+
+    <details class="advanced-layers">
+      <summary class="caption">{{ 'basin.advancedLayers' | transloco }}</summary>
+      <ul class="layers">
+        @for (item of satelliteLayers(); track item.preset.id) {
+          <li>
+            <label class="toggle">
+              <input
+                type="checkbox"
+                [checked]="item.visible"
+                (change)="toggle(item.preset.id, $any($event.target).checked)"
+              />
+              <span>{{ item.preset.name[scene.lang()] }}</span>
+              @if (item.status === 'loading') {
+                <span class="caption">{{ 'basin.status.loading' | transloco }}</span>
+              } @else if (item.status === 'error') {
+                <span class="caption error">{{ 'basin.status.error' | transloco }}</span>
+              }
+            </label>
+          </li>
+        }
+      </ul>
+    </details>
+  </section>
+
+  @if (overview(); as ov) {
+    <section class="block">
+      <div class="row between">
+        <h2 class="label">{{ 'basin.summaryTitle' | transloco }}</h2>
+        <span class="caption tabular">{{ ov.overall.priority_zone_name[scene.lang()] }} · {{ ov.overall.max_score }}/100</span>
+      </div>
+      @if (ov.satellite_processing; as sat) {
+        <dl class="attrs tabular">
+          @if (sat.opera_dswx; as op) {
+            <div>
+              <dt class="caption">{{ 'basin.operaWaterArea' | transloco }}</dt>
+              <dd>{{ op.total_water_km2 }} km² ({{ op.date }})</dd>
+            </div>
+          }
+          @if (sat.nisar_basin; as nb) {
+            <div>
+              <dt class="caption">{{ 'basin.nisarCoverage' | transloco }}</dt>
+              <dd>{{ nb.basin_coverage_pct }}% ({{ nb.date }})</dd>
+            </div>
+          }
+        </dl>
+        <p class="caption">
+          {{ 'basin.anchorNote' | transloco }}
+          <a routerLink="/orbita" queryParamsHandling="preserve">{{ 'basin.openAnchor' | transloco }} →</a>
+        </p>
+      }
+    </section>
+  }
 
   @if (map.featureInfo(); as info) {
     <section class="block" aria-live="polite">
@@ -74,30 +212,45 @@
         <button class="btn-secondary small" type="button" (click)="map.clearFeatureInfo()">{{ 'basin.close' | transloco }}</button>
       </div>
       <p class="caption tabular">{{ info.lat | coordinate: 'lat' : scene.lang() }} · {{ info.lon | coordinate: 'lon' : scene.lang() }}</p>
-      @if (info.loading) {
-        <p class="muted">{{ 'basin.querying' | transloco }}</p>
-      } @else {
-        @for (result of info.results; track result.presetId) {
+      @if (map.pointDemLoading()) {
+        <p class="muted">{{ 'basin.queryingDem' | transloco }}</p>
+      } @else if (map.pointDem(); as p) {
+        @if (p.inside_basin && p.dem) {
           <div class="result">
-            <p class="label">{{ layerName(result.presetId) }}</p>
-            @if (result.error) {
-              <p class="caption error">{{ result.error }}</p>
-            } @else if (result.features.length === 0) {
-              <p class="muted">{{ 'basin.noData' | transloco }}</p>
-            } @else {
-              @for (feature of result.features; track $index) {
-                <dl class="attrs tabular">
-                  @for (entry of entries(feature.properties); track entry.key) {
-                    <div><dt class="caption">{{ entry.key }}</dt><dd>{{ entry.value }}</dd></div>
-                  }
-                </dl>
+            <p class="label">{{ 'basin.demTitle' | transloco }}</p>
+            <dl class="attrs tabular">
+              @if (p.dem.hydro?.subbasin_id; as sbid) {
+                <div><dt class="caption">{{ 'basin.subbasin' | transloco }}</dt><dd>{{ subbasinLabel(sbid) }}</dd></div>
               }
+              <div><dt class="caption">{{ 'basin.elevation' | transloco }}</dt><dd>{{ p.dem.elevation_m }} m</dd></div>
+              <div><dt class="caption">{{ 'basin.slope' | transloco }}</dt><dd>{{ p.dem.slope_deg }}°</dd></div>
+              <div>
+                <dt class="caption">Cota 2750</dt>
+                <dd>{{ (p.dem.above_cota_2750 ? 'basin.above2750' : 'basin.below2750') | transloco }}</dd>
+              </div>
+              @if (p.dem.hydro) {
+                <div>
+                  <dt class="caption">{{ 'basin.torrentNetwork' | transloco }}</dt>
+                  <dd>{{ (p.dem.hydro.in_torrent_network ? 'basin.inTorrent' : 'basin.outsideTorrent') | transloco }} (TWI {{ p.dem.hydro.twi ?? '—' }})</dd>
+                </div>
+              }
+              @if (p.precipitation) {
+                <div><dt class="caption">{{ 'basin.rain7d' | transloco }}</dt><dd>{{ p.precipitation.sum_7d_mm }} mm</dd></div>
+              }
+            </dl>
+            @if (p.dem.sar_terrain_caution) {
+              <p class="caption">{{ 'basin.sarTerrainCaution' | transloco }}</p>
             }
           </div>
+        } @else {
+          <p class="caption">{{ 'basin.noData' | transloco }}</p>
         }
       }
     </section>
   }
 
-  <a class="btn-ghost" routerLink="/orbita" queryParamsHandling="preserve">← {{ 'basin.toOrbit' | transloco }}</a>
+  <div class="row">
+    <a class="btn-ghost" routerLink="/riesgo" queryParamsHandling="preserve">{{ 'basin.toRisk' | transloco }} →</a>
+    <a class="btn-ghost" routerLink="/orbita" queryParamsHandling="preserve">← {{ 'basin.toOrbit' | transloco }}</a>
+  </div>
 </app-side-panel>

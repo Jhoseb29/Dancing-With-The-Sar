@@ -6,9 +6,8 @@ export const routes: Routes = [
   { path: 'orbita', loadChildren: () => import('./features/orbit-view/orbit-view.routes') },
   { path: 'cuenca', loadChildren: () => import('./features/basin-map/basin-map.routes') },
   { path: 'eventos', loadChildren: () => import('./features/event-explorer/event-explorer.routes') },
-  { path: 'laboratorio', loadChildren: () => import('./features/temporal-lab/temporal-lab.routes') },
   { path: 'riesgo', loadChildren: () => import('./features/risk-dashboard/risk-dashboard.routes') },
+  // Sin entrada en el menú: es donde el harness muestra sus resultados radar.
   { path: 'explicaciones', loadChildren: () => import('./features/didactic-insights/didactic-insights.routes') },
-  { path: 'procedencia', loadChildren: () => import('./features/data-provenance/data-provenance.routes') },
   { path: '**', redirectTo: 'orbita' },
 ];

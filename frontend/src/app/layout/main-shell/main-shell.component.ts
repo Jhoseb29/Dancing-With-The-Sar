@@ -23,7 +23,7 @@ export class MainShellComponent {
 
   protected readonly langs = AVAILABLE_LANGS;
   protected readonly menuOpen = signal(false);
-  protected readonly nav = this.ui.value.routes;
+  protected readonly nav = this.ui.value.routes.filter((r) => r.inNav !== false);
   protected readonly places = this.ui.value.places;
 
   constructor() {

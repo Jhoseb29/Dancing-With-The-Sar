@@ -70,7 +70,17 @@ export default {
     changeOrigin: true,
   },
   // Eventos (OpenSpec 09): estadísticas FIRMS en compute-py.
+  // Voz a texto (respaldo de la Web Speech API): Gemini en compute-py.
+  '/api/voice': {
+    target: COMPUTE_URL,
+    changeOrigin: true,
+  },
   '/api/events': {
+    target: COMPUTE_URL,
+    changeOrigin: true,
+  },
+  // Riesgo de cuenca, Copernicus DEM y precipitación NASA en compute-py.
+  '/api/basin': {
     target: COMPUTE_URL,
     changeOrigin: true,
   },

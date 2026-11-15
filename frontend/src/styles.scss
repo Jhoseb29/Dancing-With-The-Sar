@@ -181,3 +181,75 @@ a {
     color: var(--color-star-white);
   }
 }
+
+/* Recuadro de detalle de los avisos SENAMHI sobre el mapa (MapLibre lo monta fuera de los componentes). */
+.dws-popup {
+  .maplibregl-popup-content {
+    padding: var(--spacing-12) var(--spacing-15) var(--spacing-12) var(--spacing-12);
+    border: var(--border-hairline) solid var(--color-star-white);
+    border-radius: var(--radius-md);
+    background: rgba(0, 0, 0, 0.92);
+    color: var(--color-star-white);
+    font: 13px/1.45 var(--font-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .maplibregl-popup-tip {
+    border-top-color: var(--color-star-white);
+    border-bottom-color: var(--color-star-white);
+  }
+
+  .maplibregl-popup-close-button {
+    color: var(--color-muted-text);
+    font-size: 16px;
+  }
+
+  .muted {
+    color: var(--color-muted-text);
+    font-size: 12px;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 12px;
+  }
+}
+
+.dws-popup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-10);
+  padding-right: var(--spacing-12);
+}
+
+.dws-popup-tag {
+  padding: 1px 6px;
+  border: var(--border-hairline) solid;
+  border-radius: var(--radius-md);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dws-popup-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--spacing-10);
+  border: var(--border-hairline) solid var(--color-dark-gunmetal);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-feature-settings: 'tnum' on;
+}
+
+.dws-popup-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

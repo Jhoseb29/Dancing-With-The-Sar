@@ -23,35 +23,7 @@
 
   @switch (tab()) {
     @case ('now') {
-      @if (alerts.selectedDistrict(); as d) {
-        <app-district-card
-          [district]="d"
-          [alert]="alerts.districtAlert()"
-          [rain]="alerts.rain()"
-          [radar]="alerts.radar()"
-          [basins]="districtBasins()"
-          (back)="pick(null)"
-          (openBasin)="openBasin($event)"
-        />
-      } @else {
-        <app-city-summary [districts]="districts()" (pick)="pick($event)">
-          @if (alerts.rain(); as rain) {
-            @if (rain.slots.length) {
-              <app-rain-timeline
-                [rain]="rain"
-                [frame]="alerts.rainFrame()"
-                [playing]="alerts.rainPlaying()"
-                [visible]="alerts.rainVisible()"
-                (pick)="alerts.stopRain(); alerts.rainFrame.set($event)"
-                (play)="alerts.playRain()"
-                (stop)="alerts.stopRain()"
-                (toggle)="alerts.rainVisible.set($event)"
-              />
-            }
-          }
-          <app-detection-sources [rain]="alerts.rain()" [radar]="alerts.radar()" />
-        </app-city-summary>
-      }
+      <app-stations-panel />
     }
     @case ('how') {
       <app-how-it-works />

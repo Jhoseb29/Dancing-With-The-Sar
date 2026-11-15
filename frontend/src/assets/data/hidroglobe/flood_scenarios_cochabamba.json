@@ -1,0 +1,318 @@
+{
+  "taquina_2018": {
+    "title": "Megamazamorra Taquiña (Feb 2018)",
+    "descripcion": "Desprendimiento aluvial masivo desde la cuenca alta del Tunari. 48.5 mm en 30 min, 5 fallecidos y 80 viviendas colapsadas.",
+    "tipo": "Mazamorra / Flujo de Detritos",
+    "severidad": "Extrema",
+    "lluvia_gpm_30m": 48.5,
+    "smap_humedad": 88,
+    "sar_backscatter_anomaly_db": 6.8,
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "zona": "Torrentera Taquiña - Cono de Deyección (D13)",
+          "profundidad": "≥ 6 m (Lodo y Bloques)",
+          "color": "#ef4444",
+          "evento": "Mazamorra Taquiña 2018"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -66.182,
+                -17.338
+              ],
+              [
+                -66.175,
+                -17.338
+              ],
+              [
+                -66.172,
+                -17.352
+              ],
+              [
+                -66.176,
+                -17.362
+              ],
+              [
+                -66.181,
+                -17.355
+              ],
+              [
+                -66.182,
+                -17.338
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "zona": "Av. Ecológica y Límite Tiquipaya/D13",
+          "profundidad": "≥ 2 m (Sedimento y Agua)",
+          "color": "#f97316",
+          "evento": "Mazamorra Taquiña 2018"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -66.184,
+                -17.355
+              ],
+              [
+                -66.172,
+                -17.355
+              ],
+              [
+                -66.168,
+                -17.368
+              ],
+              [
+                -66.178,
+                -17.372
+              ],
+              [
+                -66.185,
+                -17.362
+              ],
+              [
+                -66.184,
+                -17.355
+              ]
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "albarrancho_2024": {
+    "title": "Inundación Albarrancho / La Maica (Ene 2024)",
+    "descripcion": "Crecida extraordinaria del Río Rocha y colapso del sistema lagunar. 300 hectáreas lecheras anegadas y evacuación de hatos ganaderos.",
+    "tipo": "Inundación por Desborde Aluvial",
+    "severidad": "Extrema",
+    "lluvia_gpm_30m": 38.0,
+    "smap_humedad": 92,
+    "sar_backscatter_anomaly_db": -6.5,
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "zona": "Laguna Albarrancho y Riberas Río Rocha (D9)",
+          "profundidad": "≥ 2 m (Anegamiento Aluvial)",
+          "color": "#023858",
+          "evento": "Inundación Albarrancho 2024"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -66.188,
+                -17.428
+              ],
+              [
+                -66.168,
+                -17.425
+              ],
+              [
+                -66.162,
+                -17.442
+              ],
+              [
+                -66.182,
+                -17.448
+              ],
+              [
+                -66.192,
+                -17.438
+              ],
+              [
+                -66.188,
+                -17.428
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "zona": "La Maica Central y Confluencia Tamborada",
+          "profundidad": "≥ 1 m (Saturación y Espejo de Agua)",
+          "color": "#3690c0",
+          "evento": "Inundación Albarrancho 2024"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -66.175,
+                -17.42
+              ],
+              [
+                -66.155,
+                -17.422
+              ],
+              [
+                -66.152,
+                -17.436
+              ],
+              [
+                -66.172,
+                -17.435
+              ],
+              [
+                -66.175,
+                -17.42
+              ]
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "pasos_desnivel_2022": {
+    "title": "Anegamiento Pasos a Desnivel (D10/D4/D6)",
+    "descripcion": "Tormenta convectiva corta de alta intensidad (32 mm en 40 min). Colapso de bombeo pluvial en Av. Huayna Kápac, Cala Cala y Barrientos.",
+    "tipo": "Anegamiento Urbano Troncal",
+    "severidad": "Alta",
+    "lluvia_gpm_30m": 32.0,
+    "smap_humedad": 75,
+    "sar_backscatter_anomaly_db": -4.2,
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "zona": "Paso a Desnivel Av. Huayna Kápac (D10)",
+          "profundidad": "≥ 1.8 m (Atrapamiento Vehicular)",
+          "color": "#ef4444",
+          "evento": "Colapso Pluvial Pasos a Desnivel"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -66.163,
+                -17.396
+              ],
+              [
+                -66.159,
+                -17.396
+              ],
+              [
+                -66.159,
+                -17.401
+              ],
+              [
+                -66.163,
+                -17.401
+              ],
+              [
+                -66.163,
+                -17.396
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "zona": "Paso a Desnivel Cala Cala (D4)",
+          "profundidad": "≥ 0.9 m",
+          "color": "#f97316",
+          "evento": "Colapso Pluvial Pasos a Desnivel"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -66.166,
+                -17.373
+              ],
+              [
+                -66.162,
+                -17.373
+              ],
+              [
+                -66.162,
+                -17.378
+              ],
+              [
+                -66.166,
+                -17.378
+              ],
+              [
+                -66.166,
+                -17.373
+              ]
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "rocha_crecida_2026": {
+    "title": "Aviso Oficial SENAMHI N° 48/2026 (Crecida Río Rocha)",
+    "descripcion": "Intensificación de lluvias en cuenca alta y media del Río Rocha. Niveles en ascenso sostenido entre Sacaba, Cercado y Quillacollo.",
+    "tipo": "Crecida Fluvial Activa",
+    "severidad": "Naranja",
+    "lluvia_gpm_30m": 24.0,
+    "smap_humedad": 78,
+    "sar_backscatter_anomaly_db": -2.8,
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "zona": "Corredor Fluvial Río Rocha (Puente Cajón a Puente Quillacollo)",
+          "profundidad": "≥ 1.5 m (Margen de Alerta)",
+          "color": "#f97316",
+          "evento": "Aviso Oficial 48/2026"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -66.195,
+                -17.405
+              ],
+              [
+                -66.168,
+                -17.39
+              ],
+              [
+                -66.145,
+                -17.385
+              ],
+              [
+                -66.143,
+                -17.392
+              ],
+              [
+                -66.165,
+                -17.398
+              ],
+              [
+                -66.192,
+                -17.412
+              ],
+              [
+                -66.195,
+                -17.405
+              ]
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

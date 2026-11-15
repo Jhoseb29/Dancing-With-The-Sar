@@ -98,6 +98,8 @@ class HarnessRunner:
             # `--` evita que una pregunta que empiece con "-" se lea como opción.
             cmd = [self._uv_bin, "run", "--project", str(self._harness_dir), "python", "run.py", "--events", "--", question]
             env = {k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
+            # Windows: sin esto el harness escribe stdout en cp1252 y aquí se lee UTF-8.
+            env.update(PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
             self._log_file.parent.mkdir(parents=True, exist_ok=True)
             with self._log_file.open("a", encoding="utf-8") as stderr_log:
                 proc = subprocess.Popen(  # noqa: S603 - lista de argumentos, sin shell

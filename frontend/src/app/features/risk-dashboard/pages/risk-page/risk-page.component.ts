@@ -5,14 +5,12 @@ import { SceneStore } from '../../../../core/scene/scene.store';
 import { AlertsService } from '../../../../core/services/alerts.service';
 import { BasinsService } from '../../../../core/services/basins.service';
 import { GeoEngineService } from '../../../../core/services/geo-engine.service';
+import { StationsService } from '../../../../core/services/stations.service';
 import { MapCanvasComponent } from '../../../../shared/components/map-canvas/map-canvas.component';
 import { SidePanelComponent } from '../../../../shared/components/side-panel/side-panel.component';
-import { CitySummaryComponent } from '../../components/city-summary/city-summary.component';
-import { DistrictCardComponent } from '../../components/district-card/district-card.component';
 import { EvalViewComponent } from '../../components/eval-view/eval-view.component';
 import { HowItWorksComponent } from '../../components/how-it-works/how-it-works.component';
-import { DetectionSourcesComponent } from '../../components/detection-sources/detection-sources.component';
-import { RainTimelineComponent } from '../../components/rain-timeline/rain-timeline.component';
+import { StationsPanelComponent } from '../../components/stations-panel/stations-panel.component';
 
 type Tab = 'now' | 'how' | 'eval';
 
@@ -23,12 +21,9 @@ type Tab = 'now' | 'how' | 'eval';
     MapCanvasComponent,
     SidePanelComponent,
     TranslocoPipe,
-    CitySummaryComponent,
-    DistrictCardComponent,
     HowItWorksComponent,
     EvalViewComponent,
-    RainTimelineComponent,
-    DetectionSourcesComponent,
+    StationsPanelComponent,
   ],
   templateUrl: './risk-page.component.html',
   styleUrl: './risk-page.component.scss',
@@ -38,6 +33,7 @@ export class RiskPageComponent {
   protected readonly map = inject(GeoEngineService);
   protected readonly scene = inject(SceneStore);
   protected readonly alerts = inject(AlertsService);
+  private readonly stations = inject(StationsService);
   protected readonly tabs: Tab[] = ['now', 'how', 'eval'];
   protected readonly tab = signal<Tab>('now');
   protected readonly districts = computed(() => (this.alerts.districts()?.features ?? []).map((f) => f.properties));
@@ -52,6 +48,7 @@ export class RiskPageComponent {
   constructor() {
     this.alerts.connect();
     void this.basinsSvc.load();
+    void this.stations.load();
     inject(DestroyRef).onDestroy(() => {
       this.map.detach();
       this.alerts.disconnect();

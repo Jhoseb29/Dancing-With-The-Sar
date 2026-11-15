@@ -99,10 +99,7 @@ export function initialScene(): SceneState {
     camera: { placeId: null, tourId: null, follow: false },
     time: { mode: 'live', start: null, end: null, date: null, speed: 1 },
     event: null,
-    layers: [
-      { presetId: 'gamc-cuencas-influencia', visible: true, opacity: 0.6 },
-      { presetId: 'gamc-emergencias', visible: true, opacity: 1 },
-    ],
+    layers: [{ presetId: 'basin-susceptibility', visible: true, opacity: 0.72 }],
     search: { query: '', selectedPlaceId: null },
     panels: { layerPanel: true },
   };

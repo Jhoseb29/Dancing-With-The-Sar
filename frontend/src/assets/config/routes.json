@@ -22,13 +22,6 @@
       "status": "ready"
     },
     {
-      "id": "temporal",
-      "path": "laboratorio",
-      "titleKey": "nav.temporal",
-      "engine": "none",
-      "status": "pending-backend"
-    },
-    {
       "id": "risk",
       "path": "riesgo",
       "titleKey": "nav.risk",
@@ -40,14 +33,8 @@
       "path": "explicaciones",
       "titleKey": "nav.insights",
       "engine": "map",
-      "status": "ready"
-    },
-    {
-      "id": "provenance",
-      "path": "procedencia",
-      "titleKey": "nav.provenance",
-      "engine": "none",
-      "status": "pending-backend"
+      "status": "ready",
+      "inNav": false
     }
   ]
 }

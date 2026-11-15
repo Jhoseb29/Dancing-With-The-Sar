@@ -70,6 +70,10 @@
                   "ready",
                   "pending-backend"
                 ]
+              },
+              "inNav": {
+                "type": "boolean",
+                "description": "false = la ruta existe pero no aparece en el menú"
               }
             }
           }
@@ -157,7 +161,8 @@
                 "enum": [
                   "gibs-xyz",
                   "gibs-wmts",
-                  "gamc-wms"
+                  "gamc-wms",
+                  "xyz-tile"
                 ]
               },
               "name": {
@@ -181,7 +186,8 @@
                 "enum": [
                   "basemap",
                   "gamc",
-                  "event"
+                  "event",
+                  "basin-analytics"
                 ]
               },
               "url": {

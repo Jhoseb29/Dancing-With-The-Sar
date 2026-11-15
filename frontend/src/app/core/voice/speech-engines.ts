@@ -295,3 +295,118 @@ export class BrowserSpeechOutput implements SpeechOutputEngine {
     window.speechSynthesis.cancel();
   }
 }
+
+// ---- Respaldo: grabar en el navegador y transcribir en el servidor (OpenSpec 10, D6) ----
+
+/** Formatos que acepta POST /api/voice/transcribe, en orden de preferencia. */
+const RECORDER_TYPES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+const CALIBRATE_MS = 300;
+const SERVER_END_SILENCE_MS = 1500;
+const SERVER_NO_SPEECH_MS = 8000;
+const SERVER_MAX_MS = 30_000;
+
+/**
+ * Graba con MediaRecorder (con cancelación de eco y ruido), decide el final por silencio
+ * (energía RMS sobre un piso de ruido calibrado al inicio) y manda el audio al backend,
+ * que lo transcribe con Gemini. Funciona donde la Web Speech API falla (error `network`).
+ */
+export class ServerSpeechInput implements SpeechInputEngine {
+  private finish: ((deliver: boolean) => void) | null = null;
+
+  constructor(private readonly endpoint: string) {}
+
+  get supported(): boolean {
+    return typeof MediaRecorder !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
+  }
+
+  start(_lang: VoiceLang, handlers: SpeechInputHandlers): void {
+    this.finish?.(false);
+    void this.run(handlers);
+  }
+
+  stop(): void {
+    this.finish?.(true);
+  }
+
+  private async run(handlers: SpeechInputHandlers): Promise<void> {
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
+    } catch (err) {
+      const name = err instanceof DOMException ? err.name : '';
+      handlers.onError(name === 'NotFoundError' ? 'audio-capture' : 'not-allowed');
+      handlers.onEnd();
+      return;
+    }
+    const mimeType = RECORDER_TYPES.find((t) => MediaRecorder.isTypeSupported(t)) ?? '';
+    const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+    const chunks: Blob[] = [];
+    recorder.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+
+    const ctx = new AudioContext();
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 1024;
+    ctx.createMediaStreamSource(stream).connect(analyser);
+    const samples = new Float32Array(analyser.fftSize);
+    const started = performance.now();
+    let floor = 0;
+    let floorSamples = 0;
+    let heard = false;
+    let lastVoice = started;
+    let done = false;
+
+    const end = (deliver: boolean) => {
+      if (done) return;
+      done = true;
+      clearInterval(timer);
+      this.finish = null;
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        void ctx.close();
+        if (!deliver || !heard || !chunks.length) {
+          handlers.onEnd();
+          return;
+        }
+        handlers.onInterim('…');
+        try {
+          const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+          const r = await fetch(this.endpoint, { method: 'POST', headers: { 'Content-Type': blob.type }, body: blob });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const { text } = (await r.json()) as { text: string };
+          if (text.trim()) handlers.onFinal(text.trim());
+          else handlers.onError('no-speech');
+        } catch {
+          handlers.onError('stt-failed');
+        }
+        handlers.onEnd();
+      };
+      if (recorder.state !== 'inactive') recorder.stop();
+      else void recorder.onstop?.call(recorder, new Event('stop'));
+    };
+    this.finish = end;
+
+    const timer = setInterval(() => {
+      analyser.getFloatTimeDomainData(samples);
+      let sum = 0;
+      for (const v of samples) sum += v * v;
+      const rms = Math.sqrt(sum / samples.length);
+      const now = performance.now();
+      if (now - started < CALIBRATE_MS) {
+        floor = (floor * floorSamples + rms) / ++floorSamples; // piso de ruido de la sala
+        return;
+      }
+      if (rms > floor * 2.5 + 0.01) {
+        heard = true;
+        lastVoice = now;
+        handlers.onInterim('');
+      }
+      if (heard && now - lastVoice > SERVER_END_SILENCE_MS) end(true);
+      else if (!heard && now - started > SERVER_NO_SPEECH_MS) end(false);
+      else if (now - started > SERVER_MAX_MS) end(true);
+    }, 100);
+
+    recorder.start(250);
+  }
+}

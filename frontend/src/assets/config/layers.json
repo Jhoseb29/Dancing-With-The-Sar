@@ -18,217 +18,6 @@
       "source": "NASA GIBS WMTS (público, sin credenciales)"
     },
     {
-      "id": "gamc-cuencas-uh8",
-      "kind": "gamc-wms",
-      "group": "gamc",
-      "name": {
-        "es": "Cuencas UH 8",
-        "en": "Basins UH 8"
-      },
-      "description": {
-        "es": "Unidades hidrográficas nivel 8, coloreadas por categoría.",
-        "en": "Level-8 hydrographic units, colored by category."
-      },
-      "engines": [
-        "map"
-      ],
-      "serviceId": "4499e961-2b2e-4cf3-84dd-30789c31ec96",
-      "representation": "categorized",
-      "bbox": [
-        -66.433583,
-        -17.677893,
-        -65.844154,
-        -17.186852
-      ],
-      "defaultOpacity": 0.7,
-      "legend": true,
-      "featureInfo": true,
-      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
-      "source": "data-map.json → gamc_wms"
-    },
-    {
-      "id": "gamc-cuencas-uh7",
-      "kind": "gamc-wms",
-      "group": "gamc",
-      "name": {
-        "es": "Cuencas UH 7",
-        "en": "Basins UH 7"
-      },
-      "description": {
-        "es": "Unidades hidrográficas nivel 7, coloreadas por categoría.",
-        "en": "Level-7 hydrographic units, colored by category."
-      },
-      "engines": [
-        "map"
-      ],
-      "serviceId": "fb368617-f2fd-43e8-867a-4456364efb52",
-      "representation": "categorized",
-      "bbox": [
-        -66.536394,
-        -17.870027,
-        -65.574648,
-        -17.231247
-      ],
-      "defaultOpacity": 0.7,
-      "legend": true,
-      "featureInfo": true,
-      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
-      "source": "data-map.json → gamc_wms"
-    },
-    {
-      "id": "gamc-cuencas-influencia",
-      "kind": "gamc-wms",
-      "group": "gamc",
-      "name": {
-        "es": "Cuencas de influencia",
-        "en": "Influence basins"
-      },
-      "description": {
-        "es": "Cuencas que drenan hacia el área urbana.",
-        "en": "Basins draining into the urban area."
-      },
-      "engines": [
-        "map"
-      ],
-      "serviceId": "02ddf5a6-4d80-4ed3-8c73-b531b0574e81",
-      "representation": "categorized",
-      "bbox": [
-        -66.278147,
-        -17.53119,
-        -66.064787,
-        -17.24657
-      ],
-      "defaultOpacity": 0.7,
-      "legend": true,
-      "featureInfo": true,
-      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
-      "source": "data-map.json → gamc_wms"
-    },
-    {
-      "id": "gamc-drenaje",
-      "kind": "gamc-wms",
-      "group": "gamc",
-      "name": {
-        "es": "Drenaje e influencia",
-        "en": "Drainage and influence"
-      },
-      "description": {
-        "es": "Red de drenaje y su área de influencia.",
-        "en": "Drainage network and its area of influence."
-      },
-      "engines": [
-        "map"
-      ],
-      "serviceId": "d4cea6e3-fc7f-482a-94ad-bd377df78886",
-      "representation": "simple",
-      "bbox": [
-        -66.269936,
-        -17.530591,
-        -66.045853,
-        -17.260142
-      ],
-      "defaultOpacity": 0.9,
-      "legend": true,
-      "featureInfo": true,
-      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
-      "source": "data-map.json → gamc_wms"
-    },
-    {
-      "id": "gamc-cota-2750",
-      "kind": "gamc-wms",
-      "group": "gamc",
-      "name": {
-        "es": "Cota 2750",
-        "en": "2750 m contour"
-      },
-      "description": {
-        "es": "Línea de cota 2750 m (límite de crecimiento urbano hacia el Tunari).",
-        "en": "2750 m contour line (urban growth limit toward the Tunari)."
-      },
-      "engines": [
-        "map"
-      ],
-      "serviceId": "297cefa4-0832-42bb-a98e-2cbea989fd9d",
-      "representation": "categorized",
-      "bbox": [
-        -66.193763,
-        -17.367136,
-        -66.103902,
-        -17.257306
-      ],
-      "defaultOpacity": 0.9,
-      "legend": true,
-      "featureInfo": true,
-      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
-      "source": "data-map.json → gamc_wms"
-    },
-    {
-      "id": "gamc-distritos",
-      "kind": "gamc-wms",
-      "group": "gamc",
-      "name": {
-        "es": "Límite de distritos",
-        "en": "District boundaries"
-      },
-      "description": {
-        "es": "Distritos municipales de Cochabamba.",
-        "en": "Cochabamba municipal districts."
-      },
-      "engines": [
-        "map"
-      ],
-      "serviceId": "7eb13092-bf0e-493b-aae6-03c43eedda2c",
-      "representation": "categorized",
-      "bbox": [
-        -66.280703,
-        -17.53119,
-        -66.06952,
-        -17.257306
-      ],
-      "defaultOpacity": 0.6,
-      "legend": true,
-      "featureInfo": true,
-      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
-      "source": "data-map.json → gamc_wms (bbox tomado del proyecto 03; el portal repite el de Cota 2750)"
-    },
-    {
-      "id": "gamc-emergencias",
-      "kind": "gamc-wms",
-      "group": "gamc",
-      "name": {
-        "es": "Emergencias",
-        "en": "Emergencies"
-      },
-      "description": {
-        "es": "Emergencias registradas por el municipio.",
-        "en": "Emergencies recorded by the municipality."
-      },
-      "engines": [
-        "map"
-      ],
-      "serviceId": "e105a6ed-74bb-41a5-8c85-9360711ddf69",
-      "representation": "simple",
-      "bbox": [
-        -66.280703,
-        -17.53119,
-        -66.06952,
-        -17.257306
-      ],
-      "defaultOpacity": 1,
-      "legend": true,
-      "featureInfo": true,
-      "attribution": "GAMC · Gobierno Autónomo Municipal de Cochabamba",
-      "source": "data-map.json → gamc_wms",
-      "featureInfoFields": [
-        "Numero",
-        "Fecha",
-        "Descripción",
-        "Unidad Registro",
-        "Unidad Responsable",
-        "Estado"
-      ]
-    },
-    {
       "id": "gibs-viirs-falsecolor",
       "kind": "gibs-wmts",
       "group": "event",
@@ -370,6 +159,7 @@
       "tileMatrixSet": "GoogleMapsCompatible_Level12",
       "format": "png",
       "maxZoom": 12,
+      "defaultOpacity": 0.9,
       "temporal": "daily",
       "legendUrl": "https://gibs.earthdata.nasa.gov/legends/OPERA_Dynamic_Surface_Water_Extent_S1_H.svg",
       "coverageFrom": "2023-12-15",
@@ -396,6 +186,7 @@
       "tileMatrixSet": "GoogleMapsCompatible_Level13",
       "format": "png",
       "maxZoom": 13,
+      "defaultOpacity": 0.85,
       "temporal": "daily",
       "coverageFrom": "2025-10-29",
       "coverageTo": "2026-11-11",
@@ -426,6 +217,137 @@
       "legendUrl": "https://gibs.earthdata.nasa.gov/legends/MODIS_L3_NDVI_H.svg",
       "attribution": "NASA EOSDIS GIBS",
       "source": "NASA GIBS · MODIS_Terra_L3_NDVI_16Day (verificado en WMTSCapabilities 2026-11-14)"
+    },
+    {
+      "id": "copernicus-dem-slope",
+      "kind": "xyz-tile",
+      "group": "basin-analytics",
+      "name": {
+        "es": "Pendiente del terreno (Copernicus DEM 30 m)",
+        "en": "Terrain slope (Copernicus DEM 30 m)"
+      },
+      "description": {
+        "es": "Pendiente en grados calculada sobre Copernicus DEM GLO-30: ámbar 6–15°, naranja 15–25°, rojo > 25° (laderas del Tunari y posible escorzo SAR).",
+        "en": "Slope in degrees from Copernicus DEM GLO-30: amber 6–15°, orange 15–25°, red > 25° (Tunari slopes and potential SAR foreshortening)."
+      },
+      "engines": [
+        "map"
+      ],
+      "url": "/api/basin/tiles/slope/{z}/{x}/{y}.png",
+      "maxZoom": 15,
+      "defaultOpacity": 0.78,
+      "attribution": "Copernicus DEM GLO-30 (AWS Open Data)",
+      "source": "data-map.json → dem (s3://copernicus-dem-30m/)"
+    },
+    {
+      "id": "basin-susceptibility",
+      "kind": "xyz-tile",
+      "group": "basin-analytics",
+      "name": {
+        "es": "Susceptibilidad hídrica y de laderas",
+        "en": "Water & slope susceptibility"
+      },
+      "description": {
+        "es": "Cruce Copernicus DEM + lluvia NASA 7d: ámbar/rojo en laderas y torrenteras del Tunari; cian/azul en depresiones de anegamiento del valle.",
+        "en": "Copernicus DEM + 7-day NASA rainfall: amber/red on Tunari slopes and torrents; cyan/blue in valley flood depressions."
+      },
+      "engines": [
+        "map"
+      ],
+      "url": "/api/basin/tiles/susceptibility/{z}/{x}/{y}.png",
+      "maxZoom": 15,
+      "defaultOpacity": 0.8,
+      "attribution": "Copernicus DEM GLO-30 + NASA POWER/GPM",
+      "source": "compute-py · basin_risk (DEM 30 m + lluvia NASA)"
+    },
+    {
+      "id": "basin-dem-cota-drainage",
+      "kind": "xyz-tile",
+      "group": "basin-analytics",
+      "name": {
+        "es": "Cota 2750 m y torrenteras (DEM 30 m)",
+        "en": "2750 m contour & torrents (30 m DEM)"
+      },
+      "description": {
+        "es": "Contorno físico de 2750 m s.n.m. (verde) y vaguadas/torrenteras (cian) derivados de Copernicus DEM GLO-30.",
+        "en": "Physical 2750 m contour (green) and torrent channels (cyan) derived from Copernicus DEM GLO-30."
+      },
+      "engines": [
+        "map"
+      ],
+      "url": "/api/basin/tiles/cota_drainage/{z}/{x}/{y}.png",
+      "maxZoom": 15,
+      "defaultOpacity": 0.9,
+      "attribution": "Copernicus DEM GLO-30 (AWS Open Data)",
+      "source": "compute-py · basin_risk (Cota 2750 + TPI)"
+    },
+    {
+      "id": "basin-integrated-alert",
+      "kind": "xyz-tile",
+      "group": "basin-analytics",
+      "name": {
+        "es": "Alerta integrada de cuenca (DEM + Lluvia + Agua OPERA)",
+        "en": "Integrated basin alert (DEM + Rain + OPERA Water)"
+      },
+      "description": {
+        "es": "Producto fusionado a 30 m sobre Cochabamba: torrenteras críticas > 2750 m, límite Cota 2750, llanura del Rocha y espejos de agua OPERA DSWx-S1.",
+        "en": "Fused 30 m product over Cochabamba: critical torrents > 2750 m, 2750 m contour, Rocha floodplain and OPERA DSWx-S1 surface water."
+      },
+      "engines": [
+        "map"
+      ],
+      "url": "/api/basin/tiles/integrated_alert/{z}/{x}/{y}.png",
+      "maxZoom": 15,
+      "defaultOpacity": 0.92,
+      "attribution": "Copernicus DEM GLO-30 + NASA POWER/GPM + OPERA DSWx-S1",
+      "source": "compute-py · basin_risk (fusión multi-sensor en cuenca)"
+    },
+    {
+      "id": "basin-sar-change",
+      "kind": "xyz-tile",
+      "group": "basin-analytics",
+      "name": {
+        "es": "Comparación radar antes vs. después (SAR)",
+        "en": "Before vs. after radar comparison (SAR)"
+      },
+      "description": {
+        "es": "Cambio entre pasadas radar sobre la cuenca (expansión hídrica cian, humedad/rugosidad ámbar, máscara de escorzo >= 25° violeta).",
+        "en": "Change between radar passes over the basin (water expansion cyan, moisture/roughness amber, >= 25° foreshortening purple)."
+      },
+      "engines": [
+        "map"
+      ],
+      "url": "/api/basin/tiles/sar-change/{before}/{after}/{z}/{x}/{y}.png",
+      "maxZoom": 13,
+      "defaultOpacity": 0.88,
+      "attribution": "NASA NISAR / OPERA DSWx-S1 + Copernicus DEM 30 m",
+      "source": "compute-py · basin_risk (sar-change)"
+    },
+    {
+      "id": "gibs-imerg-precip",
+      "kind": "gibs-wmts",
+      "group": "event",
+      "name": {
+        "es": "Lluvia GPM IMERG (NASA GIBS)",
+        "en": "GPM IMERG rainfall (NASA GIBS)"
+      },
+      "description": {
+        "es": "Tasa de precipitación GPM IMERG a 0.1° (~11 km) recortada y suavizada sobre la cuenca.",
+        "en": "GPM IMERG precipitation rate at 0.1° (~11 km) clipped and smoothed over the basin."
+      },
+      "engines": [
+        "map"
+      ],
+      "gibsLayer": "IMERG_Precipitation_Rate",
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/IMERG_Precipitation_Rate/default/{Time}/GoogleMapsCompatible_Level6/{z}/{y}/{x}.png",
+      "tileMatrixSet": "GoogleMapsCompatible_Level6",
+      "format": "png",
+      "maxZoom": 6,
+      "defaultOpacity": 0.72,
+      "temporal": "daily",
+      "coverageTo": "2026-11-13",
+      "attribution": "NASA EOSDIS GIBS · GPM IMERG",
+      "source": "NASA GIBS WMTS · IMERG_Precipitation_Rate"
     }
   ]
 }

@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     firms_map_key: str = ""
     firms_cache_dir: Path = REPO_ROOT / "data" / "raw" / "firms"
 
+    # Datos geoespaciales reales (Copernicus DEM, GPM/POWER precipitación, manifiestos)
+    data_dir: Path = REPO_ROOT / "data"
+    earthdata_username: str = ""
+    earthdata_password: str = ""
+    earthdata_token: str = ""
+
     # Catálogo de UI compartido con el frontend y contratos JSON Schema.
     ui_config_dir: Path = REPO_ROOT / "frontend" / "src" / "assets" / "config"
     schemas_dir: Path = REPO_ROOT / "backend" / "shared" / "schemas"
@@ -40,6 +46,11 @@ class Settings(BaseSettings):
     alerts_schema_dir: Path = REPO_ROOT / "alert-harness" / "schemas"
     alerts_poll_s: float = 3.0
     alerts_initial: int = 60
+
+    # Voz a texto en el servidor (respaldo de la Web Speech API). Gemini, key del .env.
+    gemini_api_key: str = ""
+    gemini_stt_model: str = "gemini-3.5-flash-lite"
+    gemini_fallback_model: str = "gemini-3.8-flash"
 
     @property
     def harness_output_dir(self) -> Path:

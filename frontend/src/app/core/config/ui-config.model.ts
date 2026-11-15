@@ -15,6 +15,8 @@ export interface RouteConfig {
   titleKey: string;
   engine: EngineKind;
   status?: 'ready' | 'pending-backend';
+  /** false = la ruta existe pero no aparece en el menú. */
+  inNav?: boolean;
 }
 
 export interface PlaceConfig {
@@ -32,13 +34,20 @@ interface LayerBase {
   name: I18nText;
   description?: I18nText;
   engines: ('globe' | 'map')[];
-  group?: 'basemap' | 'gamc' | 'event';
+  group?: 'basemap' | 'gamc' | 'event' | 'basin-analytics';
+  defaultOpacity?: number;
   attribution?: string;
   source: string;
 }
 
 export interface GibsXyzLayer extends LayerBase {
   kind: 'gibs-xyz';
+  url: string;
+  maxZoom: number;
+}
+
+export interface XyzTileLayer extends LayerBase {
+  kind: 'xyz-tile';
   url: string;
   maxZoom: number;
 }
@@ -69,7 +78,7 @@ export interface GibsWmtsLayer extends LayerBase {
   coverageTo?: string;
 }
 
-export type LayerConfig = GibsXyzLayer | GibsWmtsLayer | GamcWmsLayer;
+export type LayerConfig = GibsXyzLayer | GibsWmtsLayer | GamcWmsLayer | XyzTileLayer;
 
 export interface EventConfig {
   id: string;

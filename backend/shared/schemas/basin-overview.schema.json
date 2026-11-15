@@ -1,0 +1,179 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dancing-with-the-sars/schemas/basin-overview.schema.json",
+  "title": "Qucha-SAR Basin Overview",
+  "description": "Contrato compartido (OpenSpec 11) para GET /api/basin/overview: subsistemas Norte-Centro-Sur, subcuencas derivadas de Copernicus DEM GLO-30, lluvia espacial GPM_3IMERGDL / POWER, cambio SAR antes/después y madurez.",
+  "type": "object",
+  "required": [
+    "generated_at",
+    "basin",
+    "overall",
+    "subsystems",
+    "zones",
+    "precipitation",
+    "nisar"
+  ],
+  "properties": {
+    "generated_at": { "type": "string" },
+    "basin": { "type": "string" },
+    "overall": {
+      "type": "object",
+      "required": ["level", "max_score", "priority_zone_id", "priority_zone_name", "cota_urbana_m"],
+      "properties": {
+        "level": { "type": "string", "enum": ["verde", "amarillo", "naranja", "rojo"] },
+        "max_score": { "type": "number" },
+        "priority_zone_id": { "type": "string" },
+        "priority_zone_name": { "$ref": "#/definitions/i18nPair" },
+        "cota_urbana_m": { "type": "number" }
+      }
+    },
+    "subsystems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "focus", "level", "max_score", "subbasin_ids", "summary_metric"],
+        "properties": {
+          "id": { "type": "string", "enum": ["north", "central", "south"] },
+          "name": { "$ref": "#/definitions/i18nPair" },
+          "focus": { "$ref": "#/definitions/i18nPair" },
+          "level": { "type": "string", "enum": ["verde", "amarillo", "naranja", "rojo"] },
+          "max_score": { "type": "number" },
+          "subbasin_ids": { "type": "array", "items": { "type": "string" } },
+          "summary_metric": { "$ref": "#/definitions/i18nPair" }
+        }
+      }
+    },
+    "zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "subsystem",
+          "name",
+          "description",
+          "hazard",
+          "bbox",
+          "centroid",
+          "geometry",
+          "area_km2",
+          "score",
+          "level",
+          "terrain",
+          "precipitation",
+          "drivers",
+          "caveats"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "subsystem": { "type": "string", "enum": ["north", "central", "south"] },
+          "name": { "$ref": "#/definitions/i18nPair" },
+          "description": { "$ref": "#/definitions/i18nPair" },
+          "hazard": { "type": "string", "enum": ["slope_mudflow", "flood_saturation", "water_balance"] },
+          "bbox": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 },
+          "centroid": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+          "geometry": { "type": "object", "required": ["type", "coordinates"] },
+          "area_km2": { "type": "number", "minimum": 0 },
+          "downstream_target": { "type": ["string", "null"] },
+          "score": { "type": "number", "minimum": 0, "maximum": 100 },
+          "level": { "type": "string", "enum": ["verde", "amarillo", "naranja", "rojo"] },
+          "dominant_driver": { "$ref": "#/definitions/i18nPair" },
+          "terrain": {
+            "type": "object",
+            "properties": {
+              "elevation_min_m": { "type": "number" },
+              "elevation_mean_m": { "type": "number" },
+              "elevation_max_m": { "type": "number" },
+              "slope_mean_deg": { "type": "number" },
+              "slope_p90_deg": { "type": "number" },
+              "steep_pct_gt20": { "type": "number" },
+              "steep_pct_gt25": { "type": "number" },
+              "steep_pct_gt30": { "type": "number" },
+              "low_slope_pct_lt5": { "type": "number" },
+              "above_2750_pct": { "type": "number" },
+              "twi_p90": { "type": "number" },
+              "torrent_density_pct": { "type": "number" }
+            }
+          },
+          "precipitation": {
+            "type": "object",
+            "required": ["latest_mm", "sum_7d_mm", "sum_30d_mm", "max_24h_30d_mm"],
+            "properties": {
+              "source": { "type": "string" },
+              "imerg_spatial_active": { "type": "boolean" },
+              "latest_mm": { "type": "number" },
+              "sum_7d_mm": { "type": "number" },
+              "sum_30d_mm": { "type": "number" },
+              "max_24h_30d_mm": { "type": "number" }
+            }
+          },
+          "fire_hotspots_30d": { "type": ["integer", "null"] },
+          "surface_water": {
+            "type": "object",
+            "properties": {
+              "opera_water_km2": { "type": "number" },
+              "baseline_dry_km2": { "type": "number" },
+              "water_anomaly_km2": { "type": "number" },
+              "sar_change_index": { "type": ["number", "null"] },
+              "note": { "type": "string" }
+            }
+          },
+          "drivers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["label_es", "label_en", "value"],
+              "properties": {
+                "label_es": { "type": "string" },
+                "label_en": { "type": "string" },
+                "value": { "type": "string" }
+              }
+            }
+          },
+          "caveats": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "precipitation": {
+      "type": "object",
+      "required": ["source", "gpm_cmr", "series"],
+      "properties": {
+        "source": { "type": "string" },
+        "gpm_cmr": { "type": "object" },
+        "series": { "type": "array" }
+      }
+    },
+    "nisar": {
+      "type": "object",
+      "required": ["source", "total_granules", "by_maturity", "verified_gibs_dates", "granules"],
+      "properties": {
+        "source": { "type": "string" },
+        "retrieved_at": { "type": "string" },
+        "total_granules": { "type": "integer" },
+        "by_product": { "type": "object" },
+        "by_maturity": { "type": "object" },
+        "verified_gibs_dates": { "type": "array", "items": { "type": "string" } },
+        "opera_dswx_dates": { "type": "array", "items": { "type": "string" } },
+        "sar_change_default": {
+          "type": "object",
+          "properties": {
+            "before_day": { "type": "string" },
+            "after_day": { "type": "string" },
+            "sensor": { "type": "string" }
+          }
+        },
+        "granules": { "type": "array" }
+      }
+    }
+  },
+  "definitions": {
+    "i18nPair": {
+      "type": "object",
+      "required": ["es", "en"],
+      "properties": {
+        "es": { "type": "string" },
+        "en": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+<header class="head">
+  <h2 class="label">Red Cochabamba</h2>
+  <span class="badge">{{ st.filtered().length }} estaciones</span>
+</header>
+
+<div class="counters">
+  <span class="count" [style.border-color]="hex.ROJA" [style.color]="hex.ROJA">{{ st.counts().ROJA }} Rojas</span>
+  <span class="count" [style.border-color]="hex.NARANJA" [style.color]="hex.NARANJA">{{ st.counts().NARANJA }} Naranjas</span>
+  <span class="count" [style.border-color]="hex.AMARILLA" [style.color]="hex.AMARILLA">{{ st.counts().AMARILLA }} Amarillas</span>
+  <span class="count" [style.border-color]="hex.VERDE" [style.color]="hex.VERDE">{{ st.counts().VERDE }} Normal</span>
+</div>
+
+<div class="filters">
+  <input
+    type="search"
+    class="field"
+    placeholder="Buscar río, torrentera o punto…"
+    aria-label="Buscar estación"
+    [value]="st.search()"
+    (input)="onSearch($event)"
+  />
+  <select class="field" aria-label="Cuenca" [value]="st.basin()" (change)="onBasin($event)">
+    @for (b of basins; track b.value) {
+      <option [value]="b.value">{{ b.label }}</option>
+    }
+  </select>
+</div>
+
+<ul class="cards">
+  @for (s of st.filtered(); track s.id) {
+    <li>
+      <button type="button" class="card" [class.active]="st.focusedId() === s.id" (click)="st.focus(s.id)">
+        <span class="row">
+          <strong>{{ s.nombre }}</strong>
+          <span class="tag" [style.border-color]="s.color" [style.color]="s.color">{{ s.alerta }}</span>
+        </span>
+        <span class="sub">{{ s.rio }} · {{ s.zona }}</span>
+        <span class="row data">
+          <span>Nivel: <b>{{ s.nivel_actual }} m</b></span>
+          <span>
+            Margen:
+            @if (s.falta_desborde > 0) {
+              <b [style.color]="s.falta_desborde <= 0.2 ? hex.ROJA : null">{{ s.falta_desborde }} m</b>
+            } @else {
+              <b [style.color]="hex.ROJA">DESBORDE</b>
+            }
+          </span>
+        </span>
+      </button>
+    </li>
+  }
+</ul>
+
+<section class="scenarios">
+  <h3 class="label">Escenarios Cochabamba</h3>
+  <div class="chips">
+    @for (sc of scenarios; track sc.key) {
+      <button type="button" class="chip" [attr.aria-pressed]="st.scenarioKey() === sc.key" (click)="st.selectScenario(sc.key)">
+        {{ sc.label }}
+      </button>
+    }
+  </div>
+  @if (st.scenario(); as sc) {
+    <article class="scenario">
+      <strong>{{ sc.title }}</strong>
+      <p class="sub">{{ sc.descripcion }}</p>
+      <div class="box">
+        <span>Tipo: <b>{{ sc.tipo }}</b> · Severidad: <b>{{ sc.severidad }}</b></span>
+        <span>Lluvia GPM 30 min: <b>{{ sc.lluvia_gpm_30m }} mm</b> · SMAP: <b>{{ sc.smap_humedad }} %</b></span>
+        <span>Anomalía SAR: <b>{{ sc.sar_backscatter_anomaly_db }} dB</b></span>
+      </div>
+      @if (st.scenarioView()?.question; as q) {
+        <button type="button" class="btn-ghost" [disabled]="harness.busy()" (click)="analyze(q)">
+          {{ harness.busy() ? 'El harness está analizando…' : 'Analizar con el harness (radar)' }}
+        </button>
+      }
+    </article>
+  }
+</section>

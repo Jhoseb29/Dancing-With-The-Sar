@@ -6,13 +6,17 @@ import {
   CallbackProperty,
   Cartesian2,
   Cartesian3,
+  Cartographic,
   Color,
   CesiumWidget,
   ClockStep,
+  DistanceDisplayCondition,
   Entity,
   ImageryLayer,
   JulianDate,
   LabelStyle,
+  NearFarScalar,
+  PolygonHierarchy,
   Rectangle,
   UrlTemplateImageryProvider,
   VerticalOrigin,
@@ -20,6 +24,11 @@ import {
 } from 'cesium';
 import { eciToEcf, gstime, propagate, twoline2satrec, SatRec } from 'satellite.js';
 import type { Remote } from 'comlink';
+import type { MultiPolygon, Polygon, Position } from 'geojson';
+import type { DistrictsFC } from '../alerts/alerts.model';
+import type { BasinsFC } from '../alerts/basins.model';
+import { ALERT_HEX, RED_DISTRICTS, Station } from '../alerts/stations.model';
+import { BASIN_TYPE_HEX, NO_DATA_HEX } from '../alerts/zone-colors';
 import type { BBox } from '../config/runtime-config.model';
 import type { EciSample, GeoSample, OrbitElements } from '../data-access/orbit.model';
 import type { OrbitWorkerApi } from '../workers/orbit.api';
@@ -48,9 +57,19 @@ export type ResolvedTourStep =
   | { bbox: BBox; durationMs: number; pauseMs: number }
   | { lon: number; lat: number; altKm: number; durationMs: number; pauseMs: number };
 
+/** Datos del alert-harness que se dibujan sobre el globo. */
+export interface GlobeAlertLayers {
+  districts: DistrictsFC | null;
+  basins: BasinsFC | null;
+  /** Estaciones del sistema de alertas (punto del color de su nivel). */
+  stations?: Station[];
+}
+
 export interface GlobeEngineOptions {
   container: HTMLElement;
   basemap: BasemapConfig;
+  /** Imagen satelital de detalle sobre el mapa base (relieve, ríos, calles al acercarse). */
+  detailImagery?: BasemapConfig;
   area: BBox;
   orbit: Remote<OrbitWorkerApi>;
   swathKm: number;
@@ -63,8 +82,14 @@ export interface GlobeEngineOptions {
 }
 
 const FONT = '700 12px Barlow, sans-serif';
+const SMALL_FONT = '700 11px Barlow, sans-serif';
 const TRACK_REFRESH_SIM_MS = 5 * 60_000;
 const SWATH_MINUTES = 25;
+const STAR_WHITE = '#f0f0fa';
+/** Los puntos de alerta se ven desde el nivel de región; las etiquetas, al acercarse a la ciudad. */
+const POINT_RANGE = new DistanceDisplayCondition(0, 2_500_000);
+const BASIN_LABEL_RANGE = new DistanceDisplayCondition(0, 45_000);
+const STATION_LABEL_RANGE = new DistanceDisplayCondition(0, 60_000);
 
 export class GlobeEngine {
   private readonly widget: CesiumWidget;
@@ -81,6 +106,7 @@ export class GlobeEngine {
   private readonly pastTrackEntity: Entity;
   private readonly futureTrackEntity: Entity;
   private readonly swathEntity: Entity;
+  private alertEntities: Entity[] = [];
   private pastTrack: Cartesian3[] = [];
   private futureTrack: Cartesian3[] = [];
   private swath: Cartesian3[] = [];
@@ -108,7 +134,21 @@ export class GlobeEngine {
     const { scene, clock } = this.widget;
     scene.backgroundColor = Color.BLACK;
     scene.globe.baseColor = Color.BLACK;
-    scene.globe.enableLighting = true;
+    // Globo siempre iluminado (sin lado nocturno) y con atmósfera: continentes, relieve y puntos legibles.
+    scene.globe.enableLighting = false;
+    scene.globe.showGroundAtmosphere = true;
+    if (scene.skyAtmosphere) scene.skyAtmosphere.show = true;
+    if (options.detailImagery) {
+      const detail = options.detailImagery;
+      this.widget.imageryLayers.addImageryProvider(
+        new UrlTemplateImageryProvider({
+          url: detail.url,
+          maximumLevel: detail.maxZoom,
+          tilingScheme: new WebMercatorTilingScheme(),
+          credit: detail.attribution,
+        }),
+      );
+    }
     clock.currentTime = JulianDate.now();
     clock.clockStep = ClockStep.SYSTEM_CLOCK_MULTIPLIER;
     clock.multiplier = 1;
@@ -148,6 +188,27 @@ export class GlobeEngine {
         positions: new CallbackProperty(() => this.swath, false),
         width: options.swathKm * 1000,
         material: Color.fromCssColorString('#f0f0fa').withAlpha(0.08),
+      },
+    });
+
+    // Haz del radar: del satélite a su nadir, y la huella iluminada en el suelo.
+    this.widget.entities.add({
+      polyline: {
+        positions: new CallbackProperty(() => this.beamPositions(), false),
+        width: 1.5,
+        arcType: ArcType.NONE,
+        material: Color.fromCssColorString(STAR_WHITE).withAlpha(0.45),
+      },
+    });
+    this.widget.entities.add({
+      position: new CallbackPositionProperty((time, result) => this.nadirPosition(time, result), false),
+      ellipse: {
+        semiMajorAxis: (options.swathKm * 1000) / 2,
+        semiMinorAxis: (options.swathKm * 1000) / 3,
+        material: Color.fromCssColorString(STAR_WHITE).withAlpha(0.14),
+        outline: true,
+        outlineColor: Color.fromCssColorString(STAR_WHITE).withAlpha(0.7),
+        height: 0,
       },
     });
 
@@ -280,6 +341,64 @@ export class GlobeEngine {
     });
   }
 
+  /**
+   * Dibuja las alertas del harness: distritos coloreados por nivel con un punto y etiqueta en su
+   * centro, y las cuencas torrenciales del Tunari con su contorno por tipo de respuesta.
+   */
+  setAlertLayers({ districts, basins, stations }: GlobeAlertLayers): void {
+    if (this.destroyed) return;
+    this.alertEntities.forEach((entity) => this.widget.entities.remove(entity));
+    this.alertEntities = [];
+    const add = (entity: Entity.ConstructorOptions) => this.alertEntities.push(this.widget.entities.add(entity));
+
+    for (const basin of basins?.features ?? []) {
+      const p = basin.properties;
+      const color = Color.fromCssColorString(BASIN_TYPE_HEX[p.tipo] ?? NO_DATA_HEX);
+      for (const ring of outerRings(basin.geometry)) {
+        add({ polyline: { positions: toPositions(ring), width: 2, arcType: ArcType.GEODESIC, material: color } });
+      }
+      add({
+        position: Cartesian3.fromDegrees(p.centro[0], p.centro[1]),
+        label: labelOptions(p.nombre, SMALL_FONT, BASIN_LABEL_RANGE),
+      });
+    }
+
+    for (const district of districts?.features ?? []) {
+      const p = district.properties;
+      const red = RED_DISTRICTS.has(p.id);
+      const color = Color.fromCssColorString(red ? ALERT_HEX.ROJA : STAR_WHITE);
+      for (const ring of outerRings(district.geometry)) {
+        add({
+          polygon: {
+            hierarchy: new PolygonHierarchy(toPositions(ring)),
+            material: color.withAlpha(red ? 0.3 : 0.06),
+            outline: false,
+            height: 0,
+          },
+        });
+        add({
+          polyline: { positions: toPositions(ring), width: 1.5, arcType: ArcType.GEODESIC, material: color.withAlpha(0.8) },
+        });
+      }
+    }
+
+    for (const st of stations ?? []) {
+      add({
+        position: Cartesian3.fromDegrees(st.lon, st.lat),
+        point: {
+          pixelSize: st.alerta === 'ROJA' ? 13 : 11,
+          color: Color.fromCssColorString(st.color),
+          outlineColor: Color.fromCssColorString(STAR_WHITE),
+          outlineWidth: 2,
+          scaleByDistance: new NearFarScalar(20_000, 1.2, 2_500_000, 0.6),
+          distanceDisplayCondition: POINT_RANGE,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+        label: labelOptions(st.nombre, SMALL_FONT, STATION_LABEL_RANGE),
+      });
+    }
+  }
+
   destroy(): void {
     if (this.destroyed) {
       return;
@@ -309,6 +428,20 @@ export class GlobeEngine {
     }
     const ecf = eciToEcf(state.position, gstime(date));
     return Cartesian3.fromElements(ecf.x * 1000, ecf.y * 1000, ecf.z * 1000, result);
+  }
+
+  private nadirPosition(time: JulianDate | undefined, result?: Cartesian3): Cartesian3 | undefined {
+    const position = this.satellitePosition(time);
+    if (!position) return undefined;
+    const carto = Cartographic.fromCartesian(position);
+    return carto ? Cartesian3.fromRadians(carto.longitude, carto.latitude, 0, undefined, result) : undefined;
+  }
+
+  private beamPositions(): Cartesian3[] {
+    const time = this.widget.clock.currentTime;
+    const sat = this.satellitePosition(time);
+    const nadir = this.nadirPosition(time);
+    return sat && nadir ? [sat, nadir] : [];
   }
 
   /** El anillo orbital es fijo en el espacio inercial; se rota con el GMST del instante actual. */
@@ -414,4 +547,29 @@ export class GlobeEngine {
 
 function toCartesians(samples: GeoSample[]): Cartesian3[] {
   return samples.map(([lon, lat]) => Cartesian3.fromDegrees(lon, lat, 0));
+}
+
+/** Anillos exteriores de un Polygon o MultiPolygon GeoJSON (los huecos no se dibujan). */
+function outerRings(geometry: Polygon | MultiPolygon): Position[][] {
+  if (geometry.type === 'Polygon') return geometry.coordinates.slice(0, 1);
+  return geometry.coordinates.map((polygon) => polygon[0]).filter(Boolean);
+}
+
+function toPositions(ring: Position[]): Cartesian3[] {
+  return ring.map(([lon, lat]) => Cartesian3.fromDegrees(lon, lat, 0));
+}
+
+function labelOptions(text: string, font: string, range: DistanceDisplayCondition): Entity.ConstructorOptions['label'] {
+  return {
+    text,
+    font,
+    fillColor: Color.fromCssColorString(STAR_WHITE),
+    outlineColor: Color.BLACK,
+    outlineWidth: 3,
+    style: LabelStyle.FILL_AND_OUTLINE,
+    verticalOrigin: VerticalOrigin.BOTTOM,
+    pixelOffset: new Cartesian2(0, -12),
+    distanceDisplayCondition: range,
+    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+  };
 }

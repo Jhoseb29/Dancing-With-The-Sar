@@ -67,7 +67,7 @@
   "basin": {
     "kicker": "Basin · Cochabamba",
     "title": "From the Tunari to the Rocha",
-    "intro": "Tunari's ravines rush down toward the city. Tap a basin to see what hazard it brings.",
+    "intro": "Copernicus DEM (30 m) terrain, NASA rainfall and NISAR L-band radar over Cochabamba. Toggle layers, click the map to inspect any point, or search a place above.",
     "toOrbit": "Back to orbit",
     "gamcLayers": "GAMC municipal layers (images)",
     "gamcSource": "Real data from the Autonomous Municipal Government of Cochabamba · Project 02",
@@ -76,10 +76,10 @@
       "error": "unavailable"
     },
     "legendOf": "Legend of {{name}}",
-    "pointInfo": "Data at this point",
+    "pointInfo": "Point diagnostics",
     "close": "Close",
     "querying": "Querying GAMC…",
-    "noData": "No data at this point.",
+    "noData": "Point outside the Cochabamba DEM clip.",
     "all": "All basins",
     "tapHint": "Sorted from most to least torrential.",
     "noBasins": "Loading basins…",
@@ -107,7 +107,71 @@
     },
     "radarTag": "radar",
     "technical": "Show technical data",
-    "meltonHelp": "relief / √area; > 0.6 debris flow, 0.3–0.6 flash flood (Melton 1965; Wilford 2004)"
+    "meltonHelp": "relief / √area; > 0.6 debris flow, 0.3–0.6 flash flood (Melton 1965; Wilford 2004)",
+    "toRisk": "Risk dashboard",
+    "satelliteLayers": "Satellite & terrain (NASA / Copernicus)",
+    "satelliteSource": "NISAR L-band + OPERA DSWx-S1 + GPM IMERG + Copernicus DEM (30 m)",
+    "modesTitle": "What to analyze in the basin",
+    "modesHint": "Choose the operational view derived from Copernicus DEM (30 m), NASA rainfall and radar over Cochabamba.",
+    "mode": {
+      "integrated": {
+        "title": "Integrated alert (recommended)",
+        "desc": "Combines Tunari torrents, 2750 m contour, daily rainfall and OPERA surface water."
+      },
+      "change": {
+        "title": "Radar change (before vs. after)",
+        "desc": "Compares two SAR dates highlighting water expansion and a >= 25° terrain caution mask."
+      },
+      "water": {
+        "title": "Surface water & drainage",
+        "desc": "OPERA DSWx-S1 (30 m) surface water alongside DEM torrent networks and 2750 m contour."
+      },
+      "nisar": {
+        "title": "NISAR L-band radar",
+        "desc": "Physical backscatter classification (water, canopy and urban) inside the basin."
+      },
+      "rain": {
+        "title": "GPM IMERG satellite rainfall",
+        "desc": "Daily precipitation estimate across the Cochabamba hydrological corridor."
+      }
+    },
+    "advancedLayers": "Individual layer inspection",
+    "summaryTitle": "Operational basin summary",
+    "operaWaterArea": "OPERA surface water",
+    "nisarCoverage": "NISAR basin coverage",
+    "anchorNote": "For full HDF5 polarimetric analysis (RVI & dual-pol calibration):",
+    "openAnchor": "Open polarimetric anchor",
+    "imergClipped": "over basin",
+    "legendTorrent": "Critical torrent > 2750 m",
+    "legendOpenWater": "OPERA water / saturation",
+    "legendSarWet": "New water / saturation",
+    "legendSarRough": "Moisture / soil roughness shift",
+    "legendSarCaution": "Slope >= 25° (SAR caution)",
+    "legendNisarSpecular": "Water / smooth saturated",
+    "legendNisarCanopy": "Vegetation / wet slope",
+    "legendNisarUrban": "Urban / double bounce",
+    "nisarDate": "NISAR date",
+    "operaDate": "Sentinel-1 date",
+    "sarBefore": "Before",
+    "sarAfter": "After",
+    "imergDate": "Latest IMERG GIBS",
+    "legendCota2750": "2750 m contour (DEM)",
+    "legendDrainage": "Torrents (TPI)",
+    "legendSlope": "Slopes / torrents",
+    "legendFlood": "Valley convergence",
+    "terrain3d": "3D terrain (Copernicus DEM)",
+    "demTitle": "Point diagnostics (30 m DEM)",
+    "subbasin": "Subbasin",
+    "torrentNetwork": "Drainage network",
+    "inTorrent": "In D8 torrent / channel",
+    "outsideTorrent": "Outside main channel",
+    "elevation": "Elevation",
+    "slope": "Slope",
+    "above2750": "Above 2750 m contour",
+    "below2750": "Below 2750 m",
+    "rain7d": "7-day rain",
+    "queryingDem": "Querying Copernicus DEM elevation…",
+    "sarTerrainCaution": "Slope ≥ 25°: potential radar foreshortening or shadow on Tunari slopes."
   },
   "common": {
     "km": "km",
@@ -180,7 +244,9 @@
         "audio-capture": "No microphone was found.",
         "network": "Speech recognition needs an internet connection.",
         "language-not-supported": "The browser does not recognize speech in this language.",
-        "start-failed": "Could not start the microphone. Try again."
+        "start-failed": "Could not start the microphone. Try again.",
+        "no-speech": "I didn't hear you. Tap Talk and try again.",
+        "stt-failed": "The audio could not be transcribed. Try again or type your question."
       }
     }
   },

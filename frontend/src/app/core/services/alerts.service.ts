@@ -119,7 +119,9 @@ export class AlertsService {
     ]);
     if (districts) this.districts.set(districts);
     if (evaluation) this.evaluation.set(evaluation);
-    if (rain) this.rain.set(rain);
+    // El monitor escribe {"slots": []} cuando no pudo bajar IMERG (p. ej. Earthdata 403):
+    // sin grilla ni pico no hay lluvia que mostrar, y los paneles asumen el payload completo.
+    this.rain.set(isCompleteRain(rain) ? rain : null);
     if (radar) this.radar.set(radar);
   }
 
@@ -131,4 +133,16 @@ export class AlertsService {
       void this.refresh(); // el nivel vigente de los distritos pudo cambiar
     }
   }
+}
+
+function isCompleteRain(rain: RainPayload | null): rain is RainPayload {
+  return (
+    !!rain &&
+    Array.isArray(rain.slots) &&
+    Array.isArray(rain.lons) &&
+    Array.isArray(rain.lats) &&
+    Array.isArray(rain.acumulado_mm) &&
+    Array.isArray(rain.productos) &&
+    !!rain.pico
+  );
 }

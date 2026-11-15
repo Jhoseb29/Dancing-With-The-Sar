@@ -1,8 +1,12 @@
 import { Injectable, Injector, effect, inject, signal, untracked, EffectRef } from '@angular/core';
 import { RuntimeConfigService } from '../config/runtime-config.service';
 import { UiConfigService } from '../config/ui-config.service';
+import { DETAIL_IMAGERY } from '../config/detail-imagery';
 import type { GlobeEngine, GlobeEngineLabels, ResolvedTourStep, SatelliteReadout } from '../globe-engine/globe-engine';
 import { OrbitElements } from '../data-access/orbit.model';
+import { AlertsService } from './alerts.service';
+import { BasinsService } from './basins.service';
+import { StationsService } from './stations.service';
 import { SceneStore } from '../scene/scene.store';
 import { ensureStylesheet } from './lazy-stylesheet';
 import { OrbitService } from './orbit.service';
@@ -25,6 +29,9 @@ export class GlobeEngineService {
   private readonly orbit = inject(OrbitService);
   private readonly scene = inject(SceneStore);
   private readonly injector = inject(Injector);
+  private readonly alerts = inject(AlertsService);
+  private readonly basins = inject(BasinsService);
+  private readonly stations = inject(StationsService);
   private engine: GlobeEngine | null = null;
   private effects: EffectRef[] = [];
 
@@ -47,6 +54,7 @@ export class GlobeEngineService {
     this.engine = new GlobeEngine({
       container,
       basemap: { url: basemap.url, maxZoom: basemap.maxZoom, attribution: basemap.attribution },
+      detailImagery: DETAIL_IMAGERY,
       area: target.bbox,
       orbit: this.orbit.computer(),
       swathKm: cfg.orbit.illustrativeSwathKm,
@@ -57,6 +65,10 @@ export class GlobeEngineService {
     });
     this.ready.set(true);
     this.bindScene();
+    // Alertas del harness sobre el globo: distritos por nivel y cuencas del Tunari.
+    this.alerts.connect();
+    void this.basins.load();
+    void this.stations.load();
   }
 
   async setOrbitElements(elements: OrbitElements): Promise<void> {
@@ -89,6 +101,14 @@ export class GlobeEngineService {
     const options = { injector: this.injector };
 
     this.effects.push(
+      effect(() => {
+        const layers = {
+          districts: this.alerts.districts(),
+          basins: this.basins.basins(),
+          stations: this.stations.stations(),
+        };
+        untracked(() => this.engine?.setAlertLayers(layers));
+      }, options),
       effect(() => {
         const speed = this.scene.time().speed;
         untracked(() => this.engine?.setClockMultiplier(speed));

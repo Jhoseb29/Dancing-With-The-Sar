@@ -52,6 +52,10 @@ export class UiConfigService {
     return this.value.layers.filter((l): l is GamcWmsLayer => l.kind === 'gamc-wms');
   }
 
+  basinAnalyticsLayers() {
+    return this.value.layers.filter((l) => l.group === 'basin-analytics');
+  }
+
   basemap(): LayerConfig & { kind: 'gibs-xyz' } {
     const layer = this.value.layers.find((l) => l.kind === 'gibs-xyz' && l.group === 'basemap');
     if (!layer || layer.kind !== 'gibs-xyz') {

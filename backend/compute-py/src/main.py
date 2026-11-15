@@ -10,8 +10,10 @@ from fastapi import FastAPI
 
 from config.settings import get_settings
 from modules.alerts.adapters.http import router as alerts_router
+from modules.basin_risk.adapters.http import router as basin_risk_router
 from modules.events.adapters.http import router as events_router
 from modules.harness.adapters.http import router as harness_router
+from modules.voice.adapters.http import router as voice_router
 
 # 12-Factor XI: logs a stdout. Nunca se registran keys.
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -22,6 +24,8 @@ app = FastAPI(title="Dancing with the SARs · compute-py")
 app.include_router(harness_router)
 app.include_router(alerts_router)
 app.include_router(events_router)
+app.include_router(voice_router)
+app.include_router(basin_risk_router)
 
 
 @app.get("/api/health")

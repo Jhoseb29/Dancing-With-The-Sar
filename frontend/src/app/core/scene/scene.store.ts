@@ -88,7 +88,13 @@ export class SceneStore {
       });
     }
     const preset = this.config.layer(presetId);
-    const opacity = preset && preset.kind === 'gamc-wms' ? preset.defaultOpacity : 1;
+    const opacity =
+      preset?.defaultOpacity ??
+      (preset && (preset.kind === 'gamc-wms' || preset.kind === 'xyz-tile')
+        ? 0.8
+        : preset?.kind === 'gibs-wmts'
+          ? 0.78
+          : 1);
     const entry: LayerState = { presetId, visible, opacity };
     return this.patch({ origin, ops: [{ op: 'add', path: '/layers/-', value: entry }] });
   }

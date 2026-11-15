@@ -3,9 +3,12 @@
 import {
   Map as MapLibreMap,
   Marker,
+  Popup,
   setWorkerUrl,
   type GeoJSONSource,
   type ImageSource,
+  type LayerSpecification,
+  type SourceSpecification,
   type StyleSpecification,
 } from 'maplibre-gl';
 import type { FeatureCollection, Point, Polygon } from 'geojson';
@@ -51,6 +54,14 @@ export type MapHotspots = FeatureCollection<
 /** Grupos de zonas interactivas que dibuja el motor. */
 export type ZoneGroup = 'districts' | 'basins';
 
+export interface ZoneOverlay {
+  id: string;
+  bbox: BBox;
+  geometry?: { type: string; coordinates: unknown };
+  level: 'verde' | 'amarillo' | 'naranja' | 'rojo';
+  selected?: boolean;
+}
+
 export interface MapClick extends FeatureInfoQuery {
   lon: number;
   lat: number;
@@ -72,6 +83,8 @@ export interface MapRelief {
 export interface GeoEngineOptions {
   container: HTMLElement;
   basemap: MapBasemap;
+  /** Imagen satelital híbrida sobre el mapa base (la misma del globo). */
+  detailImagery?: MapBasemap;
   initialBBox: BBox;
   outlines: { city: BBox; basin: BBox };
   apiBaseUrl: string;
@@ -133,6 +146,10 @@ const KIND_COLOR = [
   '#ff2ad4',
   '#ffd000',
 ];
+const TERRAIN_SOURCE_ID = 'copernicus-dem';
+const ZONES_SOURCE_ID = 'risk-zones';
+const ZONES_FILL_ID = 'risk-zones-fill';
+const ZONES_LINE_ID = 'risk-zones-line';
 
 export class GeoEngine {
   private readonly map: MapLibreMap;
@@ -145,8 +162,11 @@ export class GeoEngine {
   private pendingObjects: MapObjects | null | undefined;
   private pendingColumns: MapObjects | null | undefined;
   private pendingRelief: MapRelief | null | undefined;
+  private pendingTerrain: { enabled: boolean; url?: string } | null = null;
+  private pendingZones: ZoneOverlay[] | null | undefined;
   private readonly tileUrls = new Map<string, string>();
   private readonly zoneMarkers = new Map<ZoneGroup, Marker[]>();
+  private stationMarkers: { id: string; marker: Marker; popup: Popup }[] = [];
   /** id de capa MapLibre → grupo de zonas. */
   private readonly zoneLayers = new Map<string, ZoneGroup>();
 
@@ -160,6 +180,7 @@ export class GeoEngine {
       bounds: options.initialBBox,
       fitBoundsOptions: { padding: panelAwarePadding(options.container, options.panelOpen) },
       attributionControl: { compact: true },
+      maxZoom: 21, // la imagen satelital llega a z20: se distinguen autos y techos
     });
 
     this.map.on('style.load', () => {
@@ -192,6 +213,14 @@ export class GeoEngine {
       if (this.pendingColumns !== undefined) {
         this.setColumns(this.pendingColumns);
         this.pendingColumns = undefined;
+      }
+      if (this.pendingTerrain) {
+        this.setTerrainEnabled(this.pendingTerrain.enabled, this.pendingTerrain.url);
+        this.pendingTerrain = null;
+      }
+      if (this.pendingZones !== undefined) {
+        this.setZoneOutlines(this.pendingZones);
+        this.pendingZones = undefined;
       }
     });
 
@@ -594,6 +623,113 @@ export class GeoEngine {
     this.zoneMarkers.set(group, markers);
   }
 
+  /**
+   * Estaciones de alerta: punto del color de su nivel con su nombre; al tocarlo se abre su
+   * recuadro de detalle (`popup`, HTML ya escapado que arma el servicio).
+   */
+  setStations(
+    points: FeatureCollection<Point, { id: string; nombre: string; color: string; popup: string }> | null,
+  ): void {
+    const reopen = this.stationMarkers.find((w) => w.popup.isOpen())?.id ?? null;
+    this.stationMarkers.forEach((w) => w.marker.remove());
+    this.stationMarkers = [];
+    if (!points) return;
+    for (const f of points.features) {
+      const { id, nombre, color, popup } = f.properties;
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.title = nombre;
+      el.style.cssText =
+        'display:flex;align-items:center;gap:5px;padding:0;border:0;background:none;cursor:pointer;' +
+        'font:700 11px/1 Barlow,system-ui,sans-serif;color:#f0f0fa;text-shadow:0 0 3px #000,0 0 3px #000;white-space:nowrap;';
+      const dot = document.createElement('span');
+      dot.style.cssText = `width:13px;height:13px;border-radius:50%;background:${color};border:2px solid #f0f0fa;flex:none`;
+      el.append(dot, nombre);
+      const card = new Popup({ offset: 14, maxWidth: '330px', className: 'dws-popup', closeButton: true }).setHTML(popup);
+      const marker = new Marker({ element: el, anchor: 'left', offset: [-8, 0] })
+        .setLngLat(f.geometry.coordinates as [number, number])
+        .setPopup(card);
+      marker.addTo(this.map);
+      this.stationMarkers.push({ id, marker, popup: card });
+    }
+    const again = reopen ? this.stationMarkers.find((w) => w.id === reopen) : null;
+    if (again && !again.popup.isOpen()) again.marker.togglePopup();
+  }
+
+  /** Lleva la cámara a la estación y abre su recuadro. */
+  openStation(id: string): void {
+    const hit = this.stationMarkers.find((w) => w.id === id);
+    if (!hit) return;
+    this.stationMarkers.forEach((w) => w.popup.isOpen() && w.marker.togglePopup());
+    // Con el panel abierto, el punto queda en el centro de la zona libre del mapa (no debajo del panel).
+    this.map.easeTo({
+      center: hit.marker.getLngLat(),
+      zoom: Math.max(this.map.getZoom(), 14.5),
+      padding: panelAwarePadding(this.map.getContainer(), this.panelOpen),
+      duration: 1500,
+    });
+    if (!hit.popup.isOpen()) hit.marker.togglePopup();
+  }
+
+  flyToPoint(lon: number, lat: number, zoom: number): void {
+    this.map.easeTo({
+      center: [lon, lat],
+      zoom,
+      padding: panelAwarePadding(this.map.getContainer(), this.panelOpen),
+      duration: 1800,
+    });
+  }
+
+  /** Mancha de un evento (polígonos con `color`) y red de torrenteras (líneas con `color`). */
+  setHazard(flood: FeatureCollection | null, channels: FeatureCollection | null): void {
+    if (!this.styleReady) {
+      this.map.once('style.load', () => this.setHazard(flood, channels));
+      return;
+    }
+    const sync = (id: string, data: FeatureCollection | null, layers: LayerSpecification[]) => {
+      const source = this.map.getSource(id) as GeoJSONSource | undefined;
+      if (!data) {
+        if (source) {
+          layers.forEach((l) => this.map.removeLayer(l.id));
+          this.map.removeSource(id);
+        }
+        return;
+      }
+      if (source) {
+        source.setData(data);
+        return;
+      }
+      this.map.addSource(id, { type: 'geojson', data });
+      layers.forEach((l) => this.map.addLayer(l));
+    };
+    sync('hazard-channels', channels, [
+      {
+        id: 'hazard-channels',
+        type: 'line',
+        source: 'hazard-channels',
+        paint: {
+          'line-color': ['coalesce', ['get', 'color'], '#10b981'],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1.5, 14, 4],
+          'line-opacity': 0.9,
+        },
+      },
+    ]);
+    sync('hazard-flood', flood, [
+      {
+        id: 'hazard-flood',
+        type: 'fill',
+        source: 'hazard-flood',
+        paint: { 'fill-color': ['coalesce', ['get', 'color'], '#ef4444'], 'fill-opacity': 0.6 },
+      },
+      {
+        id: 'hazard-flood-outline',
+        type: 'line',
+        source: 'hazard-flood',
+        paint: { 'line-color': '#f0f0fa', 'line-width': 2 },
+      },
+    ]);
+  }
+
   /** Ríos y torrenteras del corredor de sedimento: líneas finas apoyadas sobre el relieve. */
   setChannels(lines: FeatureCollection | null): void {
     if (!this.styleReady) {
@@ -781,6 +917,108 @@ export class GeoEngine {
     }
   }
 
+  /** Activa o desactiva relieve 3D real desde Copernicus DEM (Terrain-RGB). */
+  setTerrainEnabled(enabled: boolean, terrainTileUrl?: string): void {
+    if (!this.styleReady) {
+      this.pendingTerrain = { enabled, url: terrainTileUrl };
+      return;
+    }
+    if (!enabled) {
+      this.map.setTerrain(null);
+      if (this.map.getPitch() > 0) {
+        this.map.easeTo({ pitch: 0, duration: 600 });
+      }
+      return;
+    }
+    if (!this.map.getSource(TERRAIN_SOURCE_ID) && terrainTileUrl) {
+      this.map.addSource(TERRAIN_SOURCE_ID, {
+        type: 'raster-dem',
+        tiles: [terrainTileUrl],
+        tileSize: 256,
+        maxzoom: 14,
+        encoding: 'mapbox',
+        attribution: 'Copernicus DEM GLO-30',
+      });
+    }
+    if (this.map.getSource(TERRAIN_SOURCE_ID)) {
+      this.map.setTerrain({ source: TERRAIN_SOURCE_ID, exaggeration: 1.5 });
+      if (this.map.getPitch() < 30) {
+        this.map.easeTo({ pitch: 46, duration: 700 });
+      }
+    }
+  }
+
+  /** Dibuja polígonos de zonas de riesgo hidrográfico coloreados por nivel de alerta. */
+  setZoneOutlines(zones: ZoneOverlay[] | null): void {
+    if (!this.styleReady) {
+      this.pendingZones = zones;
+      return;
+    }
+    const existing = this.map.getSource(ZONES_SOURCE_ID) as GeoJSONSource | undefined;
+    if (!zones || zones.length === 0) {
+      if (existing) {
+        if (this.map.getLayer(ZONES_LINE_ID)) this.map.removeLayer(ZONES_LINE_ID);
+        if (this.map.getLayer(ZONES_FILL_ID)) this.map.removeLayer(ZONES_FILL_ID);
+        this.map.removeSource(ZONES_SOURCE_ID);
+      }
+      return;
+    }
+    const fc = {
+      type: 'FeatureCollection' as const,
+      features: zones.map((z) => ({
+        type: 'Feature' as const,
+        geometry: (z.geometry as GeoJSON.Geometry | undefined) ?? bboxPolygon(z.bbox).geometry,
+        properties: { id: z.id, level: z.level, selected: Boolean(z.selected) },
+      })),
+    };
+    if (existing) {
+      existing.setData(fc);
+      return;
+    }
+    this.map.addSource(ZONES_SOURCE_ID, { type: 'geojson', data: fc });
+    this.map.addLayer(
+      {
+        id: ZONES_FILL_ID,
+        type: 'fill',
+        source: ZONES_SOURCE_ID,
+        paint: {
+          'fill-color': [
+            'match',
+            ['get', 'level'],
+            'rojo', '#e63946',
+            'naranja', '#ff7b00',
+            'amarillo', '#f4c430',
+            'verde', '#2ec4b6',
+            '#9a9aa3',
+          ],
+          'fill-opacity': ['case', ['get', 'selected'], 0.22, 0.08],
+        },
+      },
+      'basin-outline',
+    );
+    this.map.addLayer(
+      {
+        id: ZONES_LINE_ID,
+        type: 'line',
+        source: ZONES_SOURCE_ID,
+        paint: {
+          'line-color': [
+            'match',
+            ['get', 'level'],
+            'rojo', '#e63946',
+            'naranja', '#ff7b00',
+            'amarillo', '#f4c430',
+            'verde', '#2ec4b6',
+            '#9a9aa3',
+          ],
+          'line-width': ['case', ['get', 'selected'], 2.5, 1.25],
+          'line-dasharray': [3, 2],
+        },
+      },
+      'basin-outline',
+    );
+  }
+
   /** Al ocultar o mostrar el panel, el centro de la vista se desliza al área libre. */
   setPanelOpen(open: boolean): void {
     if (open === this.panelOpen) return;
@@ -790,6 +1028,7 @@ export class GeoEngine {
 
   destroy(): void {
     this.zoneMarkers.forEach((list) => list.forEach((m) => m.remove()));
+    this.stationMarkers.forEach((w) => w.marker.remove());
     this.map.remove();
   }
 }
@@ -826,10 +1065,23 @@ function bboxPolygon([minLon, minLat, maxLon, maxLat]: BBox) {
   };
 }
 
-function buildStyle({ basemap, outlines }: GeoEngineOptions): StyleSpecification {
+function buildStyle({ basemap, detailImagery, outlines }: GeoEngineOptions): StyleSpecification {
+  const detailSources: Record<string, SourceSpecification> = detailImagery
+    ? {
+        detail: {
+          type: 'raster',
+          tiles: [detailImagery.url],
+          tileSize: 256,
+          maxzoom: detailImagery.maxZoom,
+          attribution: detailImagery.attribution,
+        },
+      }
+    : {};
+  const detailLayers: LayerSpecification[] = detailImagery ? [{ id: 'detail-imagery', type: 'raster', source: 'detail' }] : [];
   return {
     version: 8,
     sources: {
+      ...detailSources,
       basemap: {
         type: 'raster',
         tiles: [basemap.url],
@@ -843,6 +1095,7 @@ function buildStyle({ basemap, outlines }: GeoEngineOptions): StyleSpecification
     layers: [
       { id: 'background', type: 'background', paint: { 'background-color': '#000000' } },
       { id: 'basemap', type: 'raster', source: 'basemap' },
+      ...detailLayers,
       {
         id: 'basin-outline',
         type: 'line',
