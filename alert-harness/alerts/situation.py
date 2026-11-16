@@ -58,7 +58,7 @@ def _bursts(grid: Grid, areas: list[tuple[str, list[float]]], with_series: bool)
         out[area_id] = {"max_mm_h": round(float(series[k]), 1), "cuando": grid.slots[k].start,
                         "acumulado_24h_mm": round(float(np.nansum(mean) * 0.5), 1)}
         if with_series:
-            out[area_id]["serie_mm_h"] = [round(float(v), 1) for v in series]
+            out[area_id]["serie_mm_h"] = [0.0 if np.isnan(v) else round(float(v), 1) for v in series]
     return out
 
 

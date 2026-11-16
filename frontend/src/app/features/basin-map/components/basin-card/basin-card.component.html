@@ -1,0 +1,52 @@
+<section class="card" [style.border-left-color]="color()">
+  <button class="back" type="button" (click)="back.emit()">← {{ 'basin.all' | transloco }}</button>
+
+  <div class="head">
+    <h2>{{ basin().nombre }}</h2>
+    <span class="badge" [style.background]="color()">{{ 'basin.type.' + basin().tipo | transloco }}</span>
+  </div>
+  <p class="why">{{ 'basin.typeWhy.' + basin().tipo | transloco }}</p>
+
+  @if (basin().distritos.length > 0) {
+    <div class="districts">
+      <span class="caption">{{ 'basin.districts' | transloco }}:</span>
+      @for (d of basin().distritos; track d) {
+        <span class="district-chip">{{ d }}</span>
+      }
+    </div>
+  }
+
+  <!-- Perfil: cuánto baja el agua (cumbre → valle) -->
+  <div class="profile" [attr.aria-label]="'basin.drop' | transloco: { m: drop() }">
+    <svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
+      <path [attr.d]="'M0 40 L0 4 Q 40 ' + (40 - basin().melton * 40) + ' 100 36 L100 40 Z'" [attr.fill]="color()" />
+    </svg>
+    <span class="caption top">{{ basin().cota_max_m }} m</span>
+    <span class="caption bottom">{{ basin().cota_min_m }} m</span>
+  </div>
+
+  <div class="facts">
+    <div><strong>{{ drop() }} m</strong><span class="caption">{{ 'basin.fact.drop' | transloco }}</span></div>
+    <div><strong>{{ basin().ladera_fuerte_pct }} %</strong><span class="caption">{{ 'basin.fact.steep' | transloco }}</span></div>
+    <div><strong>{{ basin().area_km2 }} km²</strong><span class="caption">{{ 'basin.fact.area' | transloco }}</span></div>
+  </div>
+
+  <app-satellite-saw [rain]="rain()" [radar]="radar()" [slots]="slots()" />
+
+  @if (basin().sedimento_radar; as s) {
+    <a class="radar" routerLink="/explicaciones" [queryParams]="{ run: s.corrida }">
+      <strong>{{ 'basin.radar.title' | transloco: { ha: sedimentHa() } }}</strong>
+      <span class="caption">{{ 'basin.radar.when' | transloco: { from: s.desde, to: s.hasta } }} →</span>
+    </a>
+  } @else {
+    <p class="caption">{{ 'basin.radar.none' | transloco }}</p>
+  }
+
+  <details>
+    <summary>{{ 'basin.technical' | transloco }}</summary>
+    <p class="caption">
+      Melton = {{ basin().melton }} · {{ 'basin.meltonHelp' | transloco }} · {{ 'basin.fact.slope' | transloco }}
+      {{ basin().pendiente_media_grados }}°
+    </p>
+  </details>
+</section>

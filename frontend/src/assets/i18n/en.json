@@ -159,7 +159,13 @@
     "below2750": "Below 2750 m",
     "rain7d": "7-day rain",
     "queryingDem": "Querying Copernicus DEM elevation…",
-    "sarTerrainCaution": "Slope ≥ 25°: potential radar foreshortening or shadow on Tunari slopes."
+    "sarTerrainCaution": "Slope ≥ 25°: potential radar foreshortening or shadow on Tunari slopes.",
+    "districts": "Affected districts",
+    "rainColumns": "24h rainfall columns (IMERG)",
+    "rainPeak": "24h peak: {{mm}} mm/h ({{t}})",
+    "rainAll24h": "24h accumulation across Cochabamba",
+    "rainLegendLight": "Light rain",
+    "rainLegendHeavy": "Heavy storm"
   },
   "common": {
     "km": "km",

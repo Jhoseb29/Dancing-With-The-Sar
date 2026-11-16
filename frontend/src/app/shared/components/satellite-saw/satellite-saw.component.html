@@ -8,7 +8,7 @@
   @if (bars().length) {
     <div class="bars" aria-hidden="true">
       @for (b of bars(); track b.i) {
-        <span [style.height.%]="b.pct" [title]="b.v + ' mm/h'"></span>
+        <span [style.height.%]="b.pct" [title]="b.label"></span>
       }
     </div>
     <p class="caption">{{ 'satSaw.axis' | transloco }}</p>

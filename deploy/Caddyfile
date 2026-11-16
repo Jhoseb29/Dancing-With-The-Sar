@@ -1,0 +1,9 @@
+{$SITE_ADDRESS::80} {
+	reverse_proxy web:80 {
+		flush_interval -1
+	}
+}
+
+{$IP_REDIRECT_FROM:http://127.0.0.1:18080} {
+	redir https://{$SITE_ADDRESS}{uri} 308
+}

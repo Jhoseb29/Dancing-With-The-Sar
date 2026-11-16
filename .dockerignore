@@ -1,0 +1,16 @@
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+**/.venv
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.angular
+frontend/dist
+data
+alert-harness/output
+nisar-harness/output
+ingenieria_inversa

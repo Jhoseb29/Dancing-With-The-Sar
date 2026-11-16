@@ -159,7 +159,13 @@
     "below2750": "Bajo 2750 m",
     "rain7d": "Lluvia 7 días",
     "queryingDem": "Consultando elevación Copernicus DEM…",
-    "sarTerrainCaution": "Pendiente ≥ 25°: posible escorzo o sombra radar en laderas del Tunari."
+    "sarTerrainCaution": "Pendiente ≥ 25°: posible escorzo o sombra radar en laderas del Tunari.",
+    "districts": "Distritos afectados",
+    "rainColumns": "Columnas de lluvia 24 h (IMERG)",
+    "rainPeak": "Pico 24 h: {{mm}} mm/h ({{t}})",
+    "rainAll24h": "Acumulado 24 h sobre Cochabamba",
+    "rainLegendLight": "Lluvia ligera",
+    "rainLegendHeavy": "Tormenta fuerte"
   },
   "common": {
     "km": "km",

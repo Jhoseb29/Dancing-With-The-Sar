@@ -100,6 +100,7 @@ export class GeoEngineService {
   readonly pointDem = signal<BasinPointDiagnostics | null>(null);
   readonly pointDemLoading = signal(false);
   readonly terrain3d = signal(false);
+  readonly basinRainOverlay = signal(false);
   readonly nisarDate = signal<string>('2026-10-25');
   readonly operaDate = signal<string>('2026-11-13');
   readonly imergDate = signal<string>('2026-11-13');
@@ -171,6 +172,10 @@ export class GeoEngineService {
     this.terrain3d.set(enabled);
   }
 
+  setBasinRainOverlay(enabled: boolean): void {
+    this.basinRainOverlay.set(enabled);
+  }
+
   setNisarDate(date: string): void {
     this.nisarDate.set(date);
   }
@@ -207,6 +212,7 @@ export class GeoEngineService {
     this.featureInfo.set(null);
     this.pointDem.set(null);
     this.pointDemLoading.set(false);
+    this.basinRainOverlay.set(false);
     this.pendingZoneOverlays = null;
     this.firesKey = '';
     this.fires.set({ status: 'idle' });
@@ -314,10 +320,12 @@ export class GeoEngineService {
           untracked(() => setTimeout(() => this.engine?.openStation(id), wait));
         }
       }, options),
-      // Alertas: lluvia IMERG como columnas (acumulado 24 h o la media hora elegida).
+      // Lluvia IMERG como columnas (en Alertas si se activa o en Cuenca cuando se habilita).
       effect(() => {
-        const onRisk = this.scene.route() === 'risk' && this.alerts.rainVisible();
-        const rain = onRisk ? this.alerts.rain() : null;
+        const route = this.scene.route();
+        const showRain =
+          (route === 'risk' && this.alerts.rainVisible()) || (route === 'basin' && this.basinRainOverlay());
+        const rain = showRain ? this.alerts.rain() : null;
         const frame = this.alerts.rainFrame();
         untracked(() => this.engine?.setRain(rain ? rainCells(rain, frame) : null));
       }, options),
@@ -621,7 +629,7 @@ function rainCells(rain: RainPayload, frame: number | null): FeatureCollection<P
   const total = frame === null;
   const grid = total ? rain.acumulado_mm : rain.slots[frame]?.mm_h;
   const top = total ? 60 : 20;
-  const half = (rain.celda_grados * 0.22) / 2;
+  const half = (rain.celda_grados * 0.34) / 2;
   const features: Feature<Polygon, { mm: number; h: number; c: string }>[] = [];
   rain.lons.forEach((lon, i) =>
     rain.lats.forEach((lat, j) => {

@@ -19,11 +19,18 @@ export class SatelliteSawComponent {
   private readonly lang = inject(SceneStore).lang;
   readonly rain = input<BasinRain | null>(null);
   readonly radar = input<RadarSchedule | null>(null);
+  readonly slots = input<{ inicio: string }[] | null>(null);
 
   protected readonly bars = computed(() => {
     const serie = this.rain()?.serie_mm_h ?? [];
+    const slotList = this.slots() ?? [];
     const top = Math.max(1, ...serie);
-    return serie.map((v, i) => ({ i, v, pct: (100 * v) / top }));
+    const lang = this.lang();
+    return serie.map((v, i) => {
+      const inicio = slotList[i]?.inicio;
+      const label = inicio ? `${laPazTime(inicio, lang)} · ${v} mm/h` : `${v} mm/h`;
+      return { i, v, pct: (100 * v) / top, label };
+    });
   });
   protected readonly when = computed(() => {
     const c = this.rain()?.cuando;

@@ -913,9 +913,11 @@ export class GeoEngine {
       return;
     }
     const source = this.map.getSource(RAIN_ID) as GeoJSONSource | undefined;
+    const fillId = `${RAIN_ID}-fill`;
     if (!cells) {
       if (source) {
-        this.map.removeLayer(RAIN_ID);
+        if (this.map.getLayer(RAIN_ID)) this.map.removeLayer(RAIN_ID);
+        if (this.map.getLayer(fillId)) this.map.removeLayer(fillId);
         this.map.removeSource(RAIN_ID);
       }
       return;
@@ -925,6 +927,15 @@ export class GeoEngine {
       return;
     }
     this.map.addSource(RAIN_ID, { type: 'geojson', data: cells });
+    this.map.addLayer({
+      id: fillId,
+      type: 'fill',
+      source: RAIN_ID,
+      paint: {
+        'fill-color': ['get', 'c'],
+        'fill-opacity': 0.36,
+      },
+    });
     this.map.addLayer({
       id: RAIN_ID,
       type: 'fill-extrusion',

@@ -11,6 +11,26 @@
   <p>{{ 'basin.intro' | transloco }}</p>
 
   <section class="block">
+    @if (basins.selected(); as b) {
+      <app-basin-card
+        [basin]="b"
+        [rain]="alerts.rain()?.cuencas?.[b.id] ?? null"
+        [radar]="alerts.radar()"
+        [slots]="alerts.rain()?.slots ?? null"
+        (back)="basins.select(null)"
+      />
+    } @else {
+      <app-basin-list
+        [basins]="basinList()"
+        [rainByBasin]="alerts.rain()?.cuencas ?? null"
+        (pick)="basins.select($event)"
+      />
+    }
+  </section>
+
+  <section class="block">
+    <h2 class="label">{{ 'basin.modesTitle' | transloco }}</h2>
+    <p class="caption">{{ 'basin.modesHint' | transloco }}</p>
     <div class="row">
       @for (placeId of quickPlaces; track placeId) {
         <button
@@ -28,11 +48,6 @@
         {{ v.lat | coordinate: 'lat' : scene.lang() }} · {{ v.lon | coordinate: 'lon' : scene.lang() }} · z{{ v.zoom.toFixed(1) }}
       </p>
     }
-  </section>
-
-  <section class="block">
-    <h2 class="label">{{ 'basin.modesTitle' | transloco }}</h2>
-    <p class="caption">{{ 'basin.modesHint' | transloco }}</p>
     <div class="mode-list" role="radiogroup" [attr.aria-label]="'basin.modesTitle' | transloco">
       @for (mode of modes; track mode) {
         <button
@@ -140,7 +155,31 @@
         <span class="caption">{{ 'basin.legendNisarUrban' | transloco }}</span>
       </div>
     } @else if (activeMode() === 'rain') {
-      <p class="caption subnote tabular">{{ 'basin.imergDate' | transloco }}: {{ imergDateLabel() }} · {{ 'basin.imergClipped' | transloco }}</p>
+      <div class="rain-summary">
+        <p class="caption tabular">{{ 'basin.imergDate' | transloco }}: {{ imergDateLabel() }} · {{ 'basin.imergClipped' | transloco }}</p>
+        @if (alerts.rain(); as r) {
+          @if (r.pico.max_30min_mm_h !== null) {
+            <p class="caption tabular">
+              {{ 'basin.rainPeak' | transloco: { mm: r.pico.max_30min_mm_h.toFixed(1), t: rainTime(r.pico.cuando) } }}
+            </p>
+          }
+          <div class="row">
+            @if (alerts.rainPlaying()) {
+              <button class="btn-pill" type="button" (click)="alerts.stopRain()">■ {{ 'risk.rain.stop' | transloco }}</button>
+            } @else {
+              <button class="btn-pill" type="button" (click)="alerts.playRain()">▶ {{ 'risk.rain.play' | transloco }}</button>
+            }
+            <span class="caption tabular">
+              {{ activeRainSlotTime() ?? ('basin.rainAll24h' | transloco) }}
+            </span>
+          </div>
+        }
+        <div class="ramp-legend" style="margin: 0">
+          <span class="caption">{{ 'basin.rainLegendLight' | transloco }}</span>
+          <span class="ramp rain-ramp" aria-hidden="true"></span>
+          <span class="caption">{{ 'basin.rainLegendHeavy' | transloco }}</span>
+        </div>
+      </div>
     }
 
     <label class="toggle">
@@ -150,6 +189,15 @@
         (change)="toggleTerrain3d($any($event.target).checked)"
       />
       <span>{{ 'basin.terrain3d' | transloco }}</span>
+    </label>
+
+    <label class="toggle">
+      <input
+        type="checkbox"
+        [checked]="map.basinRainOverlay()"
+        (change)="toggleRainOverlay($any($event.target).checked)"
+      />
+      <span>{{ 'basin.rainColumns' | transloco }}</span>
     </label>
 
     <details class="advanced-layers">

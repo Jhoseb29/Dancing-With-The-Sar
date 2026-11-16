@@ -156,6 +156,17 @@ p {
   background: #c084fc;
 }
 
+.rain-ramp {
+  background: linear-gradient(90deg, #9fd3ff, #3a8dff, #1f3fd1, #8a2be2);
+}
+
+.rain-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8, 8px);
+  margin: var(--spacing-4) 0 0 var(--spacing-24);
+}
+
 .wrap {
   flex-wrap: wrap;
 }

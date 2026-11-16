@@ -14,6 +14,22 @@
   width: var(--panel-max-width);
   max-height: calc(100vh - var(--topbar-height) - var(--spacing-60));
   overflow-y: auto;
+  scroll-padding-top: var(--panel-padding);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-dim-steel) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-dim-steel);
+    border-radius: var(--radius-pill);
+  }
 
   @media (max-width: 767px) {
     top: auto;

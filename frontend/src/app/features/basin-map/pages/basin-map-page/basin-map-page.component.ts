@@ -2,13 +2,18 @@ import { SidePanelComponent } from '../../../../shared/components/side-panel/sid
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { laPazDay, laPazTime } from '../../../../core/alerts/la-paz-time';
 import { RuntimeConfigService } from '../../../../core/config/runtime-config.service';
 import { UiConfigService } from '../../../../core/config/ui-config.service';
 import { BasinOverview, fetchBasinOverview } from '../../../../core/data-access/basin-risk.client';
 import { SceneStore } from '../../../../core/scene/scene.store';
+import { AlertsService } from '../../../../core/services/alerts.service';
+import { BasinsService } from '../../../../core/services/basins.service';
 import { GeoEngineService } from '../../../../core/services/geo-engine.service';
 import { MapCanvasComponent } from '../../../../shared/components/map-canvas/map-canvas.component';
 import { CoordinatePipe } from '../../../../shared/pipes/coordinate.pipe';
+import { BasinCardComponent } from '../../components/basin-card/basin-card.component';
+import { BasinListComponent } from '../../components/basin-list/basin-list.component';
 
 export type AnalysisMode = 'integrated' | 'change' | 'water' | 'nisar' | 'rain';
 
@@ -31,10 +36,18 @@ const MODE_LAYERS: Record<AnalysisMode, readonly string[]> = {
   rain: ['gibs-imerg-precip'],
 };
 
-/** Vista de cuenca Qucha-SAR (Copernicus DEM 30 m, subcuencas reales y comparación radar). Smart. */
+/** Vista de cuenca Qucha-SAR: cuencas torrenciales, lluvia IMERG y análisis Copernicus DEM / radar. Smart. */
 @Component({
   selector: 'app-basin-map-page',
-  imports: [MapCanvasComponent, SidePanelComponent, TranslocoPipe, RouterLink, CoordinatePipe],
+  imports: [
+    MapCanvasComponent,
+    SidePanelComponent,
+    TranslocoPipe,
+    RouterLink,
+    CoordinatePipe,
+    BasinCardComponent,
+    BasinListComponent,
+  ],
   templateUrl: './basin-map-page.component.html',
   styleUrl: './basin-map-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,10 +55,13 @@ const MODE_LAYERS: Record<AnalysisMode, readonly string[]> = {
 export class BasinMapPageComponent {
   protected readonly map = inject(GeoEngineService);
   protected readonly scene = inject(SceneStore);
+  protected readonly basins = inject(BasinsService);
+  protected readonly alerts = inject(AlertsService);
+  protected readonly basinList = computed(() => (this.basins.basins()?.features ?? []).map((f) => f.properties));
   private readonly ui = inject(UiConfigService);
   private readonly apiBaseUrl = inject(RuntimeConfigService).value.apiBaseUrl;
 
-  protected readonly quickPlaces = ['cochabamba-basin', 'cochabamba-city'];
+  protected readonly quickPlaces = ['cochabamba-basin', 'cochabamba-city', 'influence-basins'];
   protected readonly modes: readonly AnalysisMode[] = ['integrated', 'change', 'water', 'nisar', 'rain'];
   protected readonly activeMode = signal<AnalysisMode>('integrated');
   protected readonly overview = signal<BasinOverview | null>(null);
@@ -85,7 +101,14 @@ export class BasinMapPageComponent {
   });
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.map.detach());
+    void this.basins.load();
+    void this.alerts.refresh();
+    inject(DestroyRef).onDestroy(() => {
+      this.alerts.stopRain();
+      this.alerts.rainFrame.set(null);
+      this.map.detach();
+      this.basins.select(null);
+    });
 
     effect(() => {
       const ov = this.overview();
@@ -122,8 +145,9 @@ export class BasinMapPageComponent {
         const nd = this.nisarDates();
         this.map.setSarDates(nd[1], nd[0]);
       }
-      const imergLatest = overview.precipitation.gpm_cmr.collections['GPM_3IMERGDL']?.latest_start;
-      if (imergLatest) {
+      const imergRaw = overview.precipitation.gpm_cmr.collections['GPM_3IMERGDL']?.latest_start;
+      const imergLatest = imergRaw?.slice(0, 10);
+      if (imergLatest && /^\d{4}-\d{2}-\d{2}$/.test(imergLatest)) {
         this.imergDateLabel.set(imergLatest);
         this.map.setImergDate(imergLatest);
       }
@@ -134,6 +158,7 @@ export class BasinMapPageComponent {
 
   protected async selectMode(mode: AnalysisMode): Promise<void> {
     this.activeMode.set(mode);
+    this.map.setBasinRainOverlay(mode === 'rain');
     const keep = new Set(MODE_LAYERS[mode]);
     for (const id of BASIN_LAYERS) {
       const want = keep.has(id);
@@ -190,6 +215,25 @@ export class BasinMapPageComponent {
 
   protected toggleTerrain3d(enabled: boolean): void {
     this.map.setTerrain3d(enabled);
+  }
+
+  protected toggleRainOverlay(enabled: boolean): void {
+    this.map.setBasinRainOverlay(enabled);
+  }
+
+  protected rainTime(iso: string | null | undefined): string {
+    return laPazTime(iso, this.scene.lang());
+  }
+
+  protected rainDay(iso: string | null | undefined): string {
+    return laPazDay(iso, this.scene.lang());
+  }
+
+  protected activeRainSlotTime(): string | null {
+    const f = this.alerts.rainFrame();
+    const slots = this.alerts.rain()?.slots;
+    if (f === null || !slots?.[f]) return null;
+    return `${this.rainDay(slots[f].inicio)} ${this.rainTime(slots[f].inicio)}`;
   }
 
   protected setPanelOpen(open: boolean): void {
